@@ -19,7 +19,7 @@ class WebhookEventService
         $url = config('modules.webhooks.url');
 
         if (!$url) {
-            throw new DisplayException('No Webhook URL has been defined.');
+            throw new DisplayException(trans('exceptions.webhooks.url_missing'));
         }
 
         try {
@@ -40,7 +40,7 @@ class WebhookEventService
                 ]],
             ]);
         } catch (DisplayException $ex) {
-            throw new DisplayException('Unable to send webhook through URL.');
+            throw new DisplayException(trans('exceptions.webhooks.send_failed'));
         }
     }
 }

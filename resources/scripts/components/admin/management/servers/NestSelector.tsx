@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { Nest } from '@/api/routes/admin/nest';
 import { searchNests } from '@/api/routes/admin/nest';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default ({ selectedNestId, onNestSelect }: Props) => {
+    const { t } = useTranslation('admin');
     const [nests, setNests] = useState<Nest[] | null>(null);
 
     useEffect(() => {
@@ -27,10 +29,10 @@ export default ({ selectedNestId, onNestSelect }: Props) => {
 
     return (
         <>
-            <Label>Nest</Label>
+            <Label>{t('servers.nest') as string}</Label>
             <Select value={selectedNestId} onChange={e => onNestSelect(Number(e.currentTarget.value))}>
                 {!nests ? (
-                    <option disabled>Loading...</option>
+                    <option disabled>{t('servers.loading') as string}</option>
                 ) : (
                     nests?.map(v => (
                         <option key={v.uuid} value={v.id.toString()}>

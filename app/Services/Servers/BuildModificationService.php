@@ -40,7 +40,7 @@ class BuildModificationService
                 try {
                     Allocation::query()->where('id', $data['allocation_id'])->where('server_id', $server->id)->firstOrFail();
                 } catch (ModelNotFoundException) {
-                    throw new DisplayException('The requested default allocation is not currently assigned to this server.');
+                    throw new DisplayException(trans('exceptions.network.default_not_assigned'));
                 }
             }
 
@@ -107,7 +107,7 @@ class BuildModificationService
                 // will throw an exception back.
                 if ($allocation === ($data['allocation_id'] ?? $server->allocation_id)) {
                     if (empty($freshlyAllocated)) {
-                        throw new DisplayException('You are attempting to delete the default allocation for this server but there is no fallback allocation to use.');
+                        throw new DisplayException(trans('exceptions.network.no_fallback_allocation'));
                     }
 
                     // Update the default allocation to be the first allocation that we are creating.

@@ -8,6 +8,7 @@ import Input, { Textarea } from '@/elements/Input';
 import styled from 'styled-components';
 import { useFlashKey } from '@/plugins/useFlash';
 import { createSSHKey, useSSHKeys } from '@/api/routes/account/ssh-keys';
+import { useTranslation } from 'react-i18next';
 
 interface Values {
     name: string;
@@ -19,6 +20,7 @@ const CustomTextarea = styled(Textarea)`
 `;
 
 export default () => {
+    const { t } = useTranslation('dashboard');
     const { clearAndAddHttpError } = useFlashKey('account');
     const { mutate } = useSSHKeys();
 
@@ -47,18 +49,18 @@ export default () => {
                 {({ isSubmitting }) => (
                     <Form>
                         <SpinnerOverlay visible={isSubmitting} />
-                        <FormikFieldWrapper label={'SSH Key Name'} name={'name'} css={tw`mb-6`}>
+                        <FormikFieldWrapper label={t('account.sshKeyName')} name={'name'} css={tw`mb-6`}>
                             <Field name={'name'} as={Input} />
                         </FormikFieldWrapper>
                         <FormikFieldWrapper
-                            label={'Public Key'}
+                            label={t('account.publicKey')}
                             name={'publicKey'}
-                            description={'Enter your public SSH key.'}
+                            description={t('account.publicKeyDescription')}
                         >
                             <Field name={'publicKey'} as={CustomTextarea} />
                         </FormikFieldWrapper>
                         <div css={tw`flex justify-end mt-6`}>
-                            <Button>Save</Button>
+                            <Button>{t('account.save')}</Button>
                         </div>
                     </Form>
                 )}

@@ -105,11 +105,11 @@ abstract class AbstractLoginController extends ApplicationApiController
         $enabled = config('modules.auth.registration.enabled') ?? false;
 
         if (!$enabled) {
-            throw new DisplayException('User signup is disabled at this time.');
+            throw new DisplayException(trans('exceptions.auth.signup_disabled'));
         }
 
         if (User::where('username', $data['username'])->exists()) {
-            throw new DisplayException('This username is already in use by another user.');
+            throw new DisplayException(trans('exceptions.auth.username_in_use'));
         }
 
         $user = $this->creation->handle($data);

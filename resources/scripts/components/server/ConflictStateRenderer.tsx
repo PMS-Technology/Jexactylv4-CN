@@ -3,8 +3,10 @@ import ServerErrorSvg from '@/assets/images/server_error.svg';
 import ServerRestoreSvg from '@/assets/images/server_restore.svg';
 import ScreenBlock from '@/elements/ScreenBlock';
 import { ServerContext } from '@/state/server';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('server');
     const status = ServerContext.useStoreState(state => state.server.data?.status || null);
     const isTransferring = ServerContext.useStoreState(state => state.server.data?.isTransferring || false);
     const isNodeUnderMaintenance = ServerContext.useStoreState(
@@ -13,30 +15,30 @@ export default () => {
 
     return status === 'installing' || status === 'install_failed' || status === 'reinstall_failed' ? (
         <ScreenBlock
-            title={'Running Installer'}
+            title={t('conflict.runningInstallerTitle') as string}
             image={ServerInstallSvg}
-            message={'Your server should be ready soon, please try again in a few minutes.'}
+            message={t('conflict.runningInstallerMessage') as string}
         />
     ) : status === 'suspended' ? (
         <ScreenBlock
-            title={'Server Suspended'}
+            title={t('conflict.serverSuspendedTitle') as string}
             image={ServerErrorSvg}
-            message={'This server is suspended and cannot be accessed.'}
+            message={t('conflict.serverSuspendedMessage') as string}
         />
     ) : isNodeUnderMaintenance ? (
         <ScreenBlock
-            title={'Node under Maintenance'}
+            title={t('conflict.nodeMaintenanceTitle') as string}
             image={ServerErrorSvg}
-            message={'The node of this server is currently under maintenance.'}
+            message={t('conflict.nodeMaintenanceMessage') as string}
         />
     ) : (
         <ScreenBlock
-            title={isTransferring ? 'Transferring' : 'Restoring from Backup'}
+            title={isTransferring ? t('conflict.transferringTitle') as string : t('conflict.restoringTitle') as string}
             image={ServerRestoreSvg}
             message={
                 isTransferring
-                    ? 'Your server is being transferred to a new node, please check back later.'
-                    : 'Your server is currently being restored from a backup, please check back in a few minutes.'
+                    ? t('conflict.transferringMessage') as string
+                    : t('conflict.restoringMessage') as string
             }
         />
     );

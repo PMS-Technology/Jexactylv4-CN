@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import useFlash from '@/plugins/useFlash';
 import Label from '@/elements/Label';
 import Input from '@/elements/Input';
@@ -13,6 +14,7 @@ import { Alert } from '@/elements/alert';
 import { toggleModule, updateModule } from '@/api/routes/admin/auth/module';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [confirm, setConfirm] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [success, setSuccess] = useState<boolean>(false);
@@ -48,42 +50,40 @@ export default () => {
     };
 
     return (
-        <AdminBox title={'Onboarding'} icon={faDoorOpen}>
+        <AdminBox title={t('authModule.onboarding') as string} icon={faDoorOpen}>
             <FlashMessageRender byKey={'auth:modules:onboarding'} className={'my-2'} />
             {loading && <Spinner className={'absolute top-0 right-8 m-3.5'} size={'small'} />}
             {success && <CheckCircleIcon className={'w-5 h-5 absolute top-0 right-8 m-3.5 text-green-500'} />}
             <Dialog.Confirm
                 open={confirm}
-                title={'Confirm module removal'}
+                title={t('authModule.confirmModuleRemoval') as string}
                 onConfirmed={() => doDeletion()}
                 onClose={() => setConfirm(false)}
             >
-                Are you sure you wish to delete this module?
+                {t('authModule.confirmModuleDeletion') as string}
             </Dialog.Confirm>
             <TrashIcon
                 className={'w-5 h-5 absolute top-0 right-0 m-3.5 text-red-500 hover:text-red-300 duration-300'}
                 onClick={() => setConfirm(true)}
             />
             <div>
-                <Label>Content</Label>
+                <Label>{t('authModule.content') as string}</Label>
                 <Input
                     autoComplete={'off'}
                     id={'content'}
                     type={'text'}
                     name={'content'}
-                    defaultValue={content || "You can change these at any time in the 'Account' tab."}
+                    defaultValue={content || t('authModule.onboardingDefaultContent') as string}
                     onChange={e => update('content', e.target.value)}
                 />
                 <p className={'text-xs text-gray-400 mt-1'}>
-                    Set the description that should be displayed in the Onboarding dialog. You can leave this empty if
-                    you wish.
+                    {t('authModule.onboardingContentDescription') as string}
                 </p>
             </div>
             {force2fa && (
                 <Alert type={'info'} className={'mt-6'}>
                     <span className={'text-xs'}>
-                        Since &apos;Force 2FA&apos; is enabled, a box will be shown to users in the Onboarding dialog
-                        which informs users they must enable two-factor to use the Panel.
+                        {t('authModule.onboardingForce2faAlert') as string}
                     </span>
                 </Alert>
             )}

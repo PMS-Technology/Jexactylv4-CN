@@ -1,5 +1,6 @@
 import { useContext, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import type { Filters } from '@/api/routes/admin/servers/getServers';
 import getServers, { Context as ServersContext } from '@/api/routes/admin/servers/getServers';
@@ -22,6 +23,7 @@ interface Props {
 }
 
 function ServersTable({ filters }: Props) {
+    const { t } = useTranslation('admin');
     const { colors } = useStoreState(state => state.theme.data!);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
 
@@ -58,27 +60,27 @@ function ServersTable({ filters }: Props) {
                         <table css={tw`w-full table-auto`}>
                             <TableHead>
                                 <TableHeader
-                                    name={'Identifier'}
+                                    name={t('servers.identifier') as string}
                                     direction={sort === 'uuidShort' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('uuidShort')}
                                 />
                                 <TableHeader
-                                    name={'Name'}
+                                    name={t('servers.name') as string}
                                     direction={sort === 'name' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('name')}
                                 />
                                 <TableHeader
-                                    name={'Owner'}
+                                    name={t('servers.owner') as string}
                                     direction={sort === 'owner_id' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('owner_id')}
                                 />
                                 <TableHeader
-                                    name={'Node'}
+                                    name={t('servers.node') as string}
                                     direction={sort === 'node_id' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('node_id')}
                                 />
                                 <TableHeader
-                                    name={'Status'}
+                                    name={t('servers.status') as string}
                                     direction={sort === 'status' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('status')}
                                 />
@@ -143,25 +145,25 @@ function ServersTable({ filters }: Props) {
                                                     <span
                                                         css={tw`px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-yellow-200 text-yellow-800`}
                                                     >
-                                                        Installing
+                                                        {t('servers.installing') as string}
                                                     </span>
                                                 ) : server.status === 'transferring' ? (
                                                     <span
                                                         css={tw`px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-yellow-200 text-yellow-800`}
                                                     >
-                                                        Transferring
+                                                        {t('servers.transferring') as string}
                                                     </span>
                                                 ) : server.status === 'suspended' ? (
                                                     <span
                                                         css={tw`px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-red-200 text-red-800`}
                                                     >
-                                                        Suspended
+                                                        {t('servers.suspended') as string}
                                                     </span>
                                                 ) : (
                                                     <span
                                                         css={tw`px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-green-100 text-green-800`}
                                                     >
-                                                        Active
+                                                        {t('servers.active') as string}
                                                     </span>
                                                 )}
                                             </td>

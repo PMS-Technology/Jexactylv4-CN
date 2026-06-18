@@ -1,4 +1,5 @@
 import type { FormikHelpers } from 'formik';
+import { useTranslation } from 'react-i18next';
 import { Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import tw from 'twin.macro';
@@ -23,6 +24,7 @@ const distinct = (value: any, index: any, self: any) => {
 };
 
 function CreateAllocationForm({ nodeId }: { nodeId: number }) {
+    const { t } = useTranslation('admin');
     const [ips, setIPs] = useState<Option[]>([]);
 
     const { mutate } = getAllocations2(nodeId, ['server']);
@@ -64,15 +66,15 @@ function CreateAllocationForm({ nodeId }: { nodeId: number }) {
                 alias: '',
             }}
             validationSchema={object().shape({
-                ips: array(string()).required().min(1, 'You must select at least one ip address.'),
+                ips: array(string()).required().min(1, t('nodes.selectAtLeastOneIp') as string),
                 startPort: number()
                     .required()
-                    .min(1024, 'This port cannot be lower than 1024.')
-                    .max(65535, 'This port cannot exceed 65535.'),
+                    .min(1024, t('nodes.portNotLowerThan1024') as string)
+                    .max(65535, t('nodes.portNotExceed65535') as string),
                 endPort: number()
                     .nullable()
-                    .min(1024, 'This port cannot be lower than 1024.')
-                    .max(65535, 'This port cannot exceed 65535.'),
+                    .min(1024, t('nodes.portNotLowerThan1024') as string)
+                    .max(65535, t('nodes.portNotExceed65535') as string),
             })}
         >
             {({ isSubmitting, isValid }) => (
@@ -80,7 +82,7 @@ function CreateAllocationForm({ nodeId }: { nodeId: number }) {
                     <SelectField
                         id={'ips'}
                         name={'ips'}
-                        label={'IPs and CIDRs'}
+                        label={t('nodes.ipsAndCidrs') as string}
                         options={ips}
                         isValidNewOption={isValidIP}
                         isMulti
@@ -89,16 +91,16 @@ function CreateAllocationForm({ nodeId }: { nodeId: number }) {
                     />
 
                     <div css={tw`my-6 grid grid-cols-2 gap-2`}>
-                        <Field id={'startPort'} name={'startPort'} label={'Start Port'} type={'text'} />
-                        <Field id={'endPort'} name={'endPort'} label={'End Port'} type={'text'} />
+                        <Field id={'startPort'} name={'startPort'} label={t('nodes.startPort') as string} type={'text'} />
+                        <Field id={'endPort'} name={'endPort'} label={t('nodes.endPort') as string} type={'text'} />
                     </div>
 
-                    <Field id={'alias'} name={'alias'} label={'Alias'} type={'text'} />
+                    <Field id={'alias'} name={'alias'} label={t('nodes.alias') as string} type={'text'} />
 
                     <div css={tw`w-full flex flex-row items-center mt-6`}>
                         <div css={tw`flex ml-auto`}>
                             <Button type={'submit'} disabled={isSubmitting || !isValid}>
-                                Create Allocations
+                                {t('nodes.createAllocations') as string}
                             </Button>
                         </div>
                     </div>

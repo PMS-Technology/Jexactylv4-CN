@@ -1,5 +1,6 @@
 import tw from 'twin.macro';
 import { Link, NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import AdminContentBlock from '@/elements/AdminContentBlock';
 import { Button } from '@/elements/button';
 import { RealFilters, useGetUsers, Context as UsersContext } from '@/api/routes/admin/users';
@@ -32,6 +33,7 @@ import { SubNavigation, SubNavigationLink } from '../../SubNavigation';
 import { UsersIcon, UserAddIcon } from '@heroicons/react/outline';
 
 function UsersContainer() {
+    const { t } = useTranslation('admin');
     const { data: users, error, isValidating } = useGetUsers();
     const { colors } = useStoreState(state => state.theme.data!);
     const { setPage, sort, sortDirection, setSort, setFilters } = useContext(UsersContext);
@@ -53,30 +55,30 @@ function UsersContainer() {
     };
 
     return (
-        <AdminContentBlock title={'User Accounts'}>
+        <AdminContentBlock title={t('users.userAccounts') as string}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>User Accounts</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{t('users.userAccounts') as string}</h2>
                     <p
                         css={tw`hidden md:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        All users that have access to the system.
+                        {t('users.allUsersWithAccess') as string}
                     </p>
                 </div>
 
                 <div css={tw`flex ml-auto pl-4`}>
                     <Link to={'/admin/users/new'}>
                         <Button>
-                            <FontAwesomeIcon icon={faPlus} className={'mr-2 my-auto'} /> New User
+                            <FontAwesomeIcon icon={faPlus} className={'mr-2 my-auto'} /> {t('users.newUser') as string}
                         </Button>
                     </Link>
                 </div>
             </div>
             <SubNavigation>
-                <SubNavigationLink to={`/admin/users`} name={'Users'} base>
+                <SubNavigationLink to={`/admin/users`} name={t('users.users') as string} base>
                     <UsersIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to={`/admin/users/roles`} name={'Administrator Roles'}>
+                <SubNavigationLink to={`/admin/users/roles`} name={t('users.administratorRoles') as string}>
                     <UserAddIcon />
                 </SubNavigationLink>
             </SubNavigation>
@@ -87,32 +89,32 @@ function UsersContainer() {
                             <table css={tw`w-full table-auto`}>
                                 <TableHead>
                                     <TableHeader
-                                        name={'ID'}
+                                        name={t('users.id') as string}
                                         direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('id')}
                                     />
                                     <TableHeader
-                                        name={'Username'}
+                                        name={t('users.username') as string}
                                         direction={sort === 'username' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('username')}
                                     />
                                     <TableHeader
-                                        name={'Email Address'}
+                                        name={t('users.emailAddress') as string}
                                         direction={sort === 'email' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('email')}
                                     />
                                     <TableHeader
-                                        name={'2FA Enabled'}
+                                        name={t('users.twoFactorEnabled') as string}
                                         direction={sort === 'use_totp' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('use_totp')}
                                     />
                                     <TableHeader
-                                        name={'State'}
+                                        name={t('users.state') as string}
                                         direction={sort === 'state' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('state')}
                                     />
                                     <TableHeader
-                                        name={'permissions'}
+                                        name={t('users.permissions') as string}
                                         direction={sort === 'root_admin' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('root_admin')}
                                     />
@@ -147,7 +149,7 @@ function UsersContainer() {
                                                                 className={'my-auto mr-1'}
                                                                 size={'sm'}
                                                             />{' '}
-                                                            Enabled
+                                                            {t('users.enabled') as string}
                                                         </Pill>
                                                     ) : (
                                                         <Pill type={'danger'}>
@@ -156,7 +158,7 @@ function UsersContainer() {
                                                                 className={'my-auto mr-1'}
                                                                 size={'sm'}
                                                             />{' '}
-                                                            Disabled
+                                                            {t('users.disabled') as string}
                                                         </Pill>
                                                     )}
                                                 </td>
@@ -168,7 +170,7 @@ function UsersContainer() {
                                                                 className={'my-auto mr-1'}
                                                                 size={'sm'}
                                                             />{' '}
-                                                            Suspended
+                                                            {t('users.suspended') as string}
                                                         </Pill>
                                                     ) : (
                                                         <Pill type={'success'}>
@@ -177,7 +179,7 @@ function UsersContainer() {
                                                                 className={'my-auto mr-1'}
                                                                 size={'sm'}
                                                             />{' '}
-                                                            Active
+                                                            {t('users.active') as string}
                                                         </Pill>
                                                     )}
                                                 </td>
@@ -190,7 +192,7 @@ function UsersContainer() {
                                                                     className={'my-auto mr-1'}
                                                                     size={'sm'}
                                                                 />{' '}
-                                                                Admin
+                                                                {t('users.admin') as string}
                                                             </Pill>
                                                             {user.admin_role_id ? (
                                                                 <Pill type={'info'}>
@@ -208,7 +210,7 @@ function UsersContainer() {
                                                                         className={'my-auto mr-1'}
                                                                         size={'sm'}
                                                                     />{' '}
-                                                                    Full Access
+                                                                    {t('users.fullAccess') as string}
                                                                 </Pill>
                                                             )}
                                                         </>
@@ -219,7 +221,7 @@ function UsersContainer() {
                                                                 className={'my-auto mr-1'}
                                                                 size={'sm'}
                                                             />{' '}
-                                                            Standard
+                                                            {t('users.standard') as string}
                                                         </Pill>
                                                     )}
                                                 </td>

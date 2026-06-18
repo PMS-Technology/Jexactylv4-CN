@@ -56,7 +56,11 @@ class AssignmentService
             $underlying = gethostbyname($allocationIp);
             $parsed = Network::parse($underlying);
         } catch (\Exception $exception) {
-            throw new DisplayException("Could not parse provided allocation IP address for $allocationIp ($underlying): {$exception->getMessage()}", $exception);
+            throw new DisplayException(trans('exceptions.allocations.parse_ip_failed', [
+                'ip' => $allocationIp,
+                'underlying' => $underlying,
+                'message' => $exception->getMessage(),
+            ]), $exception);
         }
 
         $this->connection->beginTransaction();

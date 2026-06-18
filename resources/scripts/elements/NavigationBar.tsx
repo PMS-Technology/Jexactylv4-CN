@@ -4,6 +4,7 @@ import { faEye, faHeart, faIdBadge } from '@fortawesome/free-solid-svg-icons';
 import { useStoreState } from 'easy-peasy';
 import SearchContainer from '@account/search/SearchContainer';
 import tw from 'twin.macro';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { SiteTheme } from '@/state/theme';
 import { Link, useLocation } from 'react-router-dom';
@@ -29,6 +30,7 @@ const RightNavigation = styled.div<{ theme: SiteTheme }>`
 `;
 
 const NavigationBar = () => {
+    const { t } = useTranslation('auth');
     const [width, setWidth] = useState(0);
     const [currentPage, setCurrentPage] = useState(0);
 
@@ -101,7 +103,7 @@ const NavigationBar = () => {
                 return (
                     <>
                         <FontAwesomeIcon icon={faHeart} className={user.useTotp ? 'text-green-400' : 'text-red-400'} />
-                        2FA is {user.useTotp ? 'Enabled' : 'Disabled'}
+                        {user.useTotp ? t('2fa.enabled') : t('2fa.disabled')}
                     </>
                 );
             case 2:

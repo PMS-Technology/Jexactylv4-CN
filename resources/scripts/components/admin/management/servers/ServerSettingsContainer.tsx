@@ -1,6 +1,7 @@
 import { useStoreActions } from 'easy-peasy';
 import type { FormikHelpers } from 'formik';
 import { Form, Formik } from 'formik';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { object } from 'yup';
 
@@ -24,6 +25,7 @@ import NodeStatus from '@admin/management/nodes/NodeStatus';
 import { NavLink } from 'react-router-dom';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [node, setNode] = useState<Node | undefined>();
     const { data: server } = useServerFromRoute();
     const { secondary } = useStoreState(state => state.theme.data!.colors);
@@ -92,7 +94,7 @@ export default () => {
 
                         <div css={tw`flex flex-col`}>
                             <ServerResourceBox />
-                            <TitledGreyBox title={'Node Information'} icon={faLayerGroup} className={'mt-6'}>
+                            <TitledGreyBox title={t('servers.nodeInformation') as string} icon={faLayerGroup} className={'mt-6'}>
                                 {!node ? (
                                     <Spinner size={'large'} centered />
                                 ) : (
@@ -110,7 +112,7 @@ export default () => {
                                     <ServerDeleteButton />
 
                                     <Button type="submit" className="ml-auto" disabled={isSubmitting || !isValid}>
-                                        Save Changes
+                                        {t('servers.saveChanges') as string}
                                     </Button>
                                 </div>
                             </div>

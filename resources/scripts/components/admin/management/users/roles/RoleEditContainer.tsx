@@ -1,6 +1,7 @@
 import { action, Action, Actions, createContextStore, useStoreActions } from 'easy-peasy';
 import { Form, Formik, FormikHelpers } from 'formik';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { object, string } from 'yup';
 import { getRole, updateRole } from '@/api/routes/admin/roles';
@@ -38,6 +39,7 @@ interface Values {
 }
 
 const EditInformationContainer = () => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -79,20 +81,20 @@ const EditInformationContainer = () => {
         >
             {({ isSubmitting, isValid }) => (
                 <React.Fragment>
-                    <AdminBox title={'Edit Role'} css={tw`relative mb-6`} icon={faPencil}>
+                    <AdminBox title={t('users.editRole') as string} css={tw`relative mb-6`} icon={faPencil}>
                         <SpinnerOverlay visible={isSubmitting} />
 
                         <Form css={tw`mb-0`}>
                             <div>
-                                <Field id={'name'} name={'name'} label={'Name'} type={'text'} />
+                                <Field id={'name'} name={'name'} label={t('users.name') as string} type={'text'} />
                             </div>
 
                             <div css={tw`mt-6`}>
-                                <Field id={'description'} name={'description'} label={'Description'} type={'text'} />
+                                <Field id={'description'} name={'description'} label={t('users.description') as string} type={'text'} />
                             </div>
 
                             <div css={tw`mt-6`}>
-                                <Field id={'color'} type={'color'} name={'color'} label={'Color'} />
+                                <Field id={'color'} type={'color'} name={'color'} label={t('users.color') as string} />
                             </div>
 
                             <div css={tw`w-full flex flex-row items-center mt-6`}>
@@ -102,7 +104,7 @@ const EditInformationContainer = () => {
 
                                 <div css={tw`flex ml-auto`}>
                                     <Button type={'submit'} disabled={isSubmitting || !isValid}>
-                                        Save Changes
+                                        {t('users.saveChanges') as string}
                                     </Button>
                                 </div>
                             </div>
@@ -115,6 +117,7 @@ const EditInformationContainer = () => {
 };
 
 const RoleEditContainer = () => {
+    const { t } = useTranslation('admin');
     const params = useParams<'id'>();
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -150,7 +153,7 @@ const RoleEditContainer = () => {
     }
 
     return (
-        <AdminContentBlock title={'Role - ' + role.name}>
+        <AdminContentBlock title={t('users.rolePageTitle', { name: role.name })}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
                     <h2
@@ -161,7 +164,7 @@ const RoleEditContainer = () => {
                     </h2>
                     {(role.description || '').length < 1 ? (
                         <p css={tw`text-base text-neutral-400`}>
-                            <span css={tw`italic`}>No description</span>
+                            <span css={tw`italic`}>{t('users.noDescription') as string}</span>
                         </p>
                     ) : (
                         <p css={tw`text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}>
@@ -174,9 +177,9 @@ const RoleEditContainer = () => {
             <EditInformationContainer />
             <div css={tw`w-full flex flex-row items-center my-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>Role Permissions</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{t('users.rolePermissions') as string}</h2>
                     <p css={tw`text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}>
-                        This table contains the permissions that you can assign to the role.
+                        {t('users.rolePermissionsDescription') as string}
                     </p>
                 </div>
             </div>

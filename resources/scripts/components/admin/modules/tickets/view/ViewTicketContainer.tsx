@@ -1,4 +1,5 @@
 import tw from 'twin.macro';
+import { useTranslation } from 'react-i18next';
 import AdminContentBlock from '@/elements/AdminContentBlock';
 import { differenceInHours, format, formatDistanceToNow } from 'date-fns';
 import { statusToColor } from '@admin/modules/tickets/TicketsContainer';
@@ -25,6 +26,7 @@ import { TicketStatus, Values } from '@/api/routes/admin/tickets/types';
 import { updateTicket, useTicketFromRoute } from '@/api/routes/admin/tickets';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { data: ticket, isLoading } = useTicketFromRoute();
     const boxStatus = useStatus();
 
@@ -57,13 +59,13 @@ export default () => {
     if (!ticket.user)
         return (
             <Alert type={'danger'}>
-                This ticket was created without an assigned user. This ticket must be deleted.&nbsp;
+                {t('ticketsModule.ticketWithoutUser') as string}&nbsp;
                 <DeleteTicketDialog ticketId={ticket.id} />
             </Alert>
         );
 
     return (
-        <AdminContentBlock title={`View ticket: ${ticket.title}`}>
+        <AdminContentBlock title={`${t('ticketsModule.viewTicket') as string}: ${ticket.title}`}>
             <div className={'w-full flex flex-row items-center mb-8'}>
                 <div className={'flex flex-col flex-shrink'} style={{ minWidth: '0' }}>
                     <h2 className={'text-2xl font-header font-medium inline-flex'}>
@@ -82,7 +84,7 @@ export default () => {
                             'text-base text-sm mt-1 text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden'
                         }
                     >
-                        First created&nbsp;
+                        {t('ticketsModule.firstCreated') as string}&nbsp;
                         {Math.abs(differenceInHours(ticket.created_at, new Date())) > 48
                             ? format(ticket.created_at, 'MMM do, yyyy h:mma')
                             : formatDistanceToNow(ticket.created_at, { addSuffix: true })}
@@ -100,21 +102,21 @@ export default () => {
             >
                 {({ isSubmitting }) => (
                     <Form>
-                        <AdminBox title={'Ticket Options'} icon={faGears} status={boxStatus.status}>
+                        <AdminBox title={t('ticketsModule.ticketOptions') as string} icon={faGears} status={boxStatus.status}>
                             <div className={'grid lg:grid-cols-3 gap-4'}>
                                 <div>
-                                    <Label>Update ticket status</Label>
+                                    <Label>{t('ticketsModule.updateTicketStatus') as string}</Label>
                                     <Select
                                         defaultValue={ticket.status}
                                         onChange={e => setStatus(String(e.target.value) as TicketStatus)}
                                     >
-                                        <option value={'pending'}>Pending</option>
-                                        <option value={'in-progress'}>In Progress</option>
-                                        <option value={'resolved'}>Resolved</option>
-                                        <option value={'unresolved'}>Unresolved</option>
+                                        <option value={'pending'}>{t('ticketsModule.pending') as string}</option>
+                                        <option value={'in-progress'}>{t('ticketsModule.inProgress') as string}</option>
+                                        <option value={'resolved'}>{t('ticketsModule.resolved') as string}</option>
+                                        <option value={'unresolved'}>{t('ticketsModule.unresolved') as string}</option>
                                     </Select>
                                     <p className={'text-xs mt-1 text-gray-400'}>
-                                        Change the state of this ticket for the user.
+                                        {t('ticketsModule.changeStateDescription') as string}
                                     </p>
                                 </div>
                                 <div>
@@ -133,13 +135,13 @@ export default () => {
                                         )}
                                     </div>
                                     <p className={'text-xs mt-1 text-gray-400'}>
-                                        You may assign a Panel administrator to be responsible for this ticket.
+                                        {t('ticketsModule.assignAdministratorDescription') as string}
                                     </p>
                                 </div>
                                 <div>
                                     <UserSelect selected={ticket.user} />
                                     <p className={'text-xs mt-1 text-gray-400'}>
-                                        If needed, you can re-assign this ticket to a different user.
+                                        {t('ticketsModule.reassignUserDescription') as string}
                                     </p>
                                 </div>
                             </div>
@@ -147,7 +149,7 @@ export default () => {
                                 <div className={'ml-auto mt-4'}>
                                     <DeleteTicketDialog ticketId={ticket.id} />
                                     <Button type={'submit'} disabled={isSubmitting}>
-                                        Save Changes
+                                        {t('ticketsModule.saveChanges') as string}
                                     </Button>
                                 </div>
                             </div>
@@ -158,7 +160,7 @@ export default () => {
             <div className={'border-2 border-gray-700 rounded-full my-12'} />
             <div className={'w-full flex flex-row items-center'}>
                 <div className={'flex flex-col flex-shrink'} style={{ minWidth: '0' }}>
-                    <h2 className={'text-2xl font-header font-medium inline-flex'}>Ticket Messages</h2>
+                    <h2 className={'text-2xl font-header font-medium inline-flex'}>{t('ticketsModule.ticketMessages') as string}</h2>
                 </div>
                 <div css={tw`flex ml-auto pl-4`}>
                     <NewMessageDialog ticketId={ticket.id} />

@@ -1,14 +1,16 @@
 import { useStoreState } from '@/state/hooks';
+import { useTranslation } from 'react-i18next';
 import FeatureContainer from '@/elements/FeatureContainer';
 import BillingSvg from '@/assets/images/themed/BillingSvg';
 import { faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
 import ToggleFeatureButton from '@admin/modules/billing/ToggleFeatureButton';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const primary = useStoreState(state => state.theme.data!.colors.primary);
 
     return (
-        <FeatureContainer image={<BillingSvg color={primary} />} icon={faMoneyBillWave} title={'Billing System'}>
+        <FeatureContainer image={<BillingSvg color={primary} />} icon={faMoneyBillWave} title={t('billingModule.billingSystem') as string}>
             Use Jexactyl&apos;s billing and payment system to create subscriptions, manage customers and update
             balances. View PDF invoices, manually change subscription details and so much more with our easy-to-use
             interface and deep integration with third-party payment gateways like Stripe and PayPal.

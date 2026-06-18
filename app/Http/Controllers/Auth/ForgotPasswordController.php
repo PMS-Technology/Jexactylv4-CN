@@ -27,15 +27,15 @@ class ForgotPasswordController extends AbstractLoginController
         try {
             $user = User::where('email', $request->input('email'))->firstOrFail();
         } catch (DisplayException $ex) {
-            throw new DisplayException('The information provided was incorrect.');
+            throw new DisplayException(trans('exceptions.auth.incorrect_information'));
         }
 
         if (!$user->recovery_code || !password_verify($request->input('code'), $user->recovery_code)) {
-            throw new DisplayException('The information provided was incorrect.');
+            throw new DisplayException(trans('exceptions.auth.incorrect_information'));
         }
 
         if ($request->input('password') !== $request->input('password_confirm')) {
-            throw new DisplayException('The passwords entered do not match.');
+            throw new DisplayException(trans('exceptions.auth.passwords_mismatch'));
         }
 
         $user = $this->updateService->handle($user, ['password' => $request->input('password')]);

@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faSyncAlt } from '@fortawesome/free-solid-svg-icons';
 import styled, { keyframes } from 'styled-components';
 import tw from 'twin.macro';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/elements/button';
 import NotFoundSvg from '@/assets/images/not_found.svg';
 import ServerErrorSvg from '@/assets/images/server_error.svg';
@@ -82,18 +83,22 @@ type ServerErrorProps = (Omit<PropsWithBack, 'image' | 'title'> | Omit<PropsWith
     title?: string;
 };
 
-const ServerError = ({ title, ...props }: ServerErrorProps) => (
-    <ScreenBlock title={title || 'Something went wrong'} image={ServerErrorSvg} {...props} />
-);
+const ServerError = ({ title, ...props }: ServerErrorProps) => {
+    const { t } = useTranslation('common');
+    return <ScreenBlock title={title || t('error.somethingWentWrong')} image={ServerErrorSvg} {...props} />;
+};
 
-const NotFound = ({ title, message, onBack }: Partial<Pick<ScreenBlockProps, 'title' | 'message' | 'onBack'>>) => (
-    <ScreenBlock
-        title={title || '404'}
-        image={NotFoundSvg}
-        message={message || 'The requested resource was not found.'}
-        onBack={onBack}
-    />
-);
+const NotFound = ({ title, message, onBack }: Partial<Pick<ScreenBlockProps, 'title' | 'message' | 'onBack'>>) => {
+    const { t } = useTranslation('common');
+    return (
+        <ScreenBlock
+            title={title || '404'}
+            image={NotFoundSvg}
+            message={message || t('error.notFound')}
+            onBack={onBack}
+        />
+    );
+};
 
 const Suspended = ({
     date,
@@ -106,6 +111,7 @@ const Suspended = ({
     serverId?: number;
     serverUuid?: string;
 }) => {
+    const { t } = useTranslation('common');
     const [product, setProduct] = useState<Product>();
     const [renewing, setRenewing] = useState<boolean>(false);
 
@@ -166,25 +172,23 @@ const Suspended = ({
                             <FontAwesomeIcon icon={faArrowLeft} />
                         </ActionButton>
                     </div>
-                    <h2 css={tw`text-white font-bold text-4xl`}>{isFree ? 'Suspended' : 'Suspended - No Payment'}</h2>
+                    <h2 css={tw`text-white font-bold text-4xl`}>{isFree ? t('suspended') : t('suspended') + ' - 未付款'}</h2>
                     <p css={tw`text-sm text-neutral-400 mt-2`}>
                         {isFree ? (
                             <>
                                 {isLongOverdue ? (
                                     <>
-                                        Your free server has been suspended for more than {suspensionThreshold} days due
-                                        to non-renewal.{' '}
+                                        您的免费服务器因未续费已被暂停超过 {suspensionThreshold} 天。
                                         <span className={'font-bold text-red-400'}>
-                                            Please create a support ticket to restore access.
+                                            {' '}请创建工单以恢复访问。
                                         </span>{' '}
-                                        Self-service renewal is no longer available after {suspensionThreshold} days.
+                                        超过 {suspensionThreshold} 天后自助续费将不再可用。
                                     </>
                                 ) : (
                                     <>
-                                        Your free server has been suspended because the renewal date has passed. Please
-                                        renew to restore access.
+                                        您的免费服务器因续费日期已过而被暂停。请续费以恢复访问。
                                         <div className={'mt-2 text-yellow-400 font-semibold'}>
-                                            Days overdue: {daysOverdue}
+                                            逾期天数：{daysOverdue}
                                         </div>
                                     </>
                                 )}
@@ -193,26 +197,24 @@ const Suspended = ({
                             <>
                                 {isLongOverdue ? (
                                     <>
-                                        Your server has been suspended for more than {suspensionThreshold} days due to
-                                        non-payment.{' '}
+                                        您的服务器因未付款已被暂停超过 {suspensionThreshold} 天。
                                         <span className={'font-bold text-red-400'}>
-                                            Please create a support ticket to restore access.
+                                            {' '}请创建工单以恢复访问。
                                         </span>{' '}
-                                        Self-service payment is no longer available after {suspensionThreshold} days.
+                                        超过 {suspensionThreshold} 天后自助付款将不再可用。
                                     </>
                                 ) : (
                                     <>
-                                        Your server has been suspended due to a lack of payment. Please pay to restore
-                                        access.
+                                        您的服务器因未付款而被暂停。请付款以恢复访问。
                                         <div className={'mt-2 text-gray-300 font-semibold'}>
-                                            Your outstanding balance is:
+                                            您的欠款金额为：
                                             <span className={'text-white ml-2 font-bold'}>
                                                 {currency}
                                                 {product.price}
                                             </span>
                                         </div>
                                         <div className={'mt-2 text-yellow-400 font-semibold'}>
-                                            Days overdue: {daysOverdue}
+                                            逾期天数：{daysOverdue}
                                         </div>
                                     </>
                                 )}
@@ -224,15 +226,14 @@ const Suspended = ({
                         {isLongOverdue ? (
                             <div css={tw`text-center p-4 bg-red-900/30 rounded border border-red-500`}>
                                 <p css={tw`text-red-300 font-semibold`}>
-                                    Self-service renewal/payment is no longer available. Please create a support ticket
-                                    to restore your server.
+                                    自助续费/付款不再可用。请创建工单以恢复您的服务器。
                                 </p>
                             </div>
                         ) : (
                             <>
                                 {isFree ? (
                                     <Button onClick={handleFreeRenewal} disabled={renewing} size={Button.Sizes.Large}>
-                                        {renewing ? 'Renewing...' : 'Renew Free Server'}
+                                        {renewing ? '续费中...' : '续费免费服务器'}
                                     </Button>
                                 ) : (
                                     <ServerPaymentButton product={product} />

@@ -2,6 +2,7 @@ import type { Action, Actions } from 'easy-peasy';
 import { action, createContextStore, useStoreActions } from 'easy-peasy';
 import { useEffect, useState } from 'react';
 import { Link, Route, Routes, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import { getUser } from '@/api/routes/admin/users';
@@ -33,6 +34,7 @@ export const Context: ReturnType<typeof createContextStore<ctx>> = createContext
 });
 
 const UserRouter = () => {
+    const { t } = useTranslation('admin');
     const params = useParams<'id'>();
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -68,7 +70,7 @@ const UserRouter = () => {
     }
 
     return (
-        <AdminContentBlock title={'User - ' + user.id}>
+        <AdminContentBlock title={t('users.pageTitle', { id: user.id })}>
             <div css={tw`w-full flex flex-row items-center mb-4`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
                     <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{user.email}</h2>
@@ -81,7 +83,7 @@ const UserRouter = () => {
                 <div css={tw`flex ml-auto pl-4`}>
                     <Link to={'/admin/users'}>
                         <Button>
-                            <FontAwesomeIcon icon={faArrowLeft} className={'mr-2 my-auto'} /> Back to Users
+                            <FontAwesomeIcon icon={faArrowLeft} className={'mr-2 my-auto'} /> {t('users.backToUsers') as string}
                         </Button>
                     </Link>
                 </div>
@@ -90,15 +92,15 @@ const UserRouter = () => {
             <FlashMessageRender byKey={'user'} css={tw`mb-4`} />
 
             <SubNavigation>
-                <SubNavigationLink to={`/admin/users/${params.id}`} name={'About'} base>
+                <SubNavigationLink to={`/admin/users/${params.id}`} name={t('users.about') as string} base>
                     <UserIcon />
                 </SubNavigationLink>
 
-                <SubNavigationLink to={`/admin/users/${params.id}/servers`} name={'Servers'}>
+                <SubNavigationLink to={`/admin/users/${params.id}/servers`} name={t('users.servers') as string}>
                     <ServerIcon />
                 </SubNavigationLink>
 
-                <SubNavigationLink to={`/admin/users/${params.id}/manage`} name={'Manage'}>
+                <SubNavigationLink to={`/admin/users/${params.id}/manage`} name={t('users.manage') as string}>
                     <CogIcon />
                 </SubNavigationLink>
             </SubNavigation>

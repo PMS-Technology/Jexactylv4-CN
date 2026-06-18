@@ -1,4 +1,5 @@
 import { memo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { EggVariable } from '@definitions/server';
 import TitledGreyBox from '@/elements/TitledGreyBox';
 import { usePermissions } from '@/plugins/usePermissions';
@@ -18,6 +19,7 @@ interface Props {
 }
 
 const VariableBox = ({ variable }: Props) => {
+    const { t } = useTranslation('server');
     const FLASH_KEY = `server:startup:${variable.envVariable}`;
 
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
@@ -63,7 +65,7 @@ const VariableBox = ({ variable }: Props) => {
             title={
                 <p className="text-sm font-semibold">
                     {!variable.isEditable && (
-                        <span className="bg-neutral-700 text-xs py-1 px-2 rounded-full mr-2 mb-1">Read Only</span>
+                        <span className="bg-neutral-700 text-xs py-1 px-2 rounded-full mr-2 mb-1">{t('startupPage.readOnly') as string}</span>
                     )}
                     {variable.name}
                 </p>

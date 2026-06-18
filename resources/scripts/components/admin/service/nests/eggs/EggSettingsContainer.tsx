@@ -6,6 +6,7 @@ import type { FormikHelpers } from 'formik';
 import { Form, Formik, useFormikContext } from 'formik';
 import { forwardRef, useImperativeHandle, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { object } from 'yup';
 
@@ -24,20 +25,22 @@ import useFlash from '@/plugins/useFlash';
 import { useStoreState } from '@/state/hooks';
 
 export function EggInformationContainer() {
+    const { t } = useTranslation('admin');
     const { isSubmitting } = useFormikContext();
 
     return (
-        <AdminBox icon={faEgg} title={'Egg Information'} css={tw`relative`}>
+        <AdminBox icon={faEgg} title={t('nests.eggInformation') as string} css={tw`relative`}>
             <SpinnerOverlay visible={isSubmitting} />
 
-            <Field id={'name'} name={'name'} label={'Name'} type={'text'} css={tw`mb-6`} />
+            <Field id={'name'} name={'name'} label={t('nests.name') as string} type={'text'} css={tw`mb-6`} />
 
-            <Field id={'description'} name={'description'} label={'Description'} type={'text'} css={tw`mb-2`} />
+            <Field id={'description'} name={'description'} label={t('nests.description') as string} type={'text'} css={tw`mb-2`} />
         </AdminBox>
     );
 }
 
 function EggDetailsContainer() {
+    const { t } = useTranslation('admin');
     const { data: egg } = useEggFromRoute();
 
     if (!egg) {
@@ -45,14 +48,14 @@ function EggDetailsContainer() {
     }
 
     return (
-        <AdminBox icon={faEgg} title={'Egg Details'} css={tw`relative`}>
+        <AdminBox icon={faEgg} title={t('nests.eggDetails') as string} css={tw`relative`}>
             <div css={tw`mb-6`}>
-                <Label>UUID</Label>
+                <Label>{t('nests.uuid') as string}</Label>
                 <Input id={'uuid'} name={'uuid'} type={'text'} value={egg.uuid} readOnly />
             </div>
 
             <div css={tw`mb-2`}>
-                <Label>Author</Label>
+                <Label>{t('nests.author') as string}</Label>
                 <Input id={'author'} name={'author'} type={'text'} value={egg.author} readOnly />
             </div>
         </AdminBox>
@@ -60,37 +63,40 @@ function EggDetailsContainer() {
 }
 
 export function EggStartupContainer({ className }: { className?: string }) {
+    const { t } = useTranslation('admin');
     const { isSubmitting } = useFormikContext();
 
     return (
-        <AdminBox icon={faTerminal} title={'Startup Command'} css={tw`relative`} className={className}>
+        <AdminBox icon={faTerminal} title={t('nests.startupCommand') as string} css={tw`relative`} className={className}>
             <SpinnerOverlay visible={isSubmitting} />
 
-            <Field id={'startup'} name={'startup'} label={'Startup Command'} type={'text'} css={tw`mb-1`} />
+            <Field id={'startup'} name={'startup'} label={t('nests.startupCommand') as string} type={'text'} css={tw`mb-1`} />
         </AdminBox>
     );
 }
 
 export function EggImageContainer() {
+    const { t } = useTranslation('admin');
     const { isSubmitting } = useFormikContext();
 
     return (
-        <AdminBox icon={faDocker} title={'Docker'} css={tw`relative`}>
+        <AdminBox icon={faDocker} title={t('nests.docker') as string} css={tw`relative`}>
             <SpinnerOverlay visible={isSubmitting} />
 
-            <TextareaField id={'dockerImages'} name={'dockerImages'} label={'Docker Images'} rows={5} />
+            <TextareaField id={'dockerImages'} name={'dockerImages'} label={t('nests.dockerImages') as string} rows={5} />
         </AdminBox>
     );
 }
 
 export function EggLifecycleContainer() {
+    const { t } = useTranslation('admin');
     const { isSubmitting } = useFormikContext();
 
     return (
-        <AdminBox icon={faFireAlt} title={'Lifecycle'} css={tw`relative`}>
+        <AdminBox icon={faFireAlt} title={t('nests.lifecycle') as string} css={tw`relative`}>
             <SpinnerOverlay visible={isSubmitting} />
 
-            <Field id={'configStop'} name={'configStop'} label={'Stop Command'} type={'text'} css={tw`mb-1`} />
+            <Field id={'configStop'} name={'configStop'} label={t('nests.stopCommand') as string} type={'text'} css={tw`mb-1`} />
         </AdminBox>
     );
 }
@@ -108,6 +114,7 @@ export const EggProcessContainer = forwardRef<any, EggProcessContainerProps>(fun
     { className },
     ref,
 ) {
+    const { t } = useTranslation('admin');
     const { isSubmitting, values } = useFormikContext<Values>();
 
     let fetchStartupConfiguration: (() => Promise<string>) | null = null;
@@ -136,11 +143,11 @@ export const EggProcessContainer = forwardRef<any, EggProcessContainerProps>(fun
     );
 
     return (
-        <AdminBox icon={faMicrochip} title={'Process Configuration'} css={tw`relative`} className={className}>
+        <AdminBox icon={faMicrochip} title={t('nests.processConfiguration') as string} css={tw`relative`} className={className}>
             <SpinnerOverlay visible={isSubmitting} />
 
             <div css={tw`mb-5`}>
-                <Label>Startup Configuration</Label>
+                <Label>{t('nests.startupConfiguration') as string}</Label>
                 <Editor
                     childClassName={tw`h-32 rounded`}
                     initialContent={values.configStartup}
@@ -152,7 +159,7 @@ export const EggProcessContainer = forwardRef<any, EggProcessContainerProps>(fun
             </div>
 
             <div css={tw`mb-1`}>
-                <Label>Configuration Files</Label>
+                <Label>{t('nests.configurationFiles') as string}</Label>
                 <Editor
                     childClassName={tw`h-48 rounded`}
                     initialContent={values.configFiles}
@@ -177,6 +184,7 @@ interface Values {
 }
 
 export default function EggSettingsContainer() {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
 
     const ref = useRef<EggProcessContainerRef>();
@@ -256,7 +264,7 @@ export default function EggSettingsContainer() {
                             <EggDeleteButton eggId={egg.id} onDeleted={() => navigate('/admin/nests')} />
                             <EggExportButton css={tw`ml-auto mr-4`} />
                             <Button type="submit" disabled={isSubmitting || !isValid}>
-                                Save Changes
+                                {t('nests.saveChanges') as string}
                             </Button>
                         </div>
                     </div>

@@ -16,6 +16,7 @@ import { Link, NavLink } from 'react-router-dom';
 import tw from 'twin.macro';
 import { useStoreState } from '@/state/hooks';
 import { useContext, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/elements/button';
 import classNames from 'classnames';
 import { ShoppingCartIcon } from '@heroicons/react/outline';
@@ -23,6 +24,7 @@ import useFlash from '@/plugins/useFlash';
 import { CategoryFilters } from '@/api/routes/admin/billing/types';
 
 function CategoryTable() {
+    const { t } = useTranslation('admin');
     const { data: categories, error } = useGetCategories();
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { colors } = useStoreState(state => state.theme.data!);
@@ -52,18 +54,18 @@ function CategoryTable() {
         <>
             <div className={'w-full flex flex-row items-center my-8 px-8'}>
                 <div className={'flex flex-col flex-shrink'} style={{ minWidth: '0' }}>
-                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>Categories</h2>
+                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>{t('billingModule.categories')}</h2>
                     <p
                         className={
                             'hidden lg:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden'
                         }
                     >
-                        These categories are used to contain your products.
+                        {t('billingModule.categoriesContainYourProducts')}
                     </p>
                 </div>
                 <div className={'flex ml-auto pl-4'}>
                     <Link to={'/admin/billing/categories/new'}>
-                        <Button>Add Category</Button>
+                        <Button>{t('billingModule.addCategory')}</Button>
                     </Link>
                 </div>
             </div>
@@ -75,17 +77,17 @@ function CategoryTable() {
                                 <TableHead>
                                     <TableHeader />
                                     <TableHeader
-                                        name={'ID'}
+                                        name={t('billingModule.id')}
                                         direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('id')}
                                     />
                                     <TableHeader
-                                        name={'Name'}
+                                        name={t('billingModule.name')}
                                         direction={sort === 'name' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('name')}
                                     />
-                                    <TableHeader name={'Description'} />
-                                    <TableHeader name={'Created At'} />
+                                    <TableHeader name={t('billingModule.description')} />
+                                    <TableHeader name={t('billingModule.createdAt')} />
                                     <TableHeader />
                                 </TableHead>
                                 <TableBody>
@@ -133,7 +135,7 @@ function CategoryTable() {
                                                                 : 'bg-red-200 text-red-800',
                                                         )}
                                                     >
-                                                        {category.visible ? 'Visible' : 'Hidden'}
+                                                        {category.visible ? t('billingModule.visible') : t('billingModule.hidden')}
                                                     </span>
                                                 </td>
                                             </TableRow>

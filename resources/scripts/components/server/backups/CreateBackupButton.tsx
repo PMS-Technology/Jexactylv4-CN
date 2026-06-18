@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Modal, { RequiredModalProps } from '@/elements/Modal';
 import { Field as FormikField, Form, Formik, FormikHelpers, useFormikContext } from 'formik';
 import { boolean, object, string } from 'yup';
@@ -21,28 +22,24 @@ interface Values {
 }
 
 const ModalContent = ({ ...props }: RequiredModalProps) => {
+    const { t } = useTranslation('server');
     const { isSubmitting } = useFormikContext<Values>();
 
     return (
         <Modal {...props} showSpinnerOverlay={isSubmitting}>
             <Form>
                 <FlashMessageRender byKey={'backups:create'} css={tw`mb-4`} />
-                <h2 css={tw`text-2xl mb-6`}>Create server backup</h2>
+                <h2 css={tw`text-2xl mb-6`}>{t('backupsPage.createServerBackup') as string}</h2>
                 <Field
                     name={'name'}
-                    label={'Backup name'}
-                    description={'If provided, the name that should be used to reference this backup.'}
+                    label={t('backupsPage.backupName') as string}
+                    description={t('backupsPage.backupNameDesc') as string}
                 />
                 <div css={tw`mt-6`}>
                     <FormikFieldWrapper
                         name={'ignored'}
-                        label={'Ignored Files & Directories'}
-                        description={`
-                            Enter the files or folders to ignore while generating this backup. Leave blank to use
-                            the contents of the .pteroignore file in the root of the server directory if present.
-                            Wildcard matching of files and folders is supported in addition to negating a rule by
-                            prefixing the path with an exclamation point.
-                        `}
+                        label={t('backupsPage.ignoredFiles') as string}
+                        description={t('backupsPage.ignoredFilesDesc') as string}
                     >
                         <FormikField as={Textarea} name={'ignored'} rows={6} />
                     </FormikFieldWrapper>
@@ -51,14 +48,14 @@ const ModalContent = ({ ...props }: RequiredModalProps) => {
                     <div css={tw`bg-black/25 mt-6 border-2 border-black/25 shadow-inner p-4 rounded`}>
                         <FormikSwitch
                             name={'isLocked'}
-                            label={'Locked'}
-                            description={'Prevents this backup from being deleted until explicitly unlocked.'}
+                            label={t('backupsPage.locked') as string}
+                            description={t('backupsPage.lockedDesc') as string}
                         />
                     </div>
                 </Can>
                 <div css={tw`flex justify-end mt-6`}>
                     <Button type={'submit'} disabled={isSubmitting}>
-                        Start backup
+                        {t('backupsPage.startBackup') as string}
                     </Button>
                 </div>
             </Form>
@@ -67,6 +64,7 @@ const ModalContent = ({ ...props }: RequiredModalProps) => {
 };
 
 export default () => {
+    const { t } = useTranslation('server');
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const [visible, setVisible] = useState(false);
@@ -108,7 +106,7 @@ export default () => {
                 </Formik>
             )}
             <Button css={tw`w-full sm:w-auto`} onClick={() => setVisible(true)}>
-                Create backup
+                {t('backupsPage.createBackup') as string}
             </Button>
         </>
     );

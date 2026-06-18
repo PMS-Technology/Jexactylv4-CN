@@ -1,4 +1,5 @@
 import { Dialog } from '@/elements/dialog';
+import { useTranslation } from 'react-i18next';
 import { createLink, CustomLink, updateLink, Values } from '@/api/routes/admin/links';
 import { VisibleDialog } from './LinksContainer';
 import Label from '@/elements/Label';
@@ -8,6 +9,7 @@ import Switch from '@/elements/Switch';
 import { mutate } from 'swr';
 
 export default ({ link, setOpen }: { link?: CustomLink; setOpen: Dispatch<SetStateAction<VisibleDialog>> }) => {
+    const { t } = useTranslation('admin');
     const [values, setValues] = useState<Values>({
         name: link?.name ?? '',
         url: link?.url ?? '',
@@ -34,22 +36,22 @@ export default ({ link, setOpen }: { link?: CustomLink; setOpen: Dispatch<SetSta
 
     return (
         <Dialog.Confirm
-            confirm={'Create'}
+            confirm={t('linksModule.create') as string}
             onConfirmed={onSubmit}
             open
             onClose={() => setOpen('none')}
-            title={'Create new link'}
+            title={t('linksModule.createNewLink') as string}
         >
             <div className={'mt-4'}>
-                <Label>Link Name</Label>
+                <Label>{t('linksModule.linkName') as string}</Label>
                 <InputField defaultValue={values.name} name={'name'} onChange={updateValues}></InputField>
-                <p className={'text-gray-400 text-sm mt-1'}>Give the link a friendly name which clients can read.</p>
+                <p className={'text-gray-400 text-sm mt-1'}>{t('linksModule.linkNameDescription') as string}</p>
             </div>
             <div className={'mt-2'}>
-                <Label>Link URL</Label>
+                <Label>{t('linksModule.linkUrl') as string}</Label>
                 <InputField defaultValue={values.url} name={'url'} onChange={updateValues}></InputField>
                 <p className={'text-gray-400 text-sm mt-1'}>
-                    This is the URL which the link points to outside of the Panel.
+                    {t('linksModule.linkUrlDescription') as string}
                 </p>
             </div>
             <div className={'xl:col-span-2 bg-black/50 border border-black shadow-inner p-4 rounded mt-4'}>
@@ -59,9 +61,9 @@ export default ({ link, setOpen }: { link?: CustomLink; setOpen: Dispatch<SetSta
                     onChange={() => {
                         setValues(prev => ({ ...prev, visible: !values.visible }));
                     }}
-                    label={'Link Visibility'}
+                    label={t('linksModule.linkVisibility') as string}
                     description={
-                        "Toggle this setting to 'on' if you want to allow users to view and use this link. You can change this setting to 'off' at any time."
+                        t('linksModule.linkVisibilityDescription') as string
                     }
                 />
             </div>

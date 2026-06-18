@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { faNetworkWired } from '@fortawesome/free-solid-svg-icons';
 import { useParams } from 'react-router-dom';
 import tw from 'twin.macro';
@@ -9,6 +10,7 @@ import DeleteAllAllocationsButton from './allocations/DeleteAllAllocationsButton
 import FlashMessageRender from '@/elements/FlashMessageRender';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const params = useParams<'id'>();
 
     return (
@@ -20,7 +22,7 @@ export default () => {
                 </div>
 
                 <div css={tw`lg:col-span-4`}>
-                    <AdminBox icon={faNetworkWired} title={'Allocations'} css={tw`h-auto w-full`}>
+                    <AdminBox icon={faNetworkWired} title={t('nodes.nodeAllocation') as string} css={tw`h-auto w-full`}>
                         <CreateAllocationForm nodeId={Number(params.id)} />
                     </AdminBox>
                     <div className={'text-right mt-4'}>

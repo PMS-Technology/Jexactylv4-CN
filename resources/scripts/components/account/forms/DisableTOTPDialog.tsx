@@ -9,8 +9,10 @@ import { disableTwoFactor } from '@/api/routes/account/two-factor';
 import { useFlashKey } from '@/plugins/useFlash';
 import { useStoreActions } from '@/state/hooks';
 import FlashMessageRender from '@/elements/FlashMessageRender';
+import { useTranslation } from 'react-i18next';
 
 const DisableTOTPDialog = () => {
+    const { t } = useTranslation('dashboard');
     const [submitting, setSubmitting] = useState(false);
     const [password, setPassword] = useState('');
     const { clearAndAddHttpError } = useFlashKey('account:two-step');
@@ -18,8 +20,13 @@ const DisableTOTPDialog = () => {
     const updateUserData = useStoreActions(actions => actions.user.updateUserData);
 
     useEffect(() => {
-        setProps(state => ({ ...state, preventExternalClose: submitting }));
-    }, [submitting]);
+        setProps(state => ({
+            ...state,
+            title: t('account.disableTwoStepTitle'),
+            description: t('account.disableTwoStepDescription'),
+            preventExternalClose: submitting,
+        }));
+    }, [submitting, t]);
 
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -42,7 +49,7 @@ const DisableTOTPDialog = () => {
         <form id={'disable-totp-form'} className={'mt-6'} onSubmit={submit}>
             <FlashMessageRender byKey={'account:two-step'} className={'-mt-2 mb-6'} />
             <label className={'block pb-1'} htmlFor={'totp-password'}>
-                Password
+                {t('account.password')}
             </label>
             <Input.Text
                 id={'totp-password'}
@@ -52,14 +59,14 @@ const DisableTOTPDialog = () => {
                 onChange={e => setPassword(e.currentTarget.value)}
             />
             <Dialog.Footer>
-                <Button.Text onClick={close}>Cancel</Button.Text>
+                <Button.Text onClick={close}>{t('account.cancel')}</Button.Text>
                 <Tooltip
                     delay={100}
                     disabled={password.length > 0}
-                    content={'You must enter your account password to continue.'}
+                    content={t('account.passwordRequiredToContinue')}
                 >
                     <Button.Danger type={'submit'} form={'disable-totp-form'} disabled={submitting || !password.length}>
-                        Disable
+                        {t('account.disable')}
                     </Button.Danger>
                 </Tooltip>
             </Dialog.Footer>
@@ -68,6 +75,6 @@ const DisableTOTPDialog = () => {
 };
 
 export default asDialog({
-    title: 'Disable Two-Step Verification',
-    description: 'Disabling two-step verification will make your account less secure.',
+    title: '',
+    description: '',
 })(DisableTOTPDialog);

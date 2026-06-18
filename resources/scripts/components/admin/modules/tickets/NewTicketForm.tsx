@@ -1,6 +1,7 @@
 import type { Actions } from 'easy-peasy';
 import { useStoreActions } from 'easy-peasy';
 import type { FormikHelpers } from 'formik';
+import { useTranslation } from 'react-i18next';
 import { Form, Formik } from 'formik';
 import { useNavigate } from 'react-router-dom';
 import Field, { FieldRow } from '@/elements/Field';
@@ -27,6 +28,7 @@ const initialValues: Values = {
 };
 
 export default () => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -47,14 +49,14 @@ export default () => {
     };
 
     return (
-        <AdminContentBlock title={'New Ticket'}>
+        <AdminContentBlock title={t('ticketsModule.newTicket') as string}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>New Ticket</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{t('ticketsModule.newTicket') as string}</h2>
                     <p
                         css={tw`hidden md:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        Add a new ticket for users to interact with.
+                        {t('ticketsModule.newTicketDescription') as string}
                     </p>
                 </div>
             </div>
@@ -75,37 +77,37 @@ export default () => {
                     <Form>
                         <div css={tw`flex flex-col lg:flex-row`}>
                             <div css={tw`w-full flex flex-col mr-0 lg:mr-2`}>
-                                <AdminBox title={'Ticket Details'} icon={faTicket}>
+                                <AdminBox title={t('ticketsModule.ticketDetails') as string} icon={faTicket}>
                                     <FieldRow>
                                         <Field
                                             id={'title'}
                                             name={'title'}
                                             type={'text'}
-                                            label={'Title'}
-                                            description={'A simple title or description for this ticket.'}
+                                            label={t('ticketsModule.title') as string}
+                                            description={t('ticketsModule.titleDescription') as string}
                                         />
                                         <div>
                                             <UserSelect />
                                             <p className={'text-xs pt-2'}>
-                                                This will be the user that the ticket is made for.
+                                                {t('ticketsModule.userDescription') as string}
                                             </p>
                                         </div>
                                         <div>
                                             <UserSelect isAdmin />
                                             <p className={'text-xs pt-2'}>
-                                                Set an assigned administrator to deal with this ticket.
+                                                {t('ticketsModule.adminDescription') as string}
                                             </p>
                                         </div>
                                         <div>
-                                            <Label>Select ticket status</Label>
+                                            <Label>{t('ticketsModule.selectTicketStatus') as string}</Label>
                                             <Select id={'status'} name={'status'}>
-                                                <option value={'pending'}>Pending</option>
-                                                <option value={'in-progress'}>In Progress</option>
-                                                <option value={'resolved'}>Resolved</option>
-                                                <option value={'unresolved'}>Unresolved</option>
+                                                <option value={'pending'}>{t('ticketsModule.pending') as string}</option>
+                                                <option value={'in-progress'}>{t('ticketsModule.inProgress') as string}</option>
+                                                <option value={'resolved'}>{t('ticketsModule.resolved') as string}</option>
+                                                <option value={'unresolved'}>{t('ticketsModule.unresolved') as string}</option>
                                             </Select>
                                             <p className={'text-xs pt-2'}>
-                                                Before the ticket is created, you can change the status.
+                                                {t('ticketsModule.statusDescription') as string}
                                             </p>
                                         </div>
                                     </FieldRow>
@@ -113,7 +115,7 @@ export default () => {
                                 <div css={tw`rounded shadow-md mt-4 py-2 pr-6`} style={{ backgroundColor: secondary }}>
                                     <div css={tw`flex flex-row`}>
                                         <Button type={'submit'} css={tw`ml-auto`} disabled={isSubmitting || !isValid}>
-                                            Create
+                                            {t('ticketsModule.create') as string}
                                         </Button>
                                     </div>
                                 </div>

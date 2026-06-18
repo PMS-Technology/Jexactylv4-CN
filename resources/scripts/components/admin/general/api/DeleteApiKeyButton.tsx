@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import useFlash from '@/plugins/useFlash';
 import { Dialog } from '@/elements/dialog';
 import { Button } from '@/elements/button';
@@ -7,6 +8,7 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export default ({ id }: { id: number }) => {
+    const { t } = useTranslation('admin');
     const [visible, setVisible] = useState<boolean>(false);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
 
@@ -26,9 +28,9 @@ export default ({ id }: { id: number }) => {
                 open={visible}
                 onConfirmed={submit}
                 onClose={() => setVisible(false)}
-                title={'Confirm API Key Deletion'}
+                title={t('api.confirmDelete') as string}
             >
-                Deleting this key will instantly remove all access. You will not be able to reverse this action!
+                {t('api.confirmDeleteDesc') as string}
             </Dialog.Confirm>
             <Button.Danger className={'mt-2'} size={Button.Sizes.Small} onClick={() => setVisible(true)}>
                 <FontAwesomeIcon icon={faTrash} />

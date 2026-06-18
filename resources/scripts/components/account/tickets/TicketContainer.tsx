@@ -10,6 +10,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import classNames from 'classnames';
 import { Link } from 'react-router-dom';
 import { useStoreState } from '@/state/hooks';
+import { useTranslation } from 'react-i18next';
 
 export const statusToColor = (status: string): string => {
     switch (status) {
@@ -25,6 +26,7 @@ export const statusToColor = (status: string): string => {
 };
 
 export default () => {
+    const { t } = useTranslation('dashboard');
     const { clearAndAddHttpError } = useFlashKey('account');
     const { colors } = useStoreState(state => state.theme.data!);
     const {
@@ -41,21 +43,19 @@ export default () => {
     }, [error]);
 
     return (
-        <PageContentBlock title={'Support Tickets'}>
+        <PageContentBlock title={t('tickets.title')}>
             <FlashMessageRender byKey={'account:tickets'} />
             <div className={'text-3xl lg:text-5xl font-bold mt-8 mb-12'}>
-                Your Support Tickets
-                <p className={'text-gray-400 font-normal text-sm mt-1'}>
-                    Create a ticket to gain support from an administrator.
-                </p>
+                {t('tickets.yourTickets')}
+                <p className={'text-gray-400 font-normal text-sm mt-1'}>{t('tickets.description')}</p>
             </div>
             <div className={'grid lg:grid-cols-3 gap-4'}>
                 <div className={'lg:col-span-2'}>
-                    <ContentBox title={'Support Tickets'}>
+                    <ContentBox title={t('tickets.title')}>
                         <SpinnerOverlay visible={!tickets && isValidating} />
                         {!tickets || !tickets.length ? (
                             <p className={'text-center text-sm'}>
-                                {!tickets ? 'Loading...' : 'No tickets exist for this account.'}
+                                {!tickets ? t('account.loading') : t('tickets.noTickets')}
                             </p>
                         ) : (
                             tickets.map((ticket, index) => (
@@ -88,7 +88,7 @@ export default () => {
                                             >
                                                 <p className={'text-sm'}>{format(ticket.createdAt, 'MMMM do, yyyy')}</p>
                                                 <p className={'text-2xs text-gray-300 uppercase mt-1'}>
-                                                    Created{' '}
+                                                    {t('tickets.created')}{' '}
                                                     {formatDistanceToNow(ticket.createdAt, {
                                                         includeSeconds: true,
                                                         addSuffix: true,
@@ -102,7 +102,7 @@ export default () => {
                         )}
                     </ContentBox>
                 </div>
-                <ContentBox title={'Create Ticket'}>
+                <ContentBox title={t('tickets.createTicket')}>
                     <CreateTicketForm />
                 </ContentBox>
             </div>

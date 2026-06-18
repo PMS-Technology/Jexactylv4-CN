@@ -1,10 +1,12 @@
 import { useFormikContext } from 'formik';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import SearchableSelect, { Option } from '@/elements/SearchableSelect';
 import type { UserRole } from '@definitions/admin';
 import { searchRoles } from '@/api/routes/admin/roles';
 
 export default ({ selected }: { selected?: UserRole }) => {
+    const { t } = useTranslation('admin');
     const { setFieldValue } = useFormikContext();
 
     const [userRole, setUserRole] = useState<UserRole | null>(selected || null);
@@ -36,8 +38,8 @@ export default ({ selected }: { selected?: UserRole }) => {
         <SearchableSelect
             id={'admin_role_id'}
             name={'admin_role_id'}
-            label={'Assign Admin Role'}
-            placeholder={'Select an admin role... (optional)'}
+            label={t('users.assignAdminRole') as string}
+            placeholder={t('users.selectAdminRolePlaceholder') as string}
             items={userRoles}
             selected={userRole}
             setSelected={setUserRole}

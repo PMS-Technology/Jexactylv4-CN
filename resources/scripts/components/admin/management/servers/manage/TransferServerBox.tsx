@@ -1,5 +1,6 @@
 import tw from 'twin.macro';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import AdminBox from '@/elements/AdminBox';
 import { Button } from '@/elements/button';
 import { Dialog } from '@/elements/dialog';
@@ -11,6 +12,7 @@ import transferServer from '@/api/routes/admin/servers/manage/transferServer';
 import { searchNodes, getAllocations, Node, Allocation } from '@/api/routes/admin/node';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { data: server } = useServerFromRoute();
     const [visible, setVisible] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -117,7 +119,7 @@ export default () => {
     return (
         <>
             <Dialog
-                title={'Transfer Server'}
+                title={t('servers.transferServer') as string}
                 open={visible}
                 onClose={() => {
                     setVisible(false);
@@ -130,18 +132,17 @@ export default () => {
                 <div css={tw`space-y-4`}>
                     <p css={tw`text-sm text-neutral-400`}>
                         <FontAwesomeIcon icon={faExclamationTriangle} className={'mr-1 text-yellow-500'} />
-                        Transferring a server will move all of its files to a new node. The server will be stopped
-                        during this process and may experience downtime.
+                        {t('servers.transferDescription') as string}
                     </p>
 
                     <div>
-                        <label css={tw`block text-sm font-medium mb-2`}>Target Node</label>
+                        <label css={tw`block text-sm font-medium mb-2`}>{t('servers.targetNode') as string}</label>
                         <select
                             css={tw`shadow-none block p-3 pr-8 rounded border w-full text-sm transition-colors duration-150 ease-linear border-neutral-500 text-neutral-200 bg-neutral-800 outline-none`}
                             value={selectedNodeId?.toString() || ''}
                             onChange={e => setSelectedNodeId(e.target.value ? parseInt(e.target.value) : null)}
                         >
-                            <option value="">Select a node...</option>
+                            <option value="">{t('servers.selectNode') as string}</option>
                             {nodes.map(node => (
                                 <option key={node.id} value={node.id}>
                                     {node.name} ({node.fqdn})
@@ -152,7 +153,7 @@ export default () => {
 
                     {selectedNodeId && (
                         <div>
-                            <label css={tw`block text-sm font-medium mb-2`}>Target Allocation</label>
+                            <label css={tw`block text-sm font-medium mb-2`}>{t('servers.targetAllocation') as string}</label>
                             <select
                                 css={tw`shadow-none block p-3 pr-8 rounded border w-full text-sm transition-colors duration-150 ease-linear border-neutral-500 text-neutral-200 bg-neutral-800 outline-none disabled:opacity-50`}
                                 value={selectedAllocationId?.toString() || ''}
@@ -162,10 +163,10 @@ export default () => {
                                 disabled={loading || allocations.length === 0}
                             >
                                 {allocations.length === 0 ? (
-                                    <option value="">No available allocations</option>
+                                    <option value="">{t('servers.noAvailableAllocations') as string}</option>
                                 ) : (
                                     <>
-                                        <option value="">Select an allocation...</option>
+                                        <option value="">{t('servers.selectAllocation') as string}</option>
                                         {allocations.map(allocation => (
                                             <option key={allocation.id} value={allocation.id}>
                                                 {allocation.ip}:{allocation.port}
@@ -188,22 +189,21 @@ export default () => {
                                 setAllocations([]);
                             }}
                         >
-                            Cancel
+                            {t('servers.cancel') as string}
                         </Button.Text>
                         <Button.Danger onClick={submit} disabled={!selectedNodeId || !selectedAllocationId || loading}>
-                            {loading ? 'Transferring...' : 'Transfer Server'}
+                            {loading ? (t('servers.transferring') as string) : (t('servers.transferServer') as string)}
                         </Button.Danger>
                     </div>
                 </div>
             </Dialog>
             <div css={tw`h-auto flex flex-col`}>
-                <AdminBox icon={faExchangeAlt} title={'Transfer Server'} css={tw`relative w-full`}>
+                <AdminBox icon={faExchangeAlt} title={t('servers.transferServer') as string} css={tw`relative w-full`}>
                     <Button size={Button.Sizes.Large} css={tw`w-full`} onClick={() => setVisible(true)}>
-                        Transfer Server
+                        {t('servers.transferServer') as string}
                     </Button>
                     <p css={tw`text-xs text-neutral-400 mt-2`}>
-                        Transfer this server to a different node. The server will be stopped and all files will be
-                        migrated.
+                        {t('servers.transferServerDescription') as string}
                     </p>
                 </AdminBox>
             </div>

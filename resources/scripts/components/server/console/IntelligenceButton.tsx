@@ -8,10 +8,12 @@ import Dialog from '@/elements/dialog/Dialog';
 import Spinner from '@/elements/Spinner';
 import { handleQuery } from '@/api/routes/server/ai';
 import { useStoreState } from '@/state/hooks';
+import { useTranslation } from 'react-i18next';
 
 type Visibility = 'none' | 'button' | 'dialog';
 
 export default () => {
+    const { t } = useTranslation('server');
     const [log, setLog] = useState<string[]>([]);
     const [response, setResponse] = useState<string>();
     const [loading, setLoading] = useState<boolean>(false);
@@ -57,13 +59,13 @@ export default () => {
 
     return visible === 'button' ? (
         <Button onClick={submit}>
-            <SparklesIcon className={'w-5 mr-1'} /> Ask AI
+            <SparklesIcon className={'w-5 mr-1'} /> {t('ai.askAI') as string}
         </Button>
     ) : visible === 'dialog' ? (
         <Dialog
             open={visible === 'dialog'}
             onClose={() => setVisible('none')}
-            title={'Server Assistant'}
+            title={t('ai.serverAssistant') as string}
             preventExternalClose
         >
             {loading ? (
@@ -71,7 +73,7 @@ export default () => {
             ) : response ? (
                 <div className={'overflow-x-hidden bg-black/50 rounded-lg p-3'}>{response}</div>
             ) : (
-                'Error'
+                t('ai.error') as string
             )}
         </Dialog>
     ) : (

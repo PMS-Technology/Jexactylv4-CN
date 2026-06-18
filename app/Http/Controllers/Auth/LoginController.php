@@ -99,11 +99,11 @@ class LoginController extends AbstractLoginController
         $passwordConfirm = $request->input('confirm_password');
 
         if (User::where('email', $email)->exists()) {
-            throw new DisplayException('This email is already in use.');
+            throw new DisplayException(trans('exceptions.auth.email_in_use'));
         }
 
         if ($password !== $passwordConfirm) {
-            throw new DisplayException('The passwords entered do not match.');
+            throw new DisplayException(trans('exceptions.auth.passwords_mismatch'));
         }
 
         $this->createAccount(['email' => $email, 'username' => $username, 'password' => $password]);

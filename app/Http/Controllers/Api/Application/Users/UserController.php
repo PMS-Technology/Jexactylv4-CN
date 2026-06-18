@@ -103,11 +103,11 @@ class UserController extends ApplicationApiController
                 || $request->input('admin_role_id') !== $user->admin_role_id
             )
         ) {
-            throw new DisplayException('You must be a root administrator to grant another user permissions.');
+            throw new DisplayException(trans('exceptions.application_users.root_required'));
         }
 
         if (!$request->user()->root_admin && ($user->root_admin && !$request->input('root_admin'))) {
-            throw new DisplayException('You cannot remove rootAdmin without the same level of permission.');
+            throw new DisplayException(trans('exceptions.application_users.cannot_remove_root'));
         }
 
         $this->updateService->setUserLevel(User::USER_LEVEL_ADMIN);

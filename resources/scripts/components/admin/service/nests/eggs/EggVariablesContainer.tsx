@@ -2,6 +2,7 @@ import { TrashIcon } from '@heroicons/react/outline';
 import type { FormikHelpers } from 'formik';
 import { Form, Formik, useFormikContext } from 'formik';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { array, boolean, object, string } from 'yup';
 
@@ -32,16 +33,17 @@ export const validationSchema = object().shape({
 });
 
 export function EggVariableForm({ prefix, variable }: { prefix: string; variable?: EggVariable }) {
+    const { t } = useTranslation('admin');
     console.log(variable?.id === 5 && variable);
 
     return (
         <>
-            <Field id={`${prefix}name`} name={`${prefix}name`} label={'Name'} type={'text'} css={tw`mb-6`} />
+            <Field id={`${prefix}name`} name={`${prefix}name`} label={t('nests.name') as string} type={'text'} css={tw`mb-6`} />
 
             <TextareaField
                 id={`${prefix}description`}
                 name={`${prefix}description`}
-                label={'Description'}
+                label={t('nests.description') as string}
                 rows={3}
                 css={tw`mb-4`}
             />
@@ -50,14 +52,14 @@ export function EggVariableForm({ prefix, variable }: { prefix: string; variable
                 <Field
                     id={`${prefix}environmentVariable`}
                     name={`${prefix}environmentVariable`}
-                    label={'Environment Variable'}
+                    label={t('nests.environmentVariable') as string}
                     type={'text'}
                 />
 
                 <Field
                     id={`${prefix}defaultValue`}
                     name={`${prefix}defaultValue`}
-                    label={'Default Value'}
+                    label={t('nests.defaultValue') as string}
                     type={'text'}
                 />
             </FieldRow>
@@ -73,7 +75,7 @@ export function EggVariableForm({ prefix, variable }: { prefix: string; variable
                         name={`${prefix}isUserViewable`}
                     />
                     <div css={tw`flex-1 ml-4`}>
-                        <Label>User Viewable</Label>
+                        <Label>{t('nests.userViewable') as string}</Label>
                     </div>
                 </div>
 
@@ -87,7 +89,7 @@ export function EggVariableForm({ prefix, variable }: { prefix: string; variable
                         name={`${prefix}isUserEditable`}
                     />
                     <div css={tw`flex-1 ml-4`}>
-                        <Label>User Editable</Label>
+                        <Label>{t('nests.userEditable') as string}</Label>
                     </div>
                 </div>
             </div>
@@ -95,7 +97,7 @@ export function EggVariableForm({ prefix, variable }: { prefix: string; variable
             <Field
                 id={`${prefix}rules`}
                 name={`${prefix}rules`}
-                label={'Validation Rules'}
+                label={t('nests.validationRules') as string}
                 type={'text'}
                 css={tw`mb-2`}
             />
@@ -104,6 +106,7 @@ export function EggVariableForm({ prefix, variable }: { prefix: string; variable
 }
 
 function EggVariableDeleteButton({ onClick }: { onClick: (success: () => void) => void }) {
+    const { t } = useTranslation('admin');
     const [visible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -119,14 +122,13 @@ function EggVariableDeleteButton({ onClick }: { onClick: (success: () => void) =
         <>
             <ConfirmationModal
                 visible={visible}
-                title={'Delete variable?'}
-                buttonText={'Yes, delete variable'}
+                title={t('nests.deleteVariable') as string}
+                buttonText={t('nests.yesDeleteVariable') as string}
                 onConfirmed={onDelete}
                 showSpinnerOverlay={loading}
                 onModalDismissed={() => setVisible(false)}
             >
-                Are you sure you want to delete this variable? Deleting this variable will delete it from every server
-                using this egg.
+                {t('nests.deleteVariableConfirmation') as string}
             </ConfirmationModal>
 
             <button
@@ -149,6 +151,7 @@ function EggVariableBox({
     variable: EggVariable;
     prefix: string;
 }) {
+    const { t } = useTranslation('admin');
     const { isSubmitting } = useFormikContext();
 
     return (
@@ -165,6 +168,7 @@ function EggVariableBox({
 }
 
 export default function EggVariablesContainer() {
+    const { t } = useTranslation('admin');
     const { clearAndAddHttpError } = useFlash();
 
     const { data: egg, mutate } = useEggFromRoute();
@@ -226,7 +230,7 @@ export default function EggVariablesContainer() {
                                 <NewVariableButton />
 
                                 <Button type="submit" className="ml-auto" disabled={isSubmitting || !isValid}>
-                                    Save Changes
+                                    {t('nests.saveChanges') as string}
                                 </Button>
                             </div>
                         </div>

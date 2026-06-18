@@ -36,11 +36,11 @@ class TicketController extends ClientApiController
         $max_count = (int) config('modules.tickets.max_count');
 
         if (!boolval($enabled)) {
-            throw new DisplayException('You cannot create a ticket as the module is disabled.');
+            throw new DisplayException(trans('exceptions.tickets.disabled'));
         }
 
         if ($request->user()->tickets()->count() >= $max_count) {
-            throw new DisplayException("You have reached the ticket count per user of {$max_count}.");
+            throw new DisplayException(trans('exceptions.tickets.limit_reached', ['count' => $max_count]));
         }
 
         $ticket = $request->user()->tickets()->create([
@@ -66,7 +66,7 @@ class TicketController extends ClientApiController
     public function view(Ticket $ticket, Request $request): array
     {
         if ($request->user()->id !== $ticket->user_id) {
-            throw new DisplayException('You do not own this ticket.');
+            throw new DisplayException(trans('exceptions.tickets.not_owner'));
         }
 
         return $this->transform($ticket, TicketTransformer::class);
@@ -78,7 +78,7 @@ class TicketController extends ClientApiController
     public function message(Ticket $ticket, Request $request): array
     {
         if ($request->user()->id !== $ticket->user_id) {
-            throw new DisplayException('You do not own this ticket.');
+            throw new DisplayException(trans('exceptions.tickets.not_owner'));
         }
 
         TicketMessage::create([
@@ -96,7 +96,7 @@ class TicketController extends ClientApiController
     public function delete(Ticket $ticket, ClientApiRequest $request): Response
     {
         if ($request->user()->id !== $ticket->user_id) {
-            throw new DisplayException('You do not own this ticket.');
+            throw new DisplayException(trans('exceptions.tickets.not_owner'));
         }
 
         $ticket->delete();

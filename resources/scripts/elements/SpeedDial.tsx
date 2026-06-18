@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/elements/button';
 import { useStoreState } from '@/state/hooks';
 import Tooltip from '@/elements/tooltip/Tooltip';
@@ -31,6 +32,7 @@ const QuickAction = ({ tooltip, icon, link }: QuickActionProps) => (
 );
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [open, setOpen] = useState<boolean>(false);
     const ai = useStoreState(s => s.everest.data!.ai.enabled);
     const enabled = useStoreState(s => s.settings.data!.speed_dial);
@@ -42,11 +44,11 @@ export default () => {
         <div className="hidden md:block fixed bottom-6 right-6" style={{ zIndex: 9999 }}>
             {open && (
                 <div className="flex flex-col items-center mb-4 space-y-2">
-                    {ai && <QuickAction icon={faMagicWandSparkles} link={'/admin/ai'} tooltip={'Ask AI'} />}
-                    <QuickAction icon={faLayerGroup} link={'/admin/nodes/new'} tooltip={'Create Node'} />
-                    <QuickAction icon={faServer} link={'/admin/servers/new'} tooltip={'Create Server'} />
-                    <QuickAction icon={faUserPlus} link={'/admin/users/new'} tooltip={'New User'} />
-                    {tickets && <QuickAction icon={faTicket} link={'/admin/tickets'} tooltip={'View Tickets'} />}
+                    {ai && <QuickAction icon={faMagicWandSparkles} link={'/admin/ai'} tooltip={t('speedDial.askAI')} />}
+                    <QuickAction icon={faLayerGroup} link={'/admin/nodes/new'} tooltip={t('speedDial.createNode')} />
+                    <QuickAction icon={faServer} link={'/admin/servers/new'} tooltip={t('speedDial.createServer')} />
+                    <QuickAction icon={faUserPlus} link={'/admin/users/new'} tooltip={t('speedDial.newUser')} />
+                    {tickets && <QuickAction icon={faTicket} link={'/admin/tickets'} tooltip={t('speedDial.viewTickets')} />}
                 </div>
             )}
             <Button className={'w-12 h-12'} onClick={() => setOpen(!open)}>

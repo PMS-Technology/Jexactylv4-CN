@@ -5,6 +5,7 @@ import { Alert } from '@/elements/alert';
 import Label from '@/elements/Label';
 import Spinner from '@/elements/Spinner';
 import { useStoreState } from '@/state/hooks';
+import { useTranslation } from 'react-i18next';
 import { faCashRegister } from '@fortawesome/free-solid-svg-icons';
 import EditServerBillingDialog from './EditServerBillingDialog';
 
@@ -21,6 +22,7 @@ function timeUntil(targetDate: Date | string) {
 }
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { data: server } = useServerFromRoute();
     const billing = useStoreState(state => state.everest.data!.billing);
 
@@ -35,15 +37,14 @@ export default () => {
         <div>
             {!billing.enabled && (
                 <Alert type={'danger'}>
-                    The Billing Module is currently disabled. Any changes made here will not have effect unless the
-                    module is enabled again.
+                    {t('servers.billingModuleDisabled') as string}
                 </Alert>
             )}
             <div className={'mt-4 grid lg:grid-cols-4 gap-4'}>
-                <AdminBox title={'Billing Details'} icon={faCashRegister} className={'relative'}>
+                <AdminBox title={t('servers.billingDetails') as string} icon={faCashRegister} className={'relative'}>
                     <div className={'grid gap-y-4'}>
                         <div>
-                            <Label>Plan Name and Cost</Label>
+                            <Label>{t('servers.planNameAndCost') as string}</Label>
                             <p className={'text-gray-400'}>
                                 {!server.billingProductId ? (
                                     'None'
@@ -58,7 +59,7 @@ export default () => {
                             </p>
                         </div>
                         <div>
-                            <Label>Next Renewal Due</Label>
+                            <Label>{t('servers.nextRenewalDue') as string}</Label>
                             <p className={'text-gray-400'}>
                                 {!server.renewalDate ? (
                                     'None'
@@ -73,7 +74,7 @@ export default () => {
                             </p>
                         </div>
                         <div>
-                            <Label>Resource Limits</Label>
+                            <Label>{t('servers.resourceLimits') as string}</Label>
                             <p className={'text-gray-400'}>
                                 {!server.billingProductId ? (
                                     'None'

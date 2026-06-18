@@ -1,6 +1,7 @@
 import { getRolePermisisons, updateRole } from '@/api/routes/admin/roles';
 import Spinner from '@/elements/Spinner';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PanelPermissions } from '@/state/server/permissions';
 import AdminBox from '@/elements/AdminBox';
 import Checkbox from '@/elements/inputs/Checkbox';
@@ -10,6 +11,7 @@ import { UserRole } from '@definitions/admin';
 import SpinnerOverlay from '@/elements/SpinnerOverlay';
 
 export default ({ role }: { role: UserRole }) => {
+    const { t } = useTranslation('admin');
     const [permissions, setPermissions] = useState<PanelPermissions>();
     const [selected, setSelected] = useState<string[] | undefined>(role.permissions);
     const [submitting, setSubmitting] = useState<boolean>(false);
@@ -94,7 +96,7 @@ export default ({ role }: { role: UserRole }) => {
                 })}
             </div>
             <div className={'text-right mt-4'}>
-                <Button onClick={save}>Save</Button>
+                <Button onClick={save}>{t('users.save') as string}</Button>
             </div>
         </>
     );

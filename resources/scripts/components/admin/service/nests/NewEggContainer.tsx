@@ -2,6 +2,7 @@ import type { FormikHelpers } from 'formik';
 import { Form, Formik } from 'formik';
 import { useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { object } from 'yup';
 
@@ -30,6 +31,7 @@ interface Values {
 }
 
 export default () => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
     const params = useParams<{ nestId: string }>();
 
@@ -64,14 +66,14 @@ export default () => {
     };
 
     return (
-        <AdminContentBlock title={'New Egg'}>
+        <AdminContentBlock title={t('nests.newEgg') as string}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>New Egg</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{t('nests.newEgg') as string}</h2>
                     <p
                         css={tw`hidden md:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        Add a new egg to the panel.
+                        {t('nests.addNewEggToPanel') as string}
                     </p>
                 </div>
             </div>
@@ -108,9 +110,9 @@ export default () => {
 
                         <div css={tw`bg-zinc-800 rounded shadow-md py-2 px-6 mb-16`}>
                             <div css={tw`flex flex-row`}>
-                                <Button type="submit" css={tw`ml-auto`} disabled={isSubmitting || !isValid}>
-                                    Create
-                                </Button>
+                            <Button type="submit" css={tw`ml-auto`} disabled={isSubmitting || !isValid}>
+                                {t('nests.create') as string}
+                            </Button>
                             </div>
                         </div>
                     </Form>

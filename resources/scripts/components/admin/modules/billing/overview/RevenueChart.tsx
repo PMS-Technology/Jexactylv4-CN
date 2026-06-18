@@ -12,10 +12,12 @@ import {
 import { format, startOfDay, endOfDay, isWithinInterval, eachDayOfInterval } from 'date-fns';
 import { useStoreState } from '@/state/hooks';
 import { BillingAnalytics } from '@definitions/admin';
+import { useTranslation } from 'react-i18next';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 export default ({ data, history }: { data: BillingAnalytics; history: number }) => {
+    const { t } = useTranslation('admin');
     const now = new Date();
     const startDate = new Date(now);
     startDate.setDate(now.getDate() - history);
@@ -46,7 +48,7 @@ export default ({ data, history }: { data: BillingAnalytics; history: number }) 
         labels: daysRange.map(day => format(day, 'yyyy-MM-dd')),
         datasets: [
             {
-                label: 'Revenue from Successful Orders',
+                label: t('billingModule.revenueFromSuccessfulOrders'),
                 data: dailyRevenue,
                 fill: false,
                 borderColor: '#36A2EB',
@@ -73,13 +75,13 @@ export default ({ data, history }: { data: BillingAnalytics; history: number }) 
             x: {
                 title: {
                     display: true,
-                    text: 'Date',
+                    text: t('billingModule.date'),
                 },
             },
             y: {
                 title: {
                     display: true,
-                    text: `Revenue in ${symbol}`,
+                    text: `${t('billingModule.revenueIn')} ${symbol}`,
                 },
                 beginAtZero: true,
             },

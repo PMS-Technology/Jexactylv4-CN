@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import SpinnerOverlay from '@/elements/SpinnerOverlay';
 import { Button } from '@/elements/button/index';
 import { triggerSchedule } from '@/api/routes/server/schedules';
@@ -7,6 +8,7 @@ import useFlash from '@/plugins/useFlash';
 import { type Schedule } from '@definitions/server';
 
 const RunScheduleButton = ({ schedule }: { schedule: Schedule }) => {
+    const { t } = useTranslation('server');
     const [loading, setLoading] = useState(false);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
 
@@ -37,7 +39,7 @@ const RunScheduleButton = ({ schedule }: { schedule: Schedule }) => {
                 disabled={schedule.isProcessing}
                 onClick={onTriggerExecute}
             >
-                Run Now
+                {t('schedulesPage.runNow') as string}
             </Button>
         </>
     );

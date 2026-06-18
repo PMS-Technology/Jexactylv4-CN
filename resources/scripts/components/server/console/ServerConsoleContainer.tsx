@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import isEqual from 'react-fast-compare';
 import { Alert } from '@/elements/alert';
 import Can from '@/elements/Can';
@@ -33,6 +34,7 @@ function statusToColor(status: ServerStatus): string {
 }
 
 function ServerConsoleContainer() {
+    const { t } = useTranslation('server');
     const user = useStoreState(state => state.user.data!);
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
     const name = ServerContext.useStoreState(state => state.server.data!.name);
@@ -60,21 +62,19 @@ function ServerConsoleContainer() {
         Math.abs(daysUntilRenewal) <= freeGraceDays;
 
     return (
-        <PageContentBlock title={'Server Console'} showFlashKey={'console:share'}>
+        <PageContentBlock title={t('consolePage.title') as string} showFlashKey={'console:share'}>
             {showRenewalWarning && (
                 <Alert type={'warning'} className={'mb-4'}>
-                    Your server is {Math.abs(daysUntilRenewal!)} day{Math.abs(daysUntilRenewal!) !== 1 ? 's' : ''}{' '}
-                    overdue for renewal. Please renew within {freeGraceDays} days to avoid permanent suspension. Your
-                    server files and data will be preserved.
+                    {t('consolePage.renewalOverdue', { days: Math.abs(daysUntilRenewal!), freeGraceDays }) as string}
                 </Alert>
             )}
             {(isNodeUnderMaintenance || isInstalling || isTransferring) && (
                 <Alert type={'warning'} className={'mb-4'}>
                     {isNodeUnderMaintenance
-                        ? 'The node of this server is currently under maintenance and all actions are unavailable.'
+                        ? (t('consolePage.nodeMaintenance') as string)
                         : isInstalling
-                        ? 'This server is currently running its installation process and most actions are unavailable.'
-                        : 'This server is currently being transferred to another node and all actions are unavailable.'}
+                        ? (t('consolePage.installing') as string)
+                        : (t('consolePage.transferring') as string)}
                 </Alert>
             )}
             <div className={'mb-4 flex justify-between gap-4 bg-black/50 rounded-lg p-5'}>
@@ -85,13 +85,13 @@ function ServerConsoleContainer() {
                             {isInstalling && (
                                 <>
                                     <FontAwesomeIcon icon={faDownload} className={'my-auto mr-1'} />
-                                    Installing
+                                    {t('consolePage.installingStatus') as string}
                                 </>
                             )}
                             {isTransferring && (
                                 <>
                                     <FontAwesomeIcon icon={faSpinner} className={'animate-spin my-auto mr-1'} />
-                                    Transferring
+                                    {t('consolePage.transferringStatus') as string}
                                 </>
                             )}
                             {!isInstalling && !isTransferring && (
@@ -109,7 +109,7 @@ function ServerConsoleContainer() {
                     <p className={'text-sm line-clamp-2'}>
                         {description ?? uuid}
                         {renewalDate && (
-                            <span className={'ml-1'}>&bull; {timeUntil(renewalDate!).days} days until renewal</span>
+                            <span className={'ml-1'}>&bull; {t('consolePage.daysUntilRenewal', { days: timeUntil(renewalDate!).days }) as string}</span>
                         )}
                     </p>
                 </div>

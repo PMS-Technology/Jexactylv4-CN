@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ServerContext } from '@/state/server';
 import { reinstallServer } from '@/api/routes/server';
 import { Actions, useStoreActions } from 'easy-peasy';
@@ -9,6 +10,7 @@ import { Button } from '@/elements/button/index';
 import { Dialog } from '@/elements/dialog';
 
 export default () => {
+    const { t } = useTranslation('server');
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
     const [modalVisible, setModalVisible] = useState(false);
     const { addFlash, clearFlashes } = useStoreActions((actions: Actions<ApplicationStore>) => actions.flashes);
@@ -20,7 +22,7 @@ export default () => {
                 addFlash({
                     key: 'settings',
                     type: 'success',
-                    message: 'Your server has begun the reinstallation process.',
+                    message: t('consolePage.reinstallStarted') as string,
                 });
             })
             .catch(error => {
@@ -39,24 +41,16 @@ export default () => {
         <>
             <Dialog.Confirm
                 open={modalVisible}
-                title={'Confirm server reinstallation'}
-                confirm={'Yes, reinstall server'}
+                title={t('consolePage.confirmReinstall') as string}
+                confirm={t('consolePage.reinstallYes') as string}
                 onClose={() => setModalVisible(false)}
                 onConfirmed={reinstall}
             >
-                <div css={tw`text-sm rounded-lg p-4 bg-yellow-500/25 mb-4`}>
-                    Reinstalling your server will stop it, and then re-run the installation script that initially set it
-                    up.&nbsp;
-                    <strong css={tw`font-medium`}>
-                        Some files may be deleted or modified during this process, please back up your data before
-                        continuing.
-                    </strong>
-                </div>
-                Your server will be stopped and some files may be deleted or modified during this process, are you sure
-                you wish to continue?
+                <div css={tw`text-sm rounded-lg p-4 bg-yellow-500/25 mb-4`} dangerouslySetInnerHTML={{ __html: t('consolePage.reinstallWarning') as string }} />
+                {t('consolePage.reinstallConfirm') as string}
             </Dialog.Confirm>
             <Button.Danger type={'button'} variant={Button.Variants.Secondary} onClick={() => setModalVisible(true)}>
-                Reinstall Server
+                {t('consolePage.reinstallServer') as string}
             </Button.Danger>
         </>
     );

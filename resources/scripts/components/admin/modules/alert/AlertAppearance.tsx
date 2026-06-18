@@ -1,4 +1,5 @@
 import { Alert } from '@/elements/alert';
+import { useTranslation } from 'react-i18next';
 import AdminBox from '@/elements/AdminBox';
 import { useStoreActions, useStoreState } from '@/state/hooks';
 import { faCircle, faDesktop, faList } from '@fortawesome/free-solid-svg-icons';
@@ -36,6 +37,7 @@ const DemoBox = ({ children, selected }: { children: ReactNode; selected: boolea
 };
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { status, setStatus } = useStatus();
     const { clearAndAddHttpError } = useFlash();
     const [open, setOpen] = useState<boolean>(false);
@@ -71,13 +73,13 @@ export default () => {
                 {alert.content}
             </Dialog.Confirm>
             <FlashMessageRender byKey={'alerts:view'} className={'mb-2'} />
-            <AdminBox title={'Preview'} icon={faDesktop}>
+            <AdminBox title={t('alertModule.preview') as string} icon={faDesktop}>
                 {alert.enabled && alert.position === 'top-center' ? (
                     <Alert type={alert.type}>{alert.content}</Alert>
                 ) : alert.position === 'bottom-right' ? (
                     <>
                         <p className={'text-center text-lg text-gray-400 font-semibold'}>
-                            Alert is being displayed in the bottom-right mode.
+                            {t('alertModule.bottomRightMode') as string}
                         </p>
                         <div className={'fixed bottom-2 right-2 z-50 m-4'}>
                             <MessageBox type={alert.type as FlashMessageType}>{alert.content}</MessageBox>
@@ -86,7 +88,7 @@ export default () => {
                 ) : alert.position === 'bottom-left' ? (
                     <>
                         <p className={'text-center text-lg text-gray-400 font-semibold'}>
-                            Alert is being displayed in the bottom-left mode.
+                            {t('alertModule.bottomLeftMode') as string}
                         </p>
                         <div className={'fixed bottom-2 left-64 z-50 m-4'}>
                             <MessageBox type={alert.type as FlashMessageType}>{alert.content}</MessageBox>
@@ -94,16 +96,16 @@ export default () => {
                     </>
                 ) : alert.position === 'center' ? (
                     <p className={'text-center text-lg text-gray-400 font-semibold'}>
-                        Alert is being displayed as a dialog in the center.
+                        {t('alertModule.centerDialogMode') as string}
                     </p>
                 ) : (
                     <p className={'text-center text-lg text-gray-400 font-semibold'}>
-                        Alert is currently disabled, so no preview is available.
+                        {t('alertModule.alertDisabled') as string}
                     </p>
                 )}
             </AdminBox>
             <div className={'mt-6'}>
-                <AdminBox title={'Alert Format'} icon={faList} status={status}>
+                <AdminBox title={t('alertModule.alertFormat') as string} icon={faList} status={status}>
                     <div className={'grid md:grid-cols-4 gap-8'}>
                         <div onClick={() => submit('top-center' as AlertPosition)}>
                             <DemoBox selected={alert.position === 'top-center'}>
@@ -113,7 +115,7 @@ export default () => {
                                 ></div>
                             </DemoBox>
                             <p className={'text-xs text-gray-400 mt-1'}>
-                                Position the alert in the center of the page.
+                                {t('alertModule.positionTopCenter') as string}
                             </p>
                         </div>
                         <div onClick={() => submit('bottom-right' as AlertPosition)}>
@@ -125,7 +127,7 @@ export default () => {
                                     &nbsp;
                                 </div>
                             </DemoBox>
-                            <p className={'text-xs text-gray-400 mt-1'}>Position the alert to the bottom right.</p>
+                            <p className={'text-xs text-gray-400 mt-1'}>{t('alertModule.positionBottomRight') as string}</p>
                         </div>
                         <div onClick={() => submit('bottom-left' as AlertPosition)}>
                             <DemoBox selected={alert.position === 'bottom-left'}>
@@ -137,7 +139,7 @@ export default () => {
                                 </div>
                             </DemoBox>
                             <p className={'text-xs text-gray-400 mt-1'}>
-                                Position the alert to the bottom left of the page.
+                                {t('alertModule.positionBottomLeft') as string}
                             </p>
                         </div>
                         <div
@@ -157,7 +159,7 @@ export default () => {
                                 </div>
                             </DemoBox>
                             <p className={'text-xs text-gray-400 mt-1'}>
-                                Position the alert in the center of the page as a dialog.
+                                {t('alertModule.positionCenterDialog') as string}
                             </p>
                         </div>
                     </div>

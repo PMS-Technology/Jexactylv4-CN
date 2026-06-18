@@ -4,6 +4,7 @@ export interface RouteDefinition {
     route: string;
     path: string;
     name?: string;
+    nameKey?: string;
     component: ComponentType;
     end?: boolean;
     icon?: ElementType;

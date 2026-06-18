@@ -1,6 +1,7 @@
 import type { FormikHelpers } from 'formik';
 import { Form, Formik } from 'formik';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { object, string } from 'yup';
 
@@ -26,6 +27,7 @@ const schema = object().shape({
 });
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [visible, setVisible] = useState(false);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { mutate } = getNests();
@@ -64,15 +66,15 @@ export default () => {
                     >
                         <FlashMessageRender byKey={'nest:create'} css={tw`mb-6`} />
 
-                        <h2 css={tw`mb-6 text-2xl text-neutral-100`}>New Nest</h2>
+                        <h2 css={tw`mb-6 text-2xl text-neutral-100`}>{t('nests.newNest') as string}</h2>
 
                         <Form css={tw`m-0`}>
                             <Field
                                 type={'text'}
                                 id={'name'}
                                 name={'name'}
-                                label={'Name'}
-                                description={'A short name used to identify this nest.'}
+                                label={t('nests.name') as string}
+                                description={t('nests.shortNameDescription') as string}
                                 autoFocus
                             />
 
@@ -81,8 +83,8 @@ export default () => {
                                     type={'text'}
                                     id={'description'}
                                     name={'description'}
-                                    label={'Description'}
-                                    description={'A description for this nest.'}
+                                    label={t('nests.description') as string}
+                                    description={t('nests.nestDescription') as string}
                                 />
                             </div>
 
@@ -91,8 +93,8 @@ export default () => {
                                     type={'text'}
                                     id={'author'}
                                     name={'author'}
-                                    label={'Author email'}
-                                    description={'An email to identify who made this nest.'}
+                                    label={t('nests.authorEmail') as string}
+                                    description={t('nests.authorEmailDescription') as string}
                                 />
                             </div>
 
@@ -103,11 +105,11 @@ export default () => {
                                     className="w-full sm:mr-2 sm:w-auto"
                                     onClick={() => setVisible(false)}
                                 >
-                                    Cancel
+                                    {t('nests.cancel') as string}
                                 </Button.Text>
 
                                 <Button type="submit" className="mt-4 w-full sm:mt-0 sm:w-auto">
-                                    Create Nest
+                                    {t('nests.createNest') as string}
                                 </Button>
                             </div>
                         </Form>
@@ -121,7 +123,7 @@ export default () => {
                 className="h-10 whitespace-nowrap px-4 py-0"
                 onClick={() => setVisible(true)}
             >
-                New Nest
+                {t('nests.newNest') as string}
             </Button>
         </>
     );

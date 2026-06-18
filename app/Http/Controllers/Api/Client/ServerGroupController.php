@@ -45,7 +45,7 @@ class ServerGroupController extends ClientApiController
         try {
             $server->update(['group_id' => $id]);
         } catch (DisplayException $ex) {
-            throw new DisplayException('Unable to assign group to server.');
+            throw new DisplayException(trans('exceptions.server_groups.assign_failed'));
         }
 
         return $this->returnNoContent();
@@ -73,7 +73,7 @@ class ServerGroupController extends ClientApiController
         $group = ServerGroup::findOrFail($id);
 
         if ($group->user_id !== $request->user->id()) {
-            throw new DisplayException('You do not have permission to edit this server group.');
+            throw new DisplayException(trans('exceptions.server_groups.edit_forbidden'));
         }
 
         $group->update([
@@ -92,7 +92,7 @@ class ServerGroupController extends ClientApiController
         $group = ServerGroup::findOrFail($id);
 
         if ($group->user_id !== $request->user->id()) {
-            throw new DisplayException('You do not have permission to edit this server group.');
+            throw new DisplayException(trans('exceptions.server_groups.edit_forbidden'));
         }
 
         $group->delete();

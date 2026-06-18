@@ -2,6 +2,7 @@ import { faNetworkWired } from '@fortawesome/free-solid-svg-icons';
 import type { FormikHelpers } from 'formik';
 import { Form, Formik, useFormikContext } from 'formik';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import tw from 'twin.macro';
 import { object } from 'yup';
@@ -35,6 +36,7 @@ import getAllocations from '@/api/routes/admin/nodes/getAllocations';
 import { Alert } from '@/elements/alert';
 
 function InternalForm() {
+    const { t } = useTranslation('admin');
     const {
         isSubmitting,
         isValid,
@@ -79,8 +81,8 @@ function InternalForm() {
                         <div className="xl:col-span-2 bg-neutral-800 border border-neutral-900 shadow-inner p-4 rounded">
                             <FormikSwitch
                                 name={'startOnCompletion'}
-                                label={'Start after installation'}
-                                description={'Should the server be automatically started after it has been installed?'}
+                                label={t('servers.startAfterInstallation') as string}
+                                description={t('servers.startAfterInstallationDescription') as string}
                             />
                         </div>
                     </BaseSettingsBox>
@@ -88,12 +90,12 @@ function InternalForm() {
                     <ServerServiceContainer selectedEggId={egg?.id} setEgg={setEgg} nestId={0} />
                 </div>
                 <div className="grid grid-cols-1 gap-y-6 col-span-2 md:col-span-1">
-                    <AdminBox icon={faNetworkWired} title="Networking" isLoading={isSubmitting}>
+                    <AdminBox icon={faNetworkWired} title={t('servers.networking') as string} isLoading={isSubmitting}>
                         <div className="grid grid-cols-1 gap-4 lg:gap-6">
                             <div>
-                                <Label htmlFor={'allocation.default'}>Primary Allocation</Label>
+                                <Label htmlFor={'allocation.default'}>{t('servers.primaryAllocation') as string}</Label>
                                 {!node ? (
-                                    <Alert type={'info'}>Select a node to view allocations.</Alert>
+                                    <Alert type={'info'}>{t('servers.selectNodeToViewAllocations') as string}</Alert>
                                 ) : (
                                     <AsyncSelectField
                                         id={'allocation.default'}
@@ -108,16 +110,16 @@ function InternalForm() {
                     <ServerImageContainer />
                 </div>
 
-                <AdminBox title={'Startup Command'} className="relative w-full col-span-2">
+                <AdminBox title={t('servers.startupCommand') as string} className="relative w-full col-span-2">
                     <SpinnerOverlay visible={isSubmitting} />
 
                     <Field
                         id={'startup'}
                         name={'startup'}
-                        label={'Startup Command'}
+                        label={t('servers.startupCommand') as string}
                         type={'text'}
                         description={
-                            "Edit your server's startup command here. The following variables are available by default: {{SERVER_MEMORY}}, {{SERVER_IP}}, and {{SERVER_PORT}}."
+                            t('servers.startupCommandDescription') as string
                         }
                         placeholder={egg?.startup || ''}
                     />
@@ -135,7 +137,7 @@ function InternalForm() {
                 <div className="bg-neutral-700 rounded shadow-md px-4 py-3 col-span-2">
                     <div className="flex flex-row">
                         <Button type="submit" className="ml-auto" disabled={isSubmitting || !isValid}>
-                            Create Server
+                            {t('servers.createServer') as string}
                         </Button>
                     </div>
                 </div>
@@ -145,6 +147,7 @@ function InternalForm() {
 }
 
 export default () => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
 
     const { clearFlashes, clearAndAddHttpError } = useFlash();
@@ -159,14 +162,14 @@ export default () => {
     };
 
     return (
-        <AdminContentBlock title={'New Server'}>
+        <AdminContentBlock title={t('servers.newServer') as string}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>New Server</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{t('servers.newServer') as string}</h2>
                     <p
                         css={tw`hidden md:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        Add a new server to the panel.
+                        {t('servers.addNewServer') as string}
                     </p>
                 </div>
             </div>

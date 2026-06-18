@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import useFlash from '@/plugins/useFlash';
 import { useState, useEffect } from 'react';
 import getNodeInformation, { NodeInformation } from '@/api/routes/admin/nodes/getNodeInformation';
@@ -8,6 +9,7 @@ import classNames from 'classnames';
 import Tooltip from '@/elements/tooltip/Tooltip';
 
 export default ({ node, className }: { node: number; className?: string }) => {
+    const { t } = useTranslation('admin');
     const { clearFlashes } = useFlash();
     const [error, setError] = useState<boolean>(false);
 
@@ -32,7 +34,7 @@ export default ({ node, className }: { node: number; className?: string }) => {
         <Tooltip
             placement={'top'}
             content={
-                info ? `${info.system.supercharged ? 'Supercharged' : ''} version ${info.version}` : 'Node Unavailable'
+                info ? `${info.system.supercharged ? t('nodes.supercharged') : ''} ${t('nodes.version')} ${info.version}` : t('nodes.unreachable')
             }
         >
             <FontAwesomeIcon

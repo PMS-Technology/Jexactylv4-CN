@@ -7,6 +7,7 @@ import Input from '@/elements/Input';
 import Label from '@/elements/Label';
 import SpinnerOverlay from '@/elements/SpinnerOverlay';
 import Switch from '@/elements/Switch';
+import { useTranslation } from 'react-i18next';
 import { useTypedForm } from '@/plugins/useTypedForm';
 import { useStoreState } from '@/state/hooks';
 import {
@@ -23,6 +24,7 @@ import classNames from 'classnames';
 import { useState } from 'react';
 
 export default ({ discountCode }: { discountCode?: DiscountCode }) => {
+    const { t } = useTranslation('admin');
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [type, setType] = useState<DiscountCodeType>('percentage');
@@ -68,14 +70,14 @@ export default ({ discountCode }: { discountCode?: DiscountCode }) => {
             <Dialog
                 open={open}
                 onClose={() => setOpen(false)}
-                title={`${edit ? 'Edit existing' : 'Create new'} discount code`}
+                title={`${edit ? t('billingModule.editExisting') : t('billingModule.createNew')} ${t('billingModule.discountCode')}`}
             >
                 <SpinnerOverlay visible={loading} />
                 <div className="space-y-4">
                     <div className={'grid lg:grid-cols-2 gap-4'}>
                         <div>
                             <Label>
-                                <FontAwesomeIcon icon={faTeletype} /> Discount Code
+                                <FontAwesomeIcon icon={faTeletype} /> {t('billingModule.discountCode')}
                             </Label>
                             <Input
                                 name={'code'}
@@ -84,13 +86,12 @@ export default ({ discountCode }: { discountCode?: DiscountCode }) => {
                                 placeholder={'SAVE25'}
                             />
                             <p className={'text-xs text-gray-400'}>
-                                Enter a discount code that clients will use. Alternatively, you can generate a random
-                                one.
+                                {t('billingModule.enterDiscountCodeDescription')}
                             </p>
                         </div>
                         <div>
                             <Label>
-                                <FontAwesomeIcon icon={faClock} /> Expiration Date
+                                <FontAwesomeIcon icon={faClock} /> {t('billingModule.expirationDate')}
                             </Label>
                             <Input
                                 type="date"
@@ -102,13 +103,13 @@ export default ({ discountCode }: { discountCode?: DiscountCode }) => {
                                 }}
                             />
                             <p className={'text-xs text-gray-400'}>
-                                If you wish, you can set a date at which the discount code will become inactive.
+                                {t('billingModule.ifYouWishYouCanSetExpirationDate')}
                             </p>
                         </div>
                     </div>
                     <div>
                         <Label>
-                            <FontAwesomeIcon icon={faFileText} /> Code Description
+                            <FontAwesomeIcon icon={faFileText} /> {t('billingModule.codeDescription')}
                         </Label>
                         <Input
                             name={'description'}
@@ -117,7 +118,7 @@ export default ({ discountCode }: { discountCode?: DiscountCode }) => {
                             placeholder={'Get 25% off our services!'}
                         />
                         <p className={'text-xs text-gray-400'}>
-                            Provide a description which gives an overview of the discount being provided.
+                            {t('billingModule.provideDescriptionOverview')}
                         </p>
                     </div>
                 </div>
@@ -125,7 +126,7 @@ export default ({ discountCode }: { discountCode?: DiscountCode }) => {
                 <div className={'space-y-4'}>
                     <div>
                         <Label>
-                            <FontAwesomeIcon icon={faMoneyBill1Wave} /> Discount Type
+                            <FontAwesomeIcon icon={faMoneyBill1Wave} /> {t('billingModule.discountType')}
                         </Label>
                         <button
                             type="button"
@@ -138,7 +139,7 @@ export default ({ discountCode }: { discountCode?: DiscountCode }) => {
                                 'rounded-l py-3 px-6 font-bold text-white w-1/2',
                             )}
                         >
-                            Percentage Reduction (%)
+                            {t('billingModule.percentageReduction')}
                         </button>
                         <button
                             type="button"
@@ -151,18 +152,16 @@ export default ({ discountCode }: { discountCode?: DiscountCode }) => {
                                 'rounded-r py-3 px-6 font-bold text-white w-1/2',
                             )}
                         >
-                            Numeric Value ({currency})
+                            {t('billingModule.numericValue')} ({currency})
                         </button>
                         <p className={'text-xs text-gray-400'}>
-                            Choose whether the discount should be a percentage discount off the original cost or a flat
-                            amount off the cost. It is recommended to use Percentage Reduction as that is the typical
-                            retailer discount method.
+                            {t('billingModule.chooseWhetherDiscountShouldBePercentageOrFlat')}
                         </p>
                     </div>
                     <div className={'grid lg:grid-cols-2 gap-4'}>
                         <div>
                             <Label>
-                                <FontAwesomeIcon icon={type === 'percentage' ? faPercent : faDollar} /> Discount Value
+                                <FontAwesomeIcon icon={type === 'percentage' ? faPercent : faDollar} /> {t('billingModule.discountValue')}
                             </Label>
                             <Input
                                 name={'value'}
@@ -170,13 +169,12 @@ export default ({ discountCode }: { discountCode?: DiscountCode }) => {
                                 onChange={e => update('value', Number(e.target.value))}
                             />
                             <p className={'text-xs text-gray-400'}>
-                                Decide how much discount this code should give to clients when used, measured in{' '}
-                                {type === 'percentage' ? '%' : currency}.
+                                {t('billingModule.decideHowMuchDiscount')}
                             </p>
                         </div>
                         <div>
                             <Label>
-                                <FontAwesomeIcon icon={faUserPlus} /> Total Uses
+                                <FontAwesomeIcon icon={faUserPlus} /> {t('billingModule.totalUses')}
                             </Label>
                             <Input
                                 name={'uses'}
@@ -184,7 +182,7 @@ export default ({ discountCode }: { discountCode?: DiscountCode }) => {
                                 onChange={e => update('uses', Number(e.target.value))}
                             />
                             <p className={'text-xs text-gray-400'}>
-                                Choose how many people can use this discount code before it expires.
+                                {t('billingModule.chooseHowManyPeopleCanUseThisDiscountCode')}
                             </p>
                         </div>
                     </div>
@@ -192,7 +190,7 @@ export default ({ discountCode }: { discountCode?: DiscountCode }) => {
                 <div className={'h-px rounded-full bg-black/50 my-8'} />
                 <div className={'bg-black/50 rounded-lg p-4'}>
                     <div className={'inline-flex'}>
-                        <Label className={'mr-2'}>Make discount code active now?</Label>
+                        <Label className={'mr-2'}>{t('billingModule.makeDiscountCodeActiveNow')}</Label>
                         <Switch
                             name={'active'}
                             defaultChecked={form.active}
@@ -200,17 +198,17 @@ export default ({ discountCode }: { discountCode?: DiscountCode }) => {
                         />
                     </div>
                     <p className={'text-xs text-gray-400'}>
-                        Choose whether this discount code will be active immediately.
+                        {t('billingModule.chooseWhetherDiscountCodeWillBeActiveImmediately')}
                     </p>
                 </div>
                 <div className={'text-right mt-8'}>
                     <Button onClick={submit} type={'submit'}>
-                        {edit ? 'Update' : 'Create'}
+                        {edit ? t('billingModule.update') : t('billingModule.create')}
                     </Button>
                 </div>
             </Dialog>
             <Button size={edit ? Button.Sizes.Small : Button.Sizes.Default} onClick={() => setOpen(true)}>
-                {edit ? 'Edit' : 'Create New'}
+                {edit ? t('billingModule.edit') : t('billingModule.createNew')}
             </Button>
         </>
     );

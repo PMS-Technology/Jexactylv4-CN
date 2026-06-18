@@ -14,11 +14,13 @@ import useFlash from '@/plugins/useFlash';
 import { useStoreState } from 'easy-peasy';
 import { useContext, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { Context as DatabasesContext } from '@/api/routes/admin/databases/getDatabases';
 import DatabaseStatus from './DatabaseStatus';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { colors } = useStoreState(state => state.theme.data!);
     const { setPage, setFilters, sort, setSort, sortDirection } = useContext(DatabasesContext);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
@@ -54,18 +56,18 @@ export default () => {
                         <table css={tw`w-full table-auto`}>
                             <TableHead>
                                 <TableHeader
-                                    name={'ID'}
+                                    name={t('databases.id') as string}
                                     direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('id')}
                                 />
                                 <TableHeader
-                                    name={'Name'}
+                                    name={t('databases.name') as string}
                                     direction={sort === 'name' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('name')}
                                 />
-                                <TableHeader name={'Address'} />
-                                <TableHeader name={'Username'} />
-                                <TableHeader name={'Status'} />
+                                <TableHeader name={t('databases.address') as string} />
+                                <TableHeader name={t('databases.username') as string} />
+                                <TableHeader name={t('databases.status') as string} />
                             </TableHead>
 
                             <TableBody>

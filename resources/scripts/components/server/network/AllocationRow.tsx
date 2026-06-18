@@ -1,4 +1,5 @@
 import { memo, useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import isEqual from 'react-fast-compare';
 import tw from 'twin.macro';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -28,6 +29,7 @@ interface Props {
 }
 
 const AllocationRow = ({ allocation }: Props) => {
+    const { t } = useTranslation('server');
     const [loading, setLoading] = useState(false);
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('server:network');
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
@@ -75,18 +77,18 @@ const AllocationRow = ({ allocation }: Props) => {
                             <Code dark>{ip(allocation.ip)}</Code>
                         </CopyOnClick>
                     )}
-                    <Label>{allocation.alias ? 'Hostname' : 'IP Address'}</Label>
+                    <Label>{allocation.alias ? (t('networkPage.hostname') as string) : (t('networkPage.ipAddress') as string)}</Label>
                 </div>
                 <div className={'w-16 overflow-hidden md:w-24'}>
                     <Code dark>{allocation.port}</Code>
-                    <Label>Port</Label>
+                    <Label>{t('networkPage.port') as string}</Label>
                 </div>
             </div>
             <div className={'mt-4 w-full md:mt-0 md:w-auto md:flex-1'}>
                 <InputSpinner visible={loading}>
                     <Textarea
                         className={'border-transparent bg-neutral-800 hover:border-neutral-600'}
-                        placeholder={'Notes'}
+                        placeholder={t('networkPage.notes') as string}
                         defaultValue={allocation.notes || undefined}
                         onChange={e => doSetNotes(e.currentTarget.value)}
                     />
@@ -95,7 +97,7 @@ const AllocationRow = ({ allocation }: Props) => {
             <div className={'mt-4 flex w-full justify-end space-x-4 md:mt-0 md:w-48'}>
                 {allocation.isDefault ? (
                     <Button size={Button.Sizes.Small} className={'!bg-blue-600 !text-slate-50'} disabled>
-                        Primary
+                        {t('networkPage.primary') as string}
                     </Button>
                 ) : (
                     <>
@@ -104,7 +106,7 @@ const AllocationRow = ({ allocation }: Props) => {
                         </Can>
                         <Can action={'allocation.update'}>
                             <Button.Text size={Button.Sizes.Small} onClick={doSetPrimary}>
-                                Make Primary
+                                {t('networkPage.makePrimary') as string}
                             </Button.Text>
                         </Can>
                     </>

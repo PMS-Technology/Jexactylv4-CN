@@ -1,12 +1,15 @@
 import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import type { ReactNode } from 'react';
 import { Component } from 'react';
+import { withTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import tw from 'twin.macro';
 
 import Icon from '@/elements/Icon';
 
 interface Props {
     children?: ReactNode;
+    t: TFunction;
 }
 
 interface State {
@@ -33,7 +36,7 @@ class ErrorBoundary extends Component<Props, State> {
                     <Icon icon={faExclamationTriangle} css={tw`h-4 w-auto mr-2`} />
 
                     <p css={tw`text-sm text-neutral-100`}>
-                        An error was encountered by the application while rendering this view. Try refreshing the page.
+                        {this.props.t('error.appError')}
                     </p>
                 </div>
             </div>
@@ -43,4 +46,4 @@ class ErrorBoundary extends Component<Props, State> {
     }
 }
 
-export default ErrorBoundary;
+export default withTranslation('common')(ErrorBoundary);

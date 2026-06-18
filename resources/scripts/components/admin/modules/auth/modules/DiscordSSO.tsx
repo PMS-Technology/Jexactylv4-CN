@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import useFlash from '@/plugins/useFlash';
 import { useStoreState } from '@/state/hooks';
@@ -14,6 +15,7 @@ import { toggleModule, updateModule } from '@/api/routes/admin/auth/module';
 import { Alert } from '@/elements/alert';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { status, setStatus } = useStatus();
     const [confirm, setConfirm] = useState<boolean>(false);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
@@ -47,7 +49,7 @@ export default () => {
 
     return (
         <AdminBox
-            title={'Discord SSO Module'}
+            title={t('authModule.discordSSOModule') as string}
             icon={faDiscord}
             byKey={'auth:modules:discord'}
             status={status}
@@ -55,18 +57,18 @@ export default () => {
         >
             <Dialog.Confirm
                 open={confirm}
-                title={'Confirm module removal'}
+                title={t('authModule.confirmModuleRemoval') as string}
                 onConfirmed={() => doDeletion()}
                 onClose={() => setConfirm(false)}
             >
-                Are you sure you wish to delete this module?
+                {t('authModule.confirmModuleDeletion') as string}
             </Dialog.Confirm>
             <TrashIcon
                 className={'w-5 h-5 absolute top-0 right-0 m-3.5 text-red-500 hover:text-red-300 duration-300'}
                 onClick={() => setConfirm(true)}
             />
             <div>
-                <Label>Client Identifier {!settings.clientId && <RequiredFieldIcon />}</Label>
+                <Label>{t('authModule.clientIdentifier') as string} {!settings.clientId && <RequiredFieldIcon />}</Label>
                 <Input
                     autoComplete={'off'}
                     id={'client_id'}
@@ -76,19 +78,19 @@ export default () => {
                     placeholder={settings.clientId ? '••••••••••••••••' : ''}
                 />
                 <p className={'text-xs text-gray-400 mt-1'}>
-                    Set the Discord Client ID. You can find this in the{' '}
+                    {t('authModule.discordClientIdDescription') as string}{' '}
                     <Link
                         to={'https://discord.com/developers/docs/intro'}
                         style={{ color: colors.primary }}
                         className={'hover:brightness-125 duration-300'}
                     >
-                        Developer Portal
+                        {t('authModule.developerPortal') as string}
                     </Link>
                     .
                 </p>
             </div>
             <div className={'my-6'}>
-                <Label>Client Secret {!settings.clientSecret && <RequiredFieldIcon />}</Label>
+                <Label>{t('authModule.clientSecret') as string} {!settings.clientSecret && <RequiredFieldIcon />}</Label>
                 <Input
                     autoComplete={'off'}
                     id={'client_secret'}
@@ -98,20 +100,20 @@ export default () => {
                     placeholder={settings.clientSecret ? '••••••••••••••••' : ''}
                 />
                 <p className={'text-xs text-gray-400 mt-1'}>
-                    Set the Discord Client Secret. You can find this in the{' '}
+                    {t('authModule.discordClientSecretDescription') as string}{' '}
                     <Link
                         to={'https://discord.com/developers/docs/intro'}
                         style={{ color: colors.primary }}
                         className={'hover:brightness-125 duration-300'}
                     >
-                        Developer Portal
+                        {t('authModule.developerPortal') as string}
                     </Link>
                     .
                 </p>
             </div>
             <Alert type={'info'}>
                 <div>
-                    Use the following Callback URL:
+                    {t('authModule.useFollowingCallbackUrl') as string}
                     <p className={'bg-black/50 p-1 rounded-lg font-mono w-fit mt-2'}>
                         /auth/modules/discord/authenticate
                     </p>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import tw from 'twin.macro';
 import Icon from '@/elements/Icon';
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const DeleteAllocationButton = ({ allocation }: Props) => {
+    const { t } = useTranslation('server');
     const [confirm, setConfirm] = useState(false);
 
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
@@ -38,11 +40,11 @@ const DeleteAllocationButton = ({ allocation }: Props) => {
             <Dialog.Confirm
                 open={confirm}
                 onClose={() => setConfirm(false)}
-                title={'Remove Allocation'}
-                confirm={'Delete'}
+                title={t('networkPage.removeAllocation') as string}
+                confirm={t('networkPage.delete') as string}
                 onConfirmed={doDeletion}
             >
-                This allocation will be immediately removed from your server.
+                {t('networkPage.removeAllocationWarning') as string}
             </Dialog.Confirm>
             <Button.Danger
                 variant={Button.Variants.Secondary}

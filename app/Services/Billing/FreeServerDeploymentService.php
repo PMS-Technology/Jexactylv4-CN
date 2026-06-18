@@ -62,7 +62,7 @@ class FreeServerDeploymentService extends ServerDeploymentService
                 'description' => $ex->getMessage(),
             ]);
 
-            throw new DisplayException('Unable to create server: ' . $ex->getMessage());
+            throw new DisplayException(trans('exceptions.billing.unable_to_create_server', ['message' => $ex->getMessage()]));
         }
 
         return $server;
@@ -75,20 +75,20 @@ class FreeServerDeploymentService extends ServerDeploymentService
     {
         if ($is_new_order) {
             if (!$node->exists()) {
-                throw new DisplayException('A valid node must be assigned for deployment.');
+                throw new DisplayException(trans('exceptions.billing.valid_node_required'));
             }
 
             if (!$node->deployable_free) {
-                throw new DisplayException('Free servers cannot be deployed to this node.');
+                throw new DisplayException(trans('exceptions.billing.free_node_unavailable'));
             }
 
             if ($user->servers()->where('billing_product_id', $product->id)->count() > 0) {
-                throw new DisplayException('You already own one of this free product and cannot have multiple.');
+                throw new DisplayException(trans('exceptions.billing.free_product_owned'));
             }
         }
 
         if ($product->isPaid()) {
-            throw new DisplayException('This package is paid and cannot be deployed for no cost.');
+            throw new DisplayException(trans('exceptions.billing.paid_package_free_deploy'));
         }
     }
 }

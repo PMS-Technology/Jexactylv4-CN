@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { getSchedule } from '@/api/routes/server/schedules';
 import Spinner from '@/elements/Spinner';
 import FlashMessageRender from '@/elements/FlashMessageRender';
@@ -26,18 +27,19 @@ const CronBox = ({ title, value, color }: { title: string; value: string; color:
     </div>
 );
 
-const ActivePill = ({ active }: { active: boolean }) => (
+const ActivePill = ({ active, label }: { active: boolean; label: string }) => (
     <span
         css={[
             tw`rounded-full px-2 py-px text-xs ml-4 uppercase`,
             active ? tw`bg-green-600 text-green-100` : tw`bg-red-600 text-red-100`,
         ]}
     >
-        {active ? 'Active' : 'Inactive'}
+        {label}
     </span>
 );
 
 export default () => {
+    const { t } = useTranslation('server');
     const { id: scheduleId } = useParams<'id'>();
     const navigate = useNavigate();
 
@@ -77,7 +79,7 @@ export default () => {
     }, []);
 
     return (
-        <PageContentBlock title={'Schedules'}>
+        <PageContentBlock title={t('schedulesPage.title') as string}>
             <FlashMessageRender byKey={'schedules'} css={tw`mb-4`} />
             {!schedule || isLoading ? (
                 <Spinner size={'large'} centered />
@@ -97,21 +99,28 @@ export default () => {
                                             css={tw`flex items-center rounded-full px-2 py-px text-xs ml-4 uppercase bg-neutral-600 text-white`}
                                         >
                                             <Spinner css={tw`w-3! h-3! mr-2`} />
-                                            Processing
+                                            {t('schedulesPage.processing') as string}
                                         </span>
                                     ) : (
-                                        <ActivePill active={schedule.isActive} />
+                                        <ActivePill
+                                            active={schedule.isActive}
+                                            label={
+                                                schedule.isActive
+                                                    ? (t('schedulesPage.active') as string)
+                                                    : (t('schedulesPage.inactive') as string)
+                                            }
+                                        />
                                     )}
                                 </h3>
                                 <p css={tw`mt-1 text-sm text-neutral-200`}>
-                                    Last run at:&nbsp;
+                                    {t('schedulesPage.lastRunLabel') as string}&nbsp;
                                     {schedule.lastRunAt ? (
                                         format(schedule.lastRunAt, "MMM do 'at' h:mma")
                                     ) : (
                                         <span css={tw`text-neutral-300`}>n/a</span>
                                     )}
                                     <span css={tw`ml-4 pl-4 border-l-4 border-neutral-600 py-px`}>
-                                        Next run at:&nbsp;
+                                        {t('schedulesPage.nextRunLabel') as string}&nbsp;
                                         {schedule.nextRunAt ? (
                                             format(schedule.nextRunAt, "MMM do 'at' h:mma")
                                         ) : (
@@ -123,18 +132,26 @@ export default () => {
                             <div css={tw`flex sm:block mt-3 sm:mt-0`}>
                                 <Can action={'schedule.update'}>
                                     <Button.Text className={'mr-4 flex-1'} onClick={toggleEditModal}>
-                                        Edit
+                                        {t('schedulesPage.edit') as string}
                                     </Button.Text>
                                     <NewTaskButton schedule={schedule} />
                                 </Can>
                             </div>
                         </div>
                         <div css={tw`hidden sm:grid grid-cols-5 md:grid-cols-5 gap-4 mb-4 mt-4`}>
-                            <CronBox color={colors.secondary} title={'Minute'} value={schedule.cron.minute} />
-                            <CronBox color={colors.secondary} title={'Hour'} value={schedule.cron.hour} />
-                            <CronBox color={colors.secondary} title={'Day (Month)'} value={schedule.cron.dayOfMonth} />
-                            <CronBox color={colors.secondary} title={'Month'} value={schedule.cron.month} />
-                            <CronBox color={colors.secondary} title={'Day (Week)'} value={schedule.cron.dayOfWeek} />
+                            <CronBox color={colors.secondary} title={t('schedulesPage.minute') as string} value={schedule.cron.minute} />
+                            <CronBox color={colors.secondary} title={t('schedulesPage.hour') as string} value={schedule.cron.hour} />
+                            <CronBox
+                                color={colors.secondary}
+                                title={t('schedulesPage.dayOfMonthShort') as string}
+                                value={schedule.cron.dayOfMonth}
+                            />
+                            <CronBox color={colors.secondary} title={t('schedulesPage.month') as string} value={schedule.cron.month} />
+                            <CronBox
+                                color={colors.secondary}
+                                title={t('schedulesPage.dayOfWeekShort') as string}
+                                value={schedule.cron.dayOfWeek}
+                            />
                         </div>
                         <div css={tw`bg-neutral-700 rounded-b`}>
                             {schedule.tasks.length > 0

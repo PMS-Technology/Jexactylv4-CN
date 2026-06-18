@@ -23,11 +23,11 @@ class DiscountCodeController extends ClientApiController
         $discount_code = DiscountCode::where('code', $request->input('discount_code'))->first();
 
         if (!$discount_code) {
-            throw new DisplayException('The selected discount code does not exist.');
+            throw new DisplayException(trans('exceptions.billing.discount_not_found'));
         }
 
         if (!$discount_code->isValid()) {
-            throw new DisplayException('The selected discount code is invalid.');
+            throw new DisplayException(trans('exceptions.billing.discount_invalid'));
         }
 
         return $this->transform($discount_code, DiscountCodeTransformer::class);

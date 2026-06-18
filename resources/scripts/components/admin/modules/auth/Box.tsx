@@ -1,4 +1,5 @@
 import AdminBox from '@/elements/AdminBox';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/elements/button';
 import { faPuzzlePiece, faStar } from '@fortawesome/free-solid-svg-icons';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default ({ name, title, disabled, recommended, description, icon }: Props) => {
+    const { t } = useTranslation('admin');
     const { clearFlashes, clearAndAddHttpError } = useFlash();
 
     const submit = () => {
@@ -36,7 +38,7 @@ export default ({ name, title, disabled, recommended, description, icon }: Props
     return (
         <AdminBox title={title} icon={icon ?? faPuzzlePiece}>
             <Button value={name} onClick={() => submit()} className={'h-8 absolute top-0 right-0 m-2'}>
-                Add to Panel
+                {t('authModule.addToPanel') as string}
             </Button>
             {description}
             {recommended && (

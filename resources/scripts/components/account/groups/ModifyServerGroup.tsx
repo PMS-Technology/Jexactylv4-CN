@@ -1,5 +1,6 @@
 import { Dialog } from '@/elements/dialog';
 import { Dispatch, FormEvent, SetStateAction, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { VisibleDialog } from './ServerGroupDialog';
 import { createServerGroup, updateServerGroup } from '@/api/routes/server/groups';
 import { type ServerGroup } from '@definitions/server';
@@ -15,6 +16,7 @@ export default ({
     open?: boolean;
     setOpen: Dispatch<SetStateAction<VisibleDialog>>;
 }) => {
+    const { t } = useTranslation('dashboard');
     const [values, setValues] = useState<{ name: string; color?: string }>({
         name: group?.name ?? '',
         color: group?.color ?? '',
@@ -44,26 +46,26 @@ export default ({
         <Dialog.Confirm
             open={!!open}
             onClose={() => setOpen({ open: 'index' })}
-            title={group ? `Modify ${group.name}` : 'Create new group'}
+            title={group ? t('groups.modifyGroup', { name: group.name }) : t('groups.createNewGroup')}
             preventExternalClose
             subDialog
             onConfirmed={onSubmit}
-            confirm={group ? 'Update' : 'Create'}
+            confirm={group ? t('groups.update') : t('groups.create')}
         >
             <div className={'mt-4'}>
-                <Label>Group Name</Label>
+                <Label>{t('groups.groupName')}</Label>
                 <InputField defaultValue={group?.name} name={'name'} onChange={updateValues}></InputField>
-                <p className={'text-gray-400 text-sm mt-1'}>Provide a name for this server group.</p>
+                <p className={'text-gray-400 text-sm mt-1'}>{t('groups.groupNameDescription')}</p>
             </div>
             <div className={'mt-2'}>
-                <Label>Group Color</Label>
+                <Label>{t('groups.groupColor')}</Label>
                 <InputField
                     type={'color'}
                     name={'color'}
                     onChange={updateValues}
                     defaultValue={group?.color}
                 ></InputField>
-                <p className={'text-gray-400 text-sm mt-1'}>This is the hex value of the group color.</p>
+                <p className={'text-gray-400 text-sm mt-1'}>{t('groups.groupColorDescription')}</p>
             </div>
         </Dialog.Confirm>
     );

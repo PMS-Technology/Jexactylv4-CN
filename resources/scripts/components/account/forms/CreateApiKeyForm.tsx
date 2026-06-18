@@ -13,6 +13,7 @@ import { Button } from '@/elements/button';
 import Input, { Textarea } from '@/elements/Input';
 import styled from 'styled-components';
 import ApiKeyModal from '@account/ApiKeyModal';
+import { useTranslation } from 'react-i18next';
 
 interface Values {
     description: string;
@@ -24,6 +25,7 @@ const CustomTextarea = styled(Textarea)`
 `;
 
 export default ({ onKeyCreated }: { onKeyCreated: (key: ApiKey) => void }) => {
+    const { t } = useTranslation('dashboard');
     const [apiKey, setApiKey] = useState('');
     const { addError, clearFlashes } = useStoreActions((actions: Actions<ApplicationStore>) => actions.flashes);
 
@@ -59,24 +61,22 @@ export default ({ onKeyCreated }: { onKeyCreated: (key: ApiKey) => void }) => {
                     <Form>
                         <SpinnerOverlay visible={isSubmitting} />
                         <FormikFieldWrapper
-                            label={'Description'}
+                            label={t('account.description')}
                             name={'description'}
-                            description={'A description of this API key.'}
+                            description={t('account.apiKeyDescription')}
                             css={tw`mb-6`}
                         >
                             <Field name={'description'} as={Input} />
                         </FormikFieldWrapper>
                         <FormikFieldWrapper
-                            label={'Allowed IPs'}
+                            label={t('account.allowedIps')}
                             name={'allowedIps'}
-                            description={
-                                'Leave blank to allow any IP address to use this API key, otherwise provide each IP address on a new line.'
-                            }
+                            description={t('account.allowedIpsDescription')}
                         >
                             <Field name={'allowedIps'} as={CustomTextarea} />
                         </FormikFieldWrapper>
                         <div css={tw`flex justify-end mt-6`}>
-                            <Button>Create</Button>
+                            <Button>{t('account.create')}</Button>
                         </div>
                     </Form>
                 )}

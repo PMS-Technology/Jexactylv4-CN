@@ -10,6 +10,7 @@ import { useFlashKey } from '@/plugins/useFlash';
 import { createTicket } from '@/api/routes/account/tickets';
 import FlashMessageRender from '@/elements/FlashMessageRender';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface Values {
     title: string;
@@ -21,6 +22,7 @@ const CustomTextarea = styled(Textarea)`
 `;
 
 export default () => {
+    const { t } = useTranslation('dashboard');
     const { clearAndAddHttpError } = useFlashKey('account:tickets');
     const navigate = useNavigate();
 
@@ -52,20 +54,20 @@ export default () => {
                         <FormikFieldWrapper
                             name={'title'}
                             css={tw`mb-6`}
-                            label={'Ticket Name'}
-                            description={'Enter a user-friendly name for this ticket.'}
+                            label={t('tickets.ticketName')}
+                            description={t('tickets.ticketNameDescription')}
                         >
                             <Field name={'title'} as={Input} />
                         </FormikFieldWrapper>
                         <FormikFieldWrapper
-                            label={'Message'}
+                            label={t('tickets.message')}
                             name={'message'}
-                            description={'Enter a message for this ticket.'}
+                            description={t('tickets.messageDescription')}
                         >
                             <Field name={'message'} as={CustomTextarea} />
                         </FormikFieldWrapper>
                         <div css={tw`flex justify-end mt-6`}>
-                            <Button>Save</Button>
+                            <Button>{t('account.save')}</Button>
                         </div>
                     </Form>
                 )}

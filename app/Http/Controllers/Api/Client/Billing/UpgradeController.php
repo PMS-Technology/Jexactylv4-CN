@@ -53,7 +53,7 @@ class UpgradeController extends ClientApiController
         $new_product = Product::findOrFail($request->input('product_id'));
 
         if ($existing_product->price >= $new_product->price) {
-            throw new DisplayException('You cannot upgrade to a cheaper plan.');
+            throw new DisplayException(trans('exceptions.billing.cheaper_plan'));
         }
 
         $charge = $this->upgradeService->charge($server, $existing_product, $new_product);
@@ -70,7 +70,7 @@ class UpgradeController extends ClientApiController
         $validated = $this->upgradeService->validate($request->user());
 
         if (!$validated) {
-            throw new DisplayException('This server cannot be upgraded at this time.');
+            throw new DisplayException(trans('exceptions.billing.upgrade_unavailable'));
         }
 
         $existing_product = Product::findOrFail($server->billing_product_id);
@@ -78,7 +78,7 @@ class UpgradeController extends ClientApiController
         $price = $this->upgradeService->charge($server, $existing_product, $new_product);
 
         if ($existing_product->price >= $new_product->price) {
-            throw new DisplayException('You cannot upgrade to a cheaper plan.');
+            throw new DisplayException(trans('exceptions.billing.cheaper_plan'));
         }
 
         $metadata = [

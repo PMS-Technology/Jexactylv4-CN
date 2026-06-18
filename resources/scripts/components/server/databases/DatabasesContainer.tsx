@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getDatabases } from '@/api/routes/server/databases';
 import { ServerContext } from '@/state/server';
 import { httpErrorToHuman } from '@/api/http';
@@ -14,6 +15,7 @@ import FadeTransition from '@/elements/transitions/FadeTransition';
 import PageContentBlock from '@/elements/PageContentBlock';
 
 export default () => {
+    const { t } = useTranslation('server');
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
     const databaseLimit = ServerContext.useStoreState(state => state.server.data!.featureLimits.databases);
 
@@ -37,7 +39,7 @@ export default () => {
     }, []);
 
     return (
-        <PageContentBlock title={'Databases'} header description={'Assign databases directly to your server.'}>
+        <PageContentBlock title={t('databasesPage.title') as string} header description={t('databasesPage.description') as string}>
             <FlashMessageRender byKey={'databases'} css={tw`mb-4`} />
             {!databases.length && loading ? (
                 <Spinner size={'large'} centered />
@@ -55,16 +57,15 @@ export default () => {
                         ) : (
                             <p css={tw`text-center text-sm text-neutral-300`}>
                                 {databaseLimit > 0
-                                    ? 'It looks like you have no databases.'
-                                    : 'Databases cannot be created for this server.'}
+                                    ? (t('databasesPage.noDatabases') as string)
+                                    : (t('databasesPage.cannotCreate') as string)}
                             </p>
                         )}
                         <Can action={'database.create'}>
                             <div css={tw`mt-6 flex items-center justify-end`}>
                                 {databaseLimit > 0 && databases.length > 0 && (
                                     <p css={tw`text-sm text-neutral-300 mb-4 sm:mr-6 sm:mb-0`}>
-                                        {databases.length} of {databaseLimit} databases have been allocated to this
-                                        server.
+                                        {t('databasesPage.allocatedCount', { count: databases.length, limit: databaseLimit }) as string}
                                     </p>
                                 )}
                                 {databaseLimit > 0 && databaseLimit !== databases.length && (

@@ -1,10 +1,12 @@
 import { Button } from '@/elements/button';
+import { useTranslation } from 'react-i18next';
 import useFlash from '@/plugins/useFlash';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { exportBillingConfiguration } from '@/api/routes/admin/billing/config';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { clearAndAddHttpError, clearFlashes, addFlash } = useFlash();
 
     const submit = () => {
@@ -15,7 +17,7 @@ export default () => {
                 addFlash({
                     key: 'billing:config',
                     type: 'success',
-                    message: 'Billing configuration exported successfully.',
+                    message: t('billingModule.billingConfigurationExportedSuccessfully'),
                 });
             })
             .catch(error => clearAndAddHttpError({ key: 'billing:config', error }));
@@ -24,7 +26,7 @@ export default () => {
     return (
         <>
             <Button onClick={submit}>
-                <FontAwesomeIcon icon={faDownload} className={'mr-1'} /> Export
+                <FontAwesomeIcon icon={faDownload} className={'mr-1'} /> {t('billingModule.export')}
             </Button>
         </>
     );

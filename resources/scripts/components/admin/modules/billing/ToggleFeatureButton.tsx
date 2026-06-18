@@ -1,8 +1,10 @@
 import { Button } from '@/elements/button';
+import { useTranslation } from 'react-i18next';
 import { useStoreState } from '@/state/hooks';
 import { updateSettings } from '@/api/routes/admin/billing';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const enabled = useStoreState(state => state.everest.data!.billing.enabled);
 
     const submit = () => {
@@ -14,7 +16,7 @@ export default () => {
 
     return (
         <div className={'mr-4'} onClick={submit}>
-            {!enabled ? <Button>Enable Billing Module</Button> : <Button.Danger>Disable Billing Module</Button.Danger>}
+            {!enabled ? <Button>{t('billingModule.enableBillingModule')}</Button> : <Button.Danger>{t('billingModule.disableBillingModule')}</Button.Danger>}
         </div>
     );
 };

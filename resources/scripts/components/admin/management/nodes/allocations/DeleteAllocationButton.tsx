@@ -1,4 +1,5 @@
 import type { Actions } from 'easy-peasy';
+import { useTranslation } from 'react-i18next';
 import { useStoreActions } from 'easy-peasy';
 import { useState } from 'react';
 import deleteAllocation from '@/api/routes/admin/nodes/allocations/deleteAllocation';
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export default ({ nodeId, allocationId, onDeleted }: Props) => {
+    const { t } = useTranslation('admin');
     const [visible, setVisible] = useState(false);
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -43,12 +45,12 @@ export default ({ nodeId, allocationId, onDeleted }: Props) => {
         <>
             <Dialog.Confirm
                 open={visible}
-                title={'Delete allocation?'}
-                confirm={'Yes, delete allocation'}
+                title={t('nodes.deleteAllocation') as string}
+                confirm={t('nodes.yesDeleteAllocation') as string}
                 onConfirmed={onDelete}
                 onClose={() => setVisible(false)}
             >
-                Are you sure you want to delete this allocation?
+                {t('nodes.confirmDeleteAllocation') as string}
             </Dialog.Confirm>
 
             <Button.Danger type={'button'} size={Button.Sizes.Small} onClick={() => setVisible(true)}>

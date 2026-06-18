@@ -1,5 +1,6 @@
 import { useContext, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { getServerPresets, Context as ServerPresetsContext } from '@/api/routes/admin/servers/presets';
 import AdminTable, {
@@ -23,6 +24,7 @@ interface Props {
 }
 
 function ServerPresetsTable({ filters }: Props) {
+    const { t } = useTranslation('admin');
     const { colors } = useStoreState(state => state.theme.data!);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
 
@@ -59,32 +61,32 @@ function ServerPresetsTable({ filters }: Props) {
                         <table css={tw`w-full table-auto`}>
                             <TableHead>
                                 <TableHeader
-                                    name={'ID'}
+                                    name={t('servers.id') as string}
                                     direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('id')}
                                 />
                                 <TableHeader
-                                    name={'Name'}
+                                    name={t('servers.name') as string}
                                     direction={sort === 'name' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('name')}
                                 />
-                                <TableHeader name={'Description'} />
+                                <TableHeader name={t('servers.description') as string} />
                                 <TableHeader
-                                    name={'CPU'}
+                                    name={t('servers.cpu') as string}
                                     direction={sort === 'cpu' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('cpu')}
                                 />
                                 <TableHeader
-                                    name={'Memory'}
+                                    name={t('servers.memory') as string}
                                     direction={sort === 'memory' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('memory')}
                                 />
                                 <TableHeader
-                                    name={'Disk'}
+                                    name={t('servers.disk') as string}
                                     direction={sort === 'disk' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('disk')}
                                 />
-                                <TableHeader name={'Has Egg?'} />
+                                <TableHeader name={t('servers.hasEgg') as string} />
                             </TableHead>
 
                             <TableBody>

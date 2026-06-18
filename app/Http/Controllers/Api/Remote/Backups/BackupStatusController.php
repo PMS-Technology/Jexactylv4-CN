@@ -109,7 +109,7 @@ class BackupStatusController extends ApplicationApiController
                 return;
             }
 
-            throw new DisplayException('Cannot complete backup request: no upload_id present on model.');
+            throw new DisplayException(trans('exceptions.backups.missing_upload_id'));
         }
 
         $params = [

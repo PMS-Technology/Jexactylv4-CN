@@ -2,6 +2,7 @@ import { LanguageDescription } from '@codemirror/language';
 import { json } from '@codemirror/lang-json';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import { exportEgg } from '@/api/routes/admin/egg';
@@ -14,6 +15,7 @@ import SpinnerOverlay from '@/elements/SpinnerOverlay';
 import useFlash from '@/plugins/useFlash';
 
 export default ({ className }: { className?: string }) => {
+    const { t } = useTranslation('admin');
     const params = useParams<'id'>();
     const { clearAndAddHttpError, clearFlashes } = useFlash();
 
@@ -45,7 +47,7 @@ export default ({ className }: { className?: string }) => {
                 css={tw`relative`}
             >
                 <SpinnerOverlay visible={loading} />
-                <h2 css={tw`mb-6 text-2xl text-neutral-100`}>Export Egg</h2>
+                <h2 css={tw`mb-6 text-2xl text-neutral-100`}>{t('nests.exportEgg') as string}</h2>
                 <FlashMessageRender byKey={'egg:export'} css={tw`mb-6`} />
 
                 <Editor
@@ -61,7 +63,7 @@ export default ({ className }: { className?: string }) => {
                         css={tw`w-full sm:w-auto sm:mr-2`}
                         onClick={() => setVisible(false)}
                     >
-                        Close
+                        {t('nests.close') as string}
                     </Button.Text>
 
                     <Button
@@ -69,7 +71,7 @@ export default ({ className }: { className?: string }) => {
                         // onClick={submit}
                         // TODO: When clicked, save as a JSON file.
                     >
-                        Save
+                        {t('nests.save') as string}
                     </Button>
                 </div>
             </Modal>
@@ -80,7 +82,7 @@ export default ({ className }: { className?: string }) => {
                 className={className}
                 onClick={() => setVisible(true)}
             >
-                Export
+                {t('nests.export') as string}
             </Button.Text>
         </>
     );

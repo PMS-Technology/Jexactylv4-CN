@@ -1,6 +1,7 @@
 import type { Actions } from 'easy-peasy';
 import { useStoreActions } from 'easy-peasy';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import deleteNest from '@/api/routes/admin/nests/deleteNest';
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export default ({ nestId, onDeleted }: Props) => {
+    const { t } = useTranslation('admin');
     const [visible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -44,13 +46,13 @@ export default ({ nestId, onDeleted }: Props) => {
         <>
             <ConfirmationModal
                 visible={visible}
-                title={'Delete nest?'}
-                buttonText={'Yes, delete nest'}
+                title={t('nests.deleteNest') as string}
+                buttonText={t('nests.yesDeleteNest') as string}
                 onConfirmed={onDelete}
                 showSpinnerOverlay={loading}
                 onModalDismissed={() => setVisible(false)}
             >
-                Are you sure you want to delete this nest? Deleting a nest will delete all eggs assigned to it.
+                {t('nests.deleteNestConfirmation') as string}
             </ConfirmationModal>
 
             <Button.Danger type="button" shape={Shape.IconSquare} onClick={() => setVisible(true)}>

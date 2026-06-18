@@ -2,6 +2,7 @@ import Modal, { RequiredModalProps } from '@/elements/Modal';
 import { Form, Formik, FormikHelpers } from 'formik';
 import Field from '@/elements/Field';
 import { join } from 'pathe';
+import { useTranslation } from 'react-i18next';
 import { renameFiles } from '@/api/routes/server/files';
 import { ServerContext } from '@/state/server';
 import tw from 'twin.macro';
@@ -16,6 +17,7 @@ interface FormikValues {
 type OwnProps = RequiredModalProps & { files: string[]; useMoveTerminology?: boolean };
 
 const RenameFileModal = ({ files, useMoveTerminology, ...props }: OwnProps) => {
+    const { t } = useTranslation('server');
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
     const { mutate } = useFileManagerSwr();
     const { clearFlashes, clearAndAddHttpError } = useFlash();
@@ -65,22 +67,22 @@ const RenameFileModal = ({ files, useMoveTerminology, ...props }: OwnProps) => {
                                     type={'string'}
                                     id={'file_name'}
                                     name={'name'}
-                                    label={'File Name'}
+                                    label={t('filesPage.fileName') as string}
                                     description={
                                         useMoveTerminology
-                                            ? 'Enter the new name and directory of this file or folder, relative to the current directory.'
+                                            ? (t('filesPage.moveDescription') as string)
                                             : undefined
                                     }
                                     autoFocus
                                 />
                             </div>
                             <div css={tw`w-full sm:w-auto mt-4 sm:mt-0`}>
-                                <Button css={tw`w-full`}>{useMoveTerminology ? 'Move' : 'Rename'}</Button>
+                                <Button css={tw`w-full`}>{useMoveTerminology ? (t('filesPage.move') as string) : (t('filesPage.rename') as string)}</Button>
                             </div>
                         </div>
                         {useMoveTerminology && (
                             <p css={tw`text-xs mt-2 text-neutral-400`}>
-                                <strong css={tw`text-neutral-200`}>New location:</strong>
+                                <strong css={tw`text-neutral-200`}>{t('filesPage.newLocation') as string}</strong>
                                 &nbsp;/home/container/{join(directory, values.name).replace(/^(\.\.\/|\/)+/, '')}
                             </p>
                         )}

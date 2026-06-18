@@ -22,6 +22,7 @@ import { Alert } from '@/elements/alert';
 import { getProducts } from '@/api/routes/account/billing/products';
 import { getCategories } from '@/api/routes/account/billing/categories';
 import { Category, Product } from '@definitions/account/billing';
+import { useTranslation } from 'react-i18next';
 
 interface LimitProps {
     icon: IconDefinition;
@@ -36,6 +37,7 @@ const LimitBox = ({ icon, limit }: LimitProps) => (
 );
 
 export default () => {
+    const { t } = useTranslation('dashboard');
     const [category, setCategory] = useState<number>();
     const [products, setProducts] = useState<Product[] | undefined>();
     const [categories, setCategories] = useState<Category[] | undefined>();
@@ -63,27 +65,24 @@ export default () => {
     if (!settings.keys.secret) {
         return (
             <Alert type={'danger'}>
-                Due to a configuration error, the store is currently unavailable. Please try again later, or refresh the
-                page.
+                {t('billing.storeUnavailable')}
             </Alert>
         );
     }
 
     return (
-        <PageContentBlock title={'Available Products'}>
+        <PageContentBlock title={t('billing.availableProducts')}>
             <div className={'text-3xl lg:text-5xl font-bold mt-8 mb-12'}>
-                Order a Product
-                <p className={'text-gray-400 font-normal text-sm mt-1'}>
-                    Choose and configure any of the products below to your liking.
-                </p>
+                {t('billing.orderProduct')}
+                <p className={'text-gray-400 font-normal text-sm mt-1'}>{t('billing.orderProductDescription')}</p>
             </div>
             <div className={'grid lg:grid-cols-4 gap-4 lg:gap-12'}>
                 <div className={'border-r-4 border-gray-500'}>
-                    <p className={'text-2xl text-gray-300 mb-8 mt-4 font-bold'}>Categories</p>
+                    <p className={'text-2xl text-gray-300 mb-8 mt-4 font-bold'}>{t('billing.categories')}</p>
                     {(!categories || categories.length < 1) && (
                         <div className={'font-semibold my-4 text-gray-400'}>
                             <FontAwesomeIcon icon={faExclamationTriangle} className={'w-5 h-5 mr-2 text-yellow-400'} />
-                            No categories found.
+                            {t('billing.noCategories')}
                         </div>
                     )}
                     {categories?.map(cat => (
@@ -117,7 +116,7 @@ export default () => {
                                         icon={faExclamationTriangle}
                                         className={'w-5 h-5 mr-2 text-yellow-400'}
                                     />
-                                    No products could be found in this category.
+                                    {t('billing.noProducts')}
                                 </div>
                             )}
                             <div className={'grid grid-cols-1 xl:grid-cols-3 gap-4'}>
@@ -143,23 +142,23 @@ export default () => {
                                                     &nbsp;
                                                     {settings.currency.code.toUpperCase()}
                                                 </span>
-                                                <span className={'text-base'}>/ monthly</span>
+                                                <span className={'text-base'}>{t('billing.monthly')}</span>
                                             </p>
                                             <div className={'grid justify-center items-center'}>
                                                 <LimitBox icon={faMicrochip} limit={<>{product.limits.cpu}% CPU</>} />
                                                 <LimitBox
                                                     icon={faMemory}
-                                                    limit={<>{product.limits.memory / 1024} GiB of RAM</>}
+                                                    limit={<>{t('billing.ram', { amount: product.limits.memory / 1024 })}</>}
                                                 />
                                                 <LimitBox
                                                     icon={faHdd}
-                                                    limit={<>{product.limits.disk / 1024} GiB of Storage</>}
+                                                    limit={<>{t('billing.storage', { amount: product.limits.disk / 1024 })}</>}
                                                 />
                                                 <div className={'border border-dashed border-gray-500 my-4'} />
                                                 {product.limits.backup ? (
                                                     <LimitBox
                                                         icon={faArchive}
-                                                        limit={<>{product.limits.backup} backup slots</>}
+                                                        limit={<>{t('billing.backupSlots', { count: product.limits.backup })}</>}
                                                     />
                                                 ) : (
                                                     <></>
@@ -167,7 +166,7 @@ export default () => {
                                                 {product.limits.database ? (
                                                     <LimitBox
                                                         icon={faDatabase}
-                                                        limit={<>{product.limits.database} database slots</>}
+                                                        limit={<>{t('billing.databaseSlots', { count: product.limits.database })}</>}
                                                     />
                                                 ) : (
                                                     <></>
@@ -176,8 +175,9 @@ export default () => {
                                                     icon={faEthernet}
                                                     limit={
                                                         <>
-                                                            {product.limits.allocation} network port
-                                                            {product.limits.allocation > 1 && 's'}
+                                                            {t('billing.networkPorts', {
+                                                                count: product.limits.allocation,
+                                                            })}
                                                         </>
                                                     }
                                                 />
@@ -185,7 +185,7 @@ export default () => {
                                             <div className={'text-center mt-6'}>
                                                 <Link to={`/account/billing/order/${product.id}`}>
                                                     <Button size={Button.Sizes.Large} className={'w-full'}>
-                                                        Configure
+                                                        {t('billing.configure')}
                                                     </Button>
                                                 </Link>
                                             </div>

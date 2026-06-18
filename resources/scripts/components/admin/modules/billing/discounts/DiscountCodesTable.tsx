@@ -13,6 +13,7 @@ import AdminTable, {
 import CopyOnClick from '@/elements/CopyOnClick';
 import tw from 'twin.macro';
 import { useContext, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import useFlash from '@/plugins/useFlash';
 import { DiscountCodeFilters } from '@/api/routes/admin/billing/types';
 import { formatDistanceToNowStrict } from 'date-fns';
@@ -21,6 +22,7 @@ import DiscountCodeDialog from './DiscountCodeDialog';
 import DeleteDiscountCodeButton from './DeleteDiscountCodeButton';
 
 function DiscountCodesTable() {
+    const { t } = useTranslation('admin');
     const { data: orders, error } = useGetDiscountCodes();
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { setSort, sort, setPage, sortDirection, setFilters } = useContext(DiscountCodeContext);
@@ -56,15 +58,15 @@ function DiscountCodesTable() {
                             <table css={tw`w-full table-auto`}>
                                 <TableHead>
                                     <TableHeader
-                                        name={'ID'}
+                                        name={t('billingModule.id')}
                                         direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('id')}
                                     />
-                                    <TableHeader name={'Code'} />
-                                    <TableHeader name={'Discount'} />
-                                    <TableHeader name={'Uses Left'} />
-                                    <TableHeader name={'Expires At'} />
-                                    <TableHeader name={'Created At'} />
+                                    <TableHeader name={t('billingModule.code')} />
+                                    <TableHeader name={t('billingModule.discount')} />
+                                    <TableHeader name={t('billingModule.usesLeft')} />
+                                    <TableHeader name={t('billingModule.expiresAt')} />
+                                    <TableHeader name={t('billingModule.createdAt')} />
                                     <TableHeader />
                                 </TableHead>
                                 <TableBody>
@@ -97,17 +99,17 @@ function DiscountCodesTable() {
                                                 </td>
                                                 <td className={'px-6 py-4'}>
                                                     {discountCode.value}
-                                                    {discountCode.type === 'percentage' ? '%' : currency} off
+                                                    {discountCode.type === 'percentage' ? '%' : currency} {t('billingModule.off')}
                                                 </td>
                                                 <td className={'px-6 py-4'}>
-                                                    {discountCode.uses ? `${discountCode.uses} remaining` : 'Unlimited'}
+                                                    {discountCode.uses ? `${discountCode.uses} ${t('billingModule.remaining')}` : t('billingModule.unlimited')}
                                                 </td>
                                                 <td className={'px-6 py-4'}>
                                                     {discountCode.expires_at
                                                         ? formatDistanceToNowStrict(discountCode.expires_at, {
                                                               addSuffix: true,
                                                           })
-                                                        : 'No Expiration'}
+                                                        : t('billingModule.noExpiration')}
                                                 </td>
                                                 <td className={'px-6 py-4'}>
                                                     {formatDistanceToNowStrict(discountCode.created_at, {

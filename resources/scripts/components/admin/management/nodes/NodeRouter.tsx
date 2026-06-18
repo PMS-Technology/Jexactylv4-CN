@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { Action, Actions } from 'easy-peasy';
 import { action, createContextStore, useStoreActions } from 'easy-peasy';
 import { useEffect, useState } from 'react';
@@ -34,6 +35,7 @@ export const Context = createContextStore<ctx>({
 });
 
 const NodeRouter = () => {
+    const { t } = useTranslation('admin');
     const params = useParams<'id'>();
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
         (actions: Actions<ApplicationStore>) => actions.flashes,
@@ -68,7 +70,7 @@ const NodeRouter = () => {
     }
 
     return (
-        <AdminContentBlock title={'Node - ' + node.name}>
+        <AdminContentBlock title={t('nodes.pageTitle', { name: node.name })}>
             <div css={tw`w-full flex flex-row items-center mb-4`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
                     <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>
@@ -86,23 +88,23 @@ const NodeRouter = () => {
             <FlashMessageRender byKey={'admin:nodes'} css={tw`mb-4`} />
 
             <SubNavigation>
-                <SubNavigationLink to={`/admin/nodes/${node.id}`} name={'About'} base>
+                <SubNavigationLink to={`/admin/nodes/${node.id}`} name={t('nodes.nodeAbout') as string} base>
                     <OfficeBuildingIcon />
                 </SubNavigationLink>
 
-                <SubNavigationLink to={`/admin/nodes/${node.id}/settings`} name={'Settings'}>
+                <SubNavigationLink to={`/admin/nodes/${node.id}/settings`} name={t('nodes.nodeSettings') as string}>
                     <CogIcon />
                 </SubNavigationLink>
 
-                <SubNavigationLink to={`/admin/nodes/${node.id}/configuration`} name={'Configuration'}>
+                <SubNavigationLink to={`/admin/nodes/${node.id}/configuration`} name={t('nodes.nodeConfiguration') as string}>
                     <CodeIcon />
                 </SubNavigationLink>
 
-                <SubNavigationLink to={`/admin/nodes/${node.id}/allocations`} name={'Allocations'}>
+                <SubNavigationLink to={`/admin/nodes/${node.id}/allocations`} name={t('nodes.nodeAllocation') as string}>
                     <WifiIcon />
                 </SubNavigationLink>
 
-                <SubNavigationLink to={`/admin/nodes/${node.id}/servers`} name={'Servers'}>
+                <SubNavigationLink to={`/admin/nodes/${node.id}/servers`} name={t('nodes.nodeServers') as string}>
                     <ServerIcon />
                 </SubNavigationLink>
             </SubNavigation>

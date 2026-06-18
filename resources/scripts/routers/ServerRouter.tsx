@@ -1,6 +1,7 @@
 import TransferListener from '@server/TransferListener';
 import { Fragment, useEffect, useState } from 'react';
 import { NavLink, Route, Routes, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import WebsocketHandler from '@server/WebsocketHandler';
 import { ServerContext, ServerStatus } from '@/state/server';
 import Spinner from '@/elements/Spinner';
@@ -37,6 +38,8 @@ function statusToColor(status: ServerStatus): string {
 }
 
 function ServerRouter() {
+    const { t } = useTranslation('common');
+    const { t: tServer } = useTranslation('server');
     const params = useParams<'id'>();
     const location = useLocation();
 
@@ -82,7 +85,7 @@ function ServerRouter() {
     if (billable && server.renewalDate && server.renewalDate.getTime() < new Date().getTime())
         return (
             <Suspended
-                id={server.billingProductId}
+                id={Number(server.billingProductId)}
                 date={server.renewalDate}
                 serverId={server.internalId}
                 serverUuid={server.uuid}
@@ -102,13 +105,13 @@ function ServerRouter() {
                             <MobileSidebar.Link
                                 key={route.route}
                                 icon={route.icon ?? PuzzleIcon}
-                                text={route.name}
+                                text={route.nameKey ? tServer(route.nameKey) : route.name}
                                 linkTo={route.path}
                                 end={route.end}
                             />
                         ))}
                     {(user.rootAdmin || user.admin_role_id) && (
-                        <MobileSidebar.Link icon={CogIcon} text={'Admin'} linkTo={'/admin'} />
+                        <MobileSidebar.Link icon={CogIcon} text={t('admin') as string} linkTo={'/admin'} />
                     )}
                 </MobileSidebar>
                 <Sidebar className={'flex-none'} $collapsed={collapsed} theme={theme}>
@@ -131,7 +134,7 @@ function ServerRouter() {
                     <Sidebar.Wrapper theme={theme} className={'mb-auto'}>
                         <NavLink to={'/'} end className={'mb-[18px]'}>
                             <DesktopComputerIcon />
-                            <span>Dashboard</span>
+                            <span>{t('dashboard')}</span>
                         </NavLink>
                         <Sidebar.Section>Server {server?.uuid?.slice(0, 8)}</Sidebar.Section>
                         {routes.server
@@ -144,7 +147,7 @@ function ServerRouter() {
                             .map(route => (
                                 <NavLink to={route.path} key={route.path} end={route.end}>
                                     <Sidebar.Icon icon={route.icon ?? PuzzleIcon} />
-                                    <span>{route.name}</span>
+                                    <span>{route.nameKey ? tServer(route.nameKey) : route.name}</span>
                                 </NavLink>
                             ))}
                         {categories.map(category => {
@@ -155,11 +158,11 @@ function ServerRouter() {
 
                             return (
                                 <Fragment key={category}>
-                                    <Sidebar.Section>{category[0]!.toUpperCase() + category.slice(1)}</Sidebar.Section>
+                                    <Sidebar.Section>{tServer(`categories.${category}`)}</Sidebar.Section>
                                     {categoryRoutes.map(route => (
                                         <NavLink to={route.path} key={route.path} end={route.end}>
                                             <Sidebar.Icon icon={route.icon ?? PuzzleIcon} />
-                                            <span>{route.name}</span>
+                                            <span>{route.nameKey ? tServer(route.nameKey) : route.name}</span>
                                         </NavLink>
                                     ))}
                                 </Fragment>
@@ -168,7 +171,7 @@ function ServerRouter() {
                         {user.rootAdmin && (
                             <NavLink to={`/admin/servers/${server?.internalId}`}>
                                 <ReplyIcon />
-                                <span>View as Admin</span>
+                                <span>{t('viewAsAdmin', { ns: 'server' })}</span>
                             </NavLink>
                         )}
                     </Sidebar.Wrapper>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/elements/button';
 import { faUpload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,6 +11,7 @@ import { Alert } from '@/elements/alert';
 import { importBillingConfiguration } from '@/api/routes/admin/billing/config';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [open, setOpen] = useState<boolean>(false);
     const [file, setFile] = useState<File | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
@@ -27,7 +29,7 @@ export default () => {
 
     const handleUploadClick = () => {
         if (!file) {
-            addFlash({ key: 'billing:config', type: 'warning', message: 'No JSON file was selected for upload.' });
+            addFlash({ key: 'billing:config', type: 'warning', message: t('billingModule.noJsonFileSelectedForUpload') });
             return;
         }
 
@@ -44,7 +46,7 @@ export default () => {
                     .then(() => {
                         setLoading(false);
                         setOpen(false);
-                        addFlash({ key: 'billing:config', type: 'success', message: 'Import completed successfully' });
+                        addFlash({ key: 'billing:config', type: 'success', message: t('billingModule.importCompletedSuccessfully') });
                     })
                     .catch(error => {
                         setLoading(false);
@@ -65,16 +67,15 @@ export default () => {
         <>
             <Dialog.Confirm
                 onConfirmed={handleUploadClick}
-                confirm={'Import Configuration'}
+                confirm={t('billingModule.importConfiguration')}
                 open={open}
                 onClose={() => setOpen(false)}
-                title={'Choose JSON to import'}
+                title={t('billingModule.chooseJsonToImport')}
             >
                 <SpinnerOverlay visible={loading} />
                 {override && (
                     <Alert type={'warning'}>
-                        It is strongly recommended to export your current configuration before overriding it, as it
-                        cannot be recovered.
+                        {t('billingModule.stronglyRecommendedToExportBeforeOverriding')}
                     </Alert>
                 )}
                 <input type="file" accept=".json" onChange={handleFileChange} className={'mt-4'} />
@@ -82,8 +83,8 @@ export default () => {
                     <Switch
                         onChange={() => setOverride(!override)}
                         name={'override'}
-                        label={'Delete existing categories and products?'}
-                        description={'This will completely erase your existing products for sale.'}
+                        label={t('billingModule.deleteExistingCategoriesAndProducts')}
+                        description={t('billingModule.willCompletelyEraseExistingProducts')}
                     />
                 </div>
                 {!override && (
@@ -92,16 +93,16 @@ export default () => {
                             onChange={() => setIgnoreDuplicates(!ignoreDuplicates)}
                             name={'ignoreDuplicates'}
                             defaultChecked={ignoreDuplicates}
-                            label={'Ignore duplicate values?'}
+                            label={t('billingModule.ignoreDuplicateValues')}
                             description={
-                                'Setting this to true will mean that products/categories with identical names will be ignored.'
+                                t('billingModule.settingToTrueWillMeanIdenticalNamesIgnored')
                             }
                         />
                     </div>
                 )}
             </Dialog.Confirm>
             <Button onClick={() => setOpen(true)} className={'ml-2'}>
-                <FontAwesomeIcon icon={faUpload} className={'mr-1'} /> Import
+                <FontAwesomeIcon icon={faUpload} className={'mr-1'} /> {t('billingModule.import')}
             </Button>
         </>
     );

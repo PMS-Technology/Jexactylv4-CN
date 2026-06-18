@@ -46,47 +46,98 @@ const admin: AdminRouteDefinition[] = [
     /**
      * Admin - General Routes
      */
-    route('', OverviewContainer, { name: 'Overview', end: true, icon: Icon.OfficeBuildingIcon, category: 'general' }),
-    route('settings/*', SettingsRouter, { name: 'Settings', icon: Icon.CogIcon, category: 'general' }),
+    route('', OverviewContainer, {
+        name: 'Overview',
+        nameKey: 'nav.overview',
+        end: true,
+        icon: Icon.OfficeBuildingIcon,
+        category: 'general',
+    }),
+    route('settings/*', SettingsRouter, {
+        name: 'Settings',
+        nameKey: 'nav.settings',
+        icon: Icon.CogIcon,
+        category: 'general',
+    }),
     route('settings/webhooks/*', WebhookRouter),
-    route('api/*', ApplicationApiRouter, { name: 'API', icon: Icon.CodeIcon, category: 'general', advanced: true }),
+    route('api/*', ApplicationApiRouter, {
+        name: 'API',
+        nameKey: 'nav.api',
+        icon: Icon.CodeIcon,
+        category: 'general',
+        advanced: true,
+    }),
 
     /**
      * Admin - Module Routes
      */
-    route('auth', AuthContainer, { name: 'Auth', icon: Icon.KeyIcon, category: 'modules', advanced: true }),
-    route('billing/*', BillingRouter, { name: 'Billing', icon: Icon.CashIcon, category: 'modules', advanced: true }),
-    route('tickets/*', TicketRouter, { name: 'Tickets', icon: Icon.TicketIcon, category: 'modules', advanced: true }),
-    route('ai/*', AIRouter, { name: 'AI', icon: Icon.SparklesIcon, category: 'modules', advanced: true }),
+    route('auth', AuthContainer, {
+        name: 'Auth',
+        nameKey: 'nav.auth',
+        icon: Icon.KeyIcon,
+        category: 'modules',
+        advanced: true,
+    }),
+    route('billing/*', BillingRouter, {
+        name: 'Billing',
+        nameKey: 'nav.billing',
+        icon: Icon.CashIcon,
+        category: 'modules',
+        advanced: true,
+    }),
+    route('tickets/*', TicketRouter, {
+        name: 'Tickets',
+        nameKey: 'nav.tickets',
+        icon: Icon.TicketIcon,
+        category: 'modules',
+        advanced: true,
+    }),
+    route('ai/*', AIRouter, { name: 'AI', nameKey: 'nav.ai', icon: Icon.SparklesIcon, category: 'modules', advanced: true }),
 
     /**
      * Admin - Appearance Routes
      */
-    route('theme', ThemeContainer, { name: 'Theme', icon: Icon.PencilAltIcon, category: 'appearance' }),
-    route('links/*', LinksContainer, { name: 'Links', icon: Icon.LinkIcon, category: 'appearance' }),
-    route('alerts/*', AlertRouter, { name: 'Alerts', icon: Icon.ShieldExclamationIcon, category: 'appearance' }),
+    route('theme', ThemeContainer, {
+        name: 'Theme',
+        nameKey: 'nav.theme',
+        icon: Icon.PencilAltIcon,
+        category: 'appearance',
+    }),
+    route('links/*', LinksContainer, { name: 'Links', nameKey: 'nav.links', icon: Icon.LinkIcon, category: 'appearance' }),
+    route('alerts/*', AlertRouter, {
+        name: 'Alerts',
+        nameKey: 'nav.alerts',
+        icon: Icon.ShieldExclamationIcon,
+        category: 'appearance',
+    }),
 
     /**
      * Admin - Management Routes
      */
     route('databases', DatabasesContainer, {
         name: 'Databases',
+        nameKey: 'nav.databases',
         icon: Icon.DatabaseIcon,
         category: 'management',
         advanced: true,
     }),
     route('databases/:id', DatabaseEditContainer),
-    route('nodes/*', NodesContainer, { name: 'Nodes', icon: Icon.ServerIcon, category: 'management' }),
+    route('nodes/*', NodesContainer, { name: 'Nodes', nameKey: 'nav.nodes', icon: Icon.ServerIcon, category: 'management' }),
     route('nodes/new', NewNodeContainer),
     route('nodes/:id/*', NodeRouter),
 
-    route('servers', ServersContainer, { name: 'Servers', icon: Icon.TerminalIcon, category: 'management' }),
+    route('servers', ServersContainer, {
+        name: 'Servers',
+        nameKey: 'nav.servers',
+        icon: Icon.TerminalIcon,
+        category: 'management',
+    }),
     route('servers/new', NewServerContainer),
     route('servers/presets', ServerPresetContainer),
     route('servers/presets/:id/*', ServerPresetViewContainer),
     route('servers/:id/*', ServerRouter),
 
-    route('users', AdminUsersContainer, { name: 'Users', icon: Icon.UserIcon, category: 'management' }),
+    route('users', AdminUsersContainer, { name: 'Users', nameKey: 'nav.users', icon: Icon.UserIcon, category: 'management' }),
     route('users/new', NewUserContainer),
     route('users/:id/*', UserRouter),
     route('users/roles', RolesContainer),

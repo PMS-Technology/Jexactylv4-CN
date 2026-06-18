@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as React from 'react';
+import type { TFunction } from 'i18next';
+import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faMemory,
@@ -65,16 +67,16 @@ export function statusToBg(state?: ServerPowerState): string {
     }
 }
 
-export function statusToLabel(state?: ServerPowerState): string {
+export function statusToLabel(t: TFunction<'dashboard'>, state?: ServerPowerState): string {
     switch (state) {
         case 'running':
-            return 'Online';
+            return t('online');
         case 'starting':
-            return 'Starting';
+            return t('starting');
         case 'stopping':
-            return 'Stopping';
+            return t('stopping');
         default:
-            return 'Offline';
+            return t('offline');
     }
 }
 
@@ -153,6 +155,7 @@ export default ({
     group?: ServerGroup;
     setOpen: React.Dispatch<React.SetStateAction<VisibleDialog>>;
 }) => {
+    const { t } = useTranslation('dashboard');
     const { clearFlashes, addFlash, clearAndAddHttpError } = useFlash();
     const [stats, setStats] = useState<ServerStats>();
     const colors = useStoreState(state => state.theme.data!.colors);
@@ -164,7 +167,7 @@ export default ({
         clearFlashes();
         removeServerFromGroup(group!.id, server.uuid)
             .then(() => {
-                addFlash({ type: 'success', key: 'dashboard:groups', message: 'Server removed from group.' });
+                addFlash({ type: 'success', key: 'dashboard:groups', message: t('serverRemovedFromGroup') });
                 setOpen({ open: 'none', serverId: undefined });
                 setRemoved(true);
             })
@@ -270,10 +273,10 @@ export default ({
                                 )}
                             >
                                 {isSuspended
-                                    ? 'Suspended'
+                                    ? t('suspended')
                                     : isTransferring
-                                    ? 'Transferring'
-                                    : statusToLabel(powerState)}
+                                    ? t('transferring')
+                                    : statusToLabel(t, powerState)}
                             </span>
                             {hasGroup ? (
                                 <span
@@ -291,7 +294,7 @@ export default ({
                                         className={
                                             'ml-0.5 text-gray-600 hover:text-red-400 transition-colors duration-150'
                                         }
-                                        title={'Remove from group'}
+                                        title={t('removeFromGroup') as string}
                                     >
                                         <FontAwesomeIcon icon={faTrash} size={'xs'} />
                                     </button>
@@ -304,7 +307,7 @@ export default ({
                                     }
                                 >
                                     <FontAwesomeIcon icon={faPlus} size={'xs'} />
-                                    Group
+                                    {t('group')}
                                 </button>
                             )}
                         </div>
@@ -321,7 +324,7 @@ export default ({
                                 <span className={'flex items-center gap-1.5 text-xs text-gray-500'}>
                                     <FontAwesomeIcon icon={faClock} size={'xs'} className={'text-gray-600'} />
                                     <span>
-                                        Renews in{' '}
+                                        {t('renewsIn')}{' '}
                                         <span
                                             className={classNames(
                                                 'font-medium',
@@ -355,10 +358,10 @@ export default ({
                             />
                             <span className={'text-sm text-gray-500'}>
                                 {isTransferring
-                                    ? 'Transfer in progress…'
+                                    ? t('transferInProgress')
                                     : isSuspended
-                                    ? 'This server is suspended'
-                                    : `Server is ${server.status ?? 'offline'}`}
+                                    ? t('serverSuspended')
+                                    : t('serverIs', { status: server.status ?? t('offline') })}
                             </span>
                         </div>
                     ) : (
@@ -370,13 +373,13 @@ export default ({
                             <ResourceBar
                                 value={Number(cpuUsed?.toFixed(1) ?? 0)}
                                 icon={faMicrochip}
-                                label={'CPU'}
+                                label={t('cpuTitle')}
                                 colorClass={'bg-white/50'}
                             />
                             <ResourceBar
                                 value={Number(memoryUsed.toFixed(1))}
                                 icon={faMemory}
-                                label={'Memory'}
+                                label={t('memoryTitle')}
                                 colorClass={'bg-white/50'}
                             />
                         </div>
@@ -390,7 +393,7 @@ export default ({
                         }
                     >
                         <FontAwesomeIcon icon={faArrowUpRightFromSquare} size={'xs'} />
-                        Manage
+                        {t('manage')}
                     </Link>
                 </div>
             </div>

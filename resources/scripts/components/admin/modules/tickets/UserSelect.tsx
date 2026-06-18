@@ -1,5 +1,6 @@
 import { useFormikContext } from 'formik';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { searchUserAccounts } from '@/api/routes/admin/users';
 import SearchableSelect, { Option } from '@/elements/SearchableSelect';
@@ -7,6 +8,7 @@ import type { User } from '@definitions/admin';
 import Avatar from '@/elements/Avatar';
 
 export default ({ selected, isAdmin }: { selected?: User; isAdmin?: boolean }) => {
+    const { t } = useTranslation('admin');
     const { setFieldValue } = useFormikContext();
 
     const [user, setUser] = useState<User | null>(selected || null);
@@ -33,8 +35,8 @@ export default ({ selected, isAdmin }: { selected?: User; isAdmin?: boolean }) =
         <SearchableSelect
             id={isAdmin ? 'assigned_to' : 'user_id'}
             name={isAdmin ? 'assigned_to' : 'user_id'}
-            label={isAdmin ? 'Assign to Administrator (optional)' : 'Ticket Owner'}
-            placeholder={'Select a user...'}
+            label={isAdmin ? (t('ticketsModule.assignToAdministrator') as string) : (t('ticketsModule.ticketOwner') as string)}
+            placeholder={t('ticketsModule.selectUser') as string}
             items={users}
             selected={user}
             setSelected={setUser}

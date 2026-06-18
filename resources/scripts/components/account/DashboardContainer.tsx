@@ -8,6 +8,7 @@ import { useStoreState } from 'easy-peasy';
 import { usePersistedState } from '@/plugins/usePersistedState';
 import Switch from '@/elements/Switch';
 import tw from 'twin.macro';
+import { useTranslation } from 'react-i18next';
 import useSWR from 'swr';
 import { PaginatedResult } from '@/api/http';
 import Pagination from '@/elements/Pagination';
@@ -27,6 +28,7 @@ import ActivityLogContainer from './activity/ActivityLogContainer';
 import classNames from 'classnames';
 
 export default () => {
+    const { t } = useTranslation('dashboard');
     const { search } = useLocation();
     const defaultPage = Number(new URLSearchParams(search).get('page') || '1');
 
@@ -62,9 +64,6 @@ export default () => {
     }, [servers?.pagination.currentPage]);
 
     useEffect(() => {
-        // Don't use react-router to handle changing this part of the URL, otherwise it
-        // triggers a needless re-render. We just want to track this in the URL incase the
-        // user refreshes the page.
         window.history.replaceState(null, document.title, `/${page <= 1 ? '' : `?page=${page}`}`);
     }, [page]);
 
@@ -74,7 +73,7 @@ export default () => {
     }, [error]);
 
     return (
-        <PageContentBlock title={`Welcome to ${name}`} header description={`Signed in as ${user.email}`}>
+        <PageContentBlock title={t('welcomeTo', { name }) as string} header description={t('signedInAs', { email: user.email }) as string}>
             <DashboardAlert />
             {open && <ServerGroupDialog open={open} setOpen={setOpen} groups={groups} setGroups={setGroups} />}
             <FlashMessageRender className={'my-4'} byKey={'dashboard'} />
@@ -91,7 +90,7 @@ export default () => {
                                     />
                                 </div>
                             )}
-                            {showOnlyAdmin ? 'Other' : 'Your'} Servers
+                            {showOnlyAdmin ? t('otherServers') : t('yourServers')}
                         </div>
                         <Button.Text
                             size={Button.Sizes.Small}
@@ -107,18 +106,16 @@ export default () => {
                                 <div className={'grid lg:grid-cols-2 gap-6 m-4'}>
                                     <ServerSvg color={colors.primary} />
                                     <div>
-                                        <h1 className={'text-gray-200 text-2xl font-bold'}>Deploy your first server</h1>
+                                        <h1 className={'text-gray-200 text-2xl font-bold'}>{t('deployFirstServer') as string}</h1>
                                         <div className={'mt-2'}>
-                                            It looks like you have no servers deployed to your account.&nbsp;
+                                            {t('noServersDeployed') as string}&nbsp;
                                             {billing ? (
                                                 <>
-                                                    With our billing portal, you can configure and purchase a new server
-                                                    plan and choose options like amount of CPU, memory and which game
-                                                    you&apos;d like to run.
+                                                    {t('billingDescription') as string}
                                                     <div className={'text-right'}>
                                                         <Link to={'/account/billing/order'}>
                                                             <Button className={'w-1/2 text-white font-normal'}>
-                                                                View Options{' '}
+                                                                {t('viewOptions') as string}{' '}
                                                                 <FontAwesomeIcon
                                                                     icon={faCircleArrowRight}
                                                                     className={'ml-2'}
@@ -128,7 +125,7 @@ export default () => {
                                                     </div>
                                                 </>
                                             ) : (
-                                                <>Think this is a mistake? Please contact our support team.</>
+                                                <>{t('contactSupport') as string}</>
                                             )}
                                         </div>
                                     </div>
@@ -156,7 +153,7 @@ export default () => {
                                                 <div css={tw`w-full sm:w-3/4 md:w-1/2 rounded-lg text-center relative`}>
                                                     <img src={NotFoundSvg} css={tw`w-2/3 h-auto select-none mx-auto`} />
                                                     <h2 css={tw`mt-10 mb-6 text-white font-medium text-xl`}>
-                                                        No servers could be found.
+                                                        {t('noServersFound') as string}
                                                     </h2>
                                                 </div>
                                             </div>
@@ -168,7 +165,7 @@ export default () => {
                     )}
                 </div>
                 {activityEnabled && (
-                    <ContentBox title={'Account Activity'}>
+                    <ContentBox title={t('accountActivity') as string}>
                         <ActivityLogContainer />
                     </ContentBox>
                 )}

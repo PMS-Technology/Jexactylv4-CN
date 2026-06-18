@@ -2,10 +2,12 @@ import { differenceInDays, parseISO } from 'date-fns';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import { BillingAnalytics } from '@definitions/admin';
+import { useTranslation } from 'react-i18next';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 export default ({ data, history }: { data: BillingAnalytics; history: number }) => {
+    const { t } = useTranslation('admin');
     const now = new Date();
 
     const successfulOrders: number = data.orders.filter(
@@ -25,10 +27,10 @@ export default ({ data, history }: { data: BillingAnalytics; history: number }) 
     ).length;
 
     const chartData = {
-        labels: ['Successful Orders', 'Failed Orders', 'Expired Orders', 'Pending Orders'],
+        labels: [t('billingModule.successfulOrders'), t('billingModule.failedOrders'), t('billingModule.expiredOrders'), t('billingModule.pendingOrders')],
         datasets: [
             {
-                label: 'Order Status',
+                label: t('billingModule.orderStatus'),
                 data: [successfulOrders, failedOrders, expiredOrders, pendingOrders],
                 backgroundColor: ['green', 'red', 'gray', 'orange'],
                 borderWidth: 1,

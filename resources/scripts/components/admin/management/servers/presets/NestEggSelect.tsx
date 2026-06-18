@@ -4,8 +4,10 @@ import Label from '@/elements/Label';
 import Select from '@/elements/Select';
 import { NameSelectProps } from '@admin/management/servers/presets/ServerPresetDialog';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const NestSelect = ({ form, update }: NameSelectProps) => {
+    const { t } = useTranslation('admin');
     const [nests, setNests] = useState<Nest[] | null>(null);
 
     useEffect(() => {
@@ -16,17 +18,17 @@ const NestSelect = ({ form, update }: NameSelectProps) => {
 
     return (
         <div>
-            <Label>Nest</Label>
+            <Label>{t('servers.nest') as string}</Label>
             <Select
                 value={form.nest_id?.toString() ?? ''}
                 onChange={e => update('nest_id', e.target.value === 'none' ? null : Number(e.target.value))}
             >
                 {!nests ? (
-                    <option disabled>Loading...</option>
+                    <option disabled>{t('servers.loading') as string}</option>
                 ) : (
                     <>
                         <option key={'none'} value={'none'}>
-                            None
+                            {t('servers.none') as string}
                         </option>
                         {nests?.map(v => (
                             <option key={v.uuid} value={v.id.toString()}>
@@ -36,12 +38,13 @@ const NestSelect = ({ form, update }: NameSelectProps) => {
                     </>
                 )}
             </Select>
-            <p className={'text-xs text-gray-400'}>Select a nest to use with this preset (optional)</p>
+            <p className={'text-xs text-gray-400'}>{t('servers.selectNestForPreset') as string}</p>
         </div>
     );
 };
 
 const EggSelect = ({ form, update }: NameSelectProps) => {
+    const { t } = useTranslation('admin');
     const [eggs, setEggs] = useState<Egg[] | null>(null);
 
     useEffect(() => {
@@ -61,13 +64,13 @@ const EggSelect = ({ form, update }: NameSelectProps) => {
 
     return (
         <div>
-            <Label>Egg</Label>
+            <Label>{t('servers.egg') as string}</Label>
             <Select
                 value={form.egg_id?.toString() ?? ''}
                 onChange={e => update('egg_id', Number(e.currentTarget.value))}
             >
                 {!eggs ? (
-                    <option disabled>Loading...</option>
+                    <option disabled>{t('servers.loading') as string}</option>
                 ) : (
                     eggs?.map(v => (
                         <option key={v.uuid} value={v.id.toString()}>
@@ -76,7 +79,7 @@ const EggSelect = ({ form, update }: NameSelectProps) => {
                     ))
                 )}
             </Select>
-            <p className={'text-xs text-gray-400'}>Select an egg to use with this preset (optional)</p>
+            <p className={'text-xs text-gray-400'}>{t('servers.selectEggForPreset') as string}</p>
         </div>
     );
 };

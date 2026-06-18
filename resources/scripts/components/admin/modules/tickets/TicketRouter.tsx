@@ -1,4 +1,5 @@
 import { useStoreState } from '@/state/hooks';
+import { useTranslation } from 'react-i18next';
 import { Route, Routes } from 'react-router-dom';
 import { NotFound } from '@/elements/ScreenBlock';
 import NewTicketForm from '@admin/modules/tickets/NewTicketForm';
@@ -12,30 +13,31 @@ import FlashMessageRender from '@/elements/FlashMessageRender';
 import TicketOptionsContainer from './TicketOptionsContainer';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const enabled = useStoreState(state => state.everest.data!.tickets.enabled);
 
     if (!enabled) return <EnableTicketsContainer />;
 
     return (
-        <AdminContentBlock title={'Ticket Dashboard'}>
+        <AdminContentBlock title={t('ticketsModule.ticketDashboard') as string}>
             <FlashMessageRender byKey={'admin:tickets'} className={'mb-4'} />
             <div className={'w-full flex flex-row items-center mb-8'}>
                 <div className={'flex flex-col flex-shrink'} style={{ minWidth: '0' }}>
-                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>Ticket Dashboard</h2>
+                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>{t('ticketsModule.ticketDashboard') as string}</h2>
                     <p
                         className={
                             'hidden lg:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden'
                         }
                     >
-                        View, create and update tickets to users for support.
+                        {t('ticketsModule.description') as string}
                     </p>
                 </div>
             </div>
             <SubNavigation>
-                <SubNavigationLink to={'/admin/tickets'} name={'Open Tickets'} base>
+                <SubNavigationLink to={'/admin/tickets'} name={t('ticketsModule.openTickets') as string} base>
                     <TicketIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to={'/admin/tickets/options'} name={'Options'}>
+                <SubNavigationLink to={'/admin/tickets/options'} name={t('ticketsModule.options') as string}>
                     <CogIcon />
                 </SubNavigationLink>
             </SubNavigation>

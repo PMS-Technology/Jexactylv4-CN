@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { ServerContext } from '@/state/server';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -9,14 +10,8 @@ import { useStoreState } from '@/state/hooks';
 import Tooltip from '@/elements/tooltip/Tooltip';
 import Input from '@/elements/Input';
 
-const sortOptions: Array<{ value: SortField; label: string; tooltip: string }> = [
-    { value: 'name', label: 'Name', tooltip: 'Sort by file/folder name' },
-    { value: 'modified', label: 'Modified', tooltip: 'Sort by last modified date' },
-    { value: 'size', label: 'Size', tooltip: 'Sort by file size' },
-    { value: 'type', label: 'Type', tooltip: 'Sort by file type/extension' },
-];
-
 const FileSortControls = () => {
+    const { t } = useTranslation('server');
     const { colors } = useStoreState(state => state.theme.data!);
     const sortField = ServerContext.useStoreState(state => state.files.sortField);
     const sortDirection = ServerContext.useStoreState(state => state.files.sortDirection);
@@ -36,10 +31,17 @@ const FileSortControls = () => {
         }
     };
 
+    const sortOptions: Array<{ value: SortField; label: string; tooltip: string }> = [
+        { value: 'name', label: t('filesPage.sort.name') as string, tooltip: t('filesPage.sort.nameTooltip') as string },
+        { value: 'modified', label: t('filesPage.sort.modified') as string, tooltip: t('filesPage.sort.modifiedTooltip') as string },
+        { value: 'size', label: t('filesPage.sort.size') as string, tooltip: t('filesPage.sort.sizeTooltip') as string },
+        { value: 'type', label: t('filesPage.sort.type') as string, tooltip: t('filesPage.sort.typeTooltip') as string },
+    ];
+
     return (
         <div css={tw`flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4`}>
             <div css={tw`flex flex-wrap items-center gap-2 sm:gap-3`}>
-                <span css={tw`text-sm text-neutral-400 font-medium`}>Sort by:</span>
+                <span css={tw`text-sm text-neutral-400 font-medium`}>{t('filesPage.sort.sortBy') as string}</span>
                 <div css={tw`flex flex-wrap gap-2`}>
                     {sortOptions.map(option => (
                         <Tooltip key={option.value} content={option.tooltip} placement="top">
@@ -78,7 +80,7 @@ const FileSortControls = () => {
                     />
                     <Input
                         type="text"
-                        placeholder="Search files..."
+                        placeholder={t('filesPage.sort.searchFiles') as string}
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                         style={{ paddingLeft: '2.5rem', fontSize: '0.875rem' }}

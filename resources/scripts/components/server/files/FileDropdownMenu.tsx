@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsisH } from '@fortawesome/free-solid-svg-icons';
 import RenameFileModal from '@server/files/RenameFileModal';
@@ -30,6 +31,7 @@ import {
 type ModalType = 'rename' | 'move' | 'chmod';
 
 const FileDropdownMenu = ({ file }: { file: FileObject }) => {
+    const { t } = useTranslation('server');
     const onClickRef = useRef<DropdownMenu>(null);
     const [visible, setVisible] = useState<boolean>(false);
     const [modal, setModal] = useState<ModalType | null>(null);
@@ -132,12 +134,11 @@ const FileDropdownMenu = ({ file }: { file: FileObject }) => {
             <Dialog.Confirm
                 open={showConfirmation}
                 onClose={() => setShowConfirmation(false)}
-                title={`Delete ${file.isFile ? 'File' : 'Directory'}`}
-                confirm={'Delete'}
+                title={t('filesPage.deleteConfirm', { type: file.isFile ? (t('filesPage.file') as string) : (t('filesPage.newDirectory') as string) }) as string}
+                confirm={t('filesPage.delete') as string}
                 onConfirmed={doDeletion}
             >
-                You will not be able to recover the contents of&nbsp;
-                <span className={'font-semibold text-slate-50'}>{file.name}</span> once deleted.
+                <span dangerouslySetInnerHTML={{ __html: t('filesPage.deleteWarning', { name: file.name }) as string }} />
             </Dialog.Confirm>
             <div
                 css={tw`absolute top-0 right-0 p-2 hover:text-white text-gray-400 duration-250`}
@@ -146,27 +147,27 @@ const FileDropdownMenu = ({ file }: { file: FileObject }) => {
                 <FontAwesomeIcon icon={faEllipsisH} className={'p-1 bg-black/25 rounded'} />
             </div>
             {visible && (
-                <Dialog open={visible} onClose={() => setVisible(false)} title={'File Options'}>
+                <Dialog open={visible} onClose={() => setVisible(false)} title={t('filesPage.fileOptions') as string}>
                     <div className={'grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4 mt-6'}>
                         <Can action={'file.update'}>
                             <Button.Text onClick={() => setModal('rename')} className={'w-full'}>
                                 <PencilIcon className={'w-4 mt-0.5 mr-2'} />
-                                Rename
+                                {t('filesPage.rename') as string}
                             </Button.Text>
                             <Button.Text onClick={() => setModal('move')} className={'w-full'}>
                                 <ArrowUpIcon className={'w-4 mt-0.5 mr-2'} />
-                                Move
+                                {t('filesPage.move') as string}
                             </Button.Text>
                             <Button.Text onClick={() => setModal('chmod')} className={'w-full'}>
                                 <CogIcon className={'w-4 mt-0.5 mr-2'} />
-                                Permissions
+                                {t('filesPage.permissions') as string}
                             </Button.Text>
                         </Can>
                         {file.isFile && (
                             <Can action={'file.create'}>
                                 <Button.Text onClick={doCopy}>
                                     <ClipboardCopyIcon className={'w-4 mt-0.5 mr-2'} />
-                                    Copy File
+                                    {t('filesPage.copyFile') as string}
                                 </Button.Text>
                             </Can>
                         )}
@@ -174,27 +175,27 @@ const FileDropdownMenu = ({ file }: { file: FileObject }) => {
                             <Can action={'file.create'}>
                                 <Button.Text onClick={doUnarchive}>
                                     <InboxIcon className={'w-4 mt-0.5 mr-2'} />
-                                    Extract Files
+                                    {t('filesPage.extractFiles') as string}
                                 </Button.Text>
                             </Can>
                         ) : (
                             <Can action={'file.archive'}>
                                 <Button.Text onClick={doArchive}>
                                     <ArchiveIcon className={'w-4 mt-0.5 mr-2'} />
-                                    Archive File
+                                    {t('filesPage.archiveFile') as string}
                                 </Button.Text>
                             </Can>
                         )}
                         {file.isFile && (
                             <Button.Text onClick={doDownload}>
                                 <DownloadIcon className={'w-4 mt-0.5 mr-2'} />
-                                Download
+                                {t('filesPage.download') as string}
                             </Button.Text>
                         )}
                         <Can action={'file.archive'}>
                             <Button.Danger onClick={() => setShowConfirmation(true)}>
                                 <TrashIcon className={'w-4 mt-0.5 mr-2'} />
-                                Delete
+                                {t('filesPage.delete') as string}
                             </Button.Danger>
                         </Can>
                     </div>

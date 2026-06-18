@@ -42,7 +42,7 @@ class UpgradeService
         }
 
         if ($order->created_at->diffInDays(now()) < $renewal_days) {
-            throw new DisplayException("You must wait {$renewal_days} between server upgrades.");
+            throw new DisplayException(trans('exceptions.billing.upgrade_wait', ['days' => $renewal_days]));
         }
 
         return true;

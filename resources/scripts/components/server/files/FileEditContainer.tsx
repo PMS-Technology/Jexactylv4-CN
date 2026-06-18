@@ -1,6 +1,7 @@
 import type { LanguageDescription } from '@codemirror/language';
 import { languages } from '@codemirror/language-data';
 import { dirname } from 'pathe';
+import { useTranslation, Trans } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import tw from 'twin.macro';
@@ -23,6 +24,7 @@ import { ServerContext } from '@/state/server';
 import { encodePathSegments } from '@/lib/helpers';
 
 export default () => {
+    const { t } = useTranslation('server');
     const [error, setError] = useState('');
     const { action, '*': rawFilename } = useParams<{ action: 'edit' | 'new'; '*': string }>();
     const [loading, setLoading] = useState(action === 'edit');
@@ -108,11 +110,15 @@ export default () => {
             {filename === '.pteroignore' ? (
                 <div css={tw`mb-4 p-4 border-l-4 bg-neutral-900 rounded border-cyan-400`}>
                     <p css={tw`text-neutral-300 text-sm`}>
-                        You&apos;re editing a <code css={tw`font-mono bg-black rounded py-px px-1`}>.pteroignore</code>{' '}
-                        file. Any files or directories listed in here will be excluded from backups. Wildcards are
-                        supported by using an asterisk (<code css={tw`font-mono bg-black rounded py-px px-1`}>*</code>).
-                        You can negate a prior rule by prepending an exclamation point (
-                        <code css={tw`font-mono bg-black rounded py-px px-1`}>!</code>).
+                        <Trans
+                            ns={'server'}
+                            i18nKey={'filesPage.pteroignoreNotice'}
+                            components={{
+                                pteroignore: <code css={tw`font-mono bg-black rounded py-px px-1`} />,
+                                wildcard: <code css={tw`font-mono bg-black rounded py-px px-1`} />,
+                                negation: <code css={tw`font-mono bg-black rounded py-px px-1`} />,
+                            }}
+                        />
                     </p>
                 </div>
             ) : null}
@@ -169,13 +175,13 @@ export default () => {
                 {action === 'edit' ? (
                     <Can action={'file.update'}>
                         <Button css={tw`flex-1 sm:flex-none`} onClick={() => save()}>
-                            Save Content
+                            {t('filesPage.saveContent') as string}
                         </Button>
                     </Can>
                 ) : (
                     <Can action={'file.create'}>
                         <Button css={tw`flex-1 sm:flex-none`} onClick={() => setModalVisible(true)}>
-                            Create File
+                            {t('filesPage.createFile') as string}
                         </Button>
                     </Can>
                 )}

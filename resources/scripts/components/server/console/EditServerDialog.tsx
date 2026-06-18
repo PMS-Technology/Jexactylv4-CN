@@ -7,6 +7,7 @@ import SpinnerOverlay from '@/elements/SpinnerOverlay';
 import { PencilAltIcon } from '@heroicons/react/outline';
 import { Field as FormikField, Form, useFormikContext, FormikHelpers, Formik } from 'formik';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import Field from '@/elements/Field';
 import { ServerContext } from '@/state/server';
@@ -25,22 +26,23 @@ interface Values {
 }
 
 const RenameServerForm = () => {
+    const { t } = useTranslation('server');
     const { isSubmitting } = useFormikContext<Values>();
 
     return (
         <>
             <SpinnerOverlay visible={isSubmitting} />
             <Form css={tw`mb-0`}>
-                <Field id={'name'} name={'name'} label={'Server Name'} type={'text'} />
+                <Field id={'name'} name={'name'} label={t('consolePage.serverName') as string} type={'text'} />
                 <div css={tw`mt-6`}>
-                    <Label>Server Description</Label>
+                    <Label>{t('consolePage.serverDescription') as string}</Label>
                     <FormikFieldWrapper name={'description'}>
                         <FormikField as={Textarea} name={'description'} rows={3} />
                     </FormikFieldWrapper>
                 </div>
                 <div css={tw`mt-6 flex items-center justify-between`}>
                     <ReinstallServerDialog />
-                    <Button type={'submit'}>Save</Button>
+                    <Button type={'submit'}>{t('consolePage.save') as string}</Button>
                 </div>
             </Form>
         </>
@@ -48,6 +50,7 @@ const RenameServerForm = () => {
 };
 
 export default () => {
+    const { t } = useTranslation('server');
     const [open, setOpen] = useState<boolean>(false);
     const server = ServerContext.useStoreState(state => state.server.data!);
     const setServer = ServerContext.useStoreActions(actions => actions.server.setServer);
@@ -66,7 +69,7 @@ export default () => {
 
     return (
         <>
-            <Dialog open={open} onClose={() => setOpen(false)} title={'Edit Server Details'}>
+            <Dialog open={open} onClose={() => setOpen(false)} title={t('consolePage.editServer') as string}>
                 <Can action={'settings.rename'}>
                     <Formik
                         onSubmit={submit}

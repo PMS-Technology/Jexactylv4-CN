@@ -1,5 +1,6 @@
 import FlashMessageRender from '@/elements/FlashMessageRender';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFlashKey } from '@/plugins/useFlash';
 import { Link } from 'react-router-dom';
 import PaginationFooter from '@/elements/table/PaginationFooter';
@@ -14,6 +15,7 @@ import { ActivityLogFilters, useActivityLogs } from '@/api/routes/admin/activity
 import { useStoreState } from '@/state/hooks';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { hash } = useLocationHash();
     const { clearAndAddHttpError } = useFlashKey('account');
     const [filters, setFilters] = useState<ActivityLogFilters>({ page: 1, sorts: { timestamp: -1 } });
@@ -44,7 +46,7 @@ export default () => {
                         className={classNames(btnStyles.button, btnStyles.text, 'w-full sm:w-auto')}
                         onClick={() => setFilters(value => ({ ...value, filters: {} }))}
                     >
-                        Clear Filters <XCircleIcon className={'ml-2 h-4 w-4'} />
+                        {t('overview.clearFilters') as string} <XCircleIcon className={'ml-2 h-4 w-4'} />
                     </Link>
                 </div>
             )}
@@ -67,7 +69,7 @@ export default () => {
                             ))}
                         </>
                     ) : (
-                        <p className={'text-center text-white'}>There are no admin logs available at this time.</p>
+                        <p className={'text-center text-white'}>{t('overview.noAdminLogs') as string}</p>
                     )}
                 </div>
             )}

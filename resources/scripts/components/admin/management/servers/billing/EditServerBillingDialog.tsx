@@ -7,6 +7,7 @@ import { CashIcon, ClockIcon, PencilAltIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
 import { Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Category, Product } from '@definitions/admin';
 import Spinner from '@/elements/Spinner';
 import FlashMessageRender from '@/elements/FlashMessageRender';
@@ -24,6 +25,7 @@ const localToUTC = (localStr: string): Date => {
 type LoadingState = 'loading' | 'ready';
 
 export default ({ server }: { server: Server }) => {
+    const { t } = useTranslation('admin');
     const billing = useStoreState(state => state.everest.data!.billing);
 
     const [open, setOpen] = useState<boolean>(false);
@@ -98,7 +100,7 @@ export default ({ server }: { server: Server }) => {
 
     return (
         <>
-            <Dialog open={open} onClose={() => setOpen(false)} title={'Edit Server Billing'}>
+            <Dialog open={open} onClose={() => setOpen(false)} title={t('servers.editServerBilling') as string}>
                 <FlashMessageRender byKey={'admin:server:billing'} />
                 <Formik onSubmit={submit} initialValues={{}}>
                     <Form>
@@ -107,10 +109,10 @@ export default ({ server }: { server: Server }) => {
                             <div>
                                 <div className={'flex'}>
                                     <Label>
-                                        <CashIcon className={'w-4 inline-flex'} /> Billing Status
+                                        <CashIcon className={'w-4 inline-flex'} /> {t('servers.billingStatus') as string}
                                     </Label>
                                     <span className={'ml-2 italic text-gray-400 text-sm'}>
-                                        Should this server be billed automatically?
+                                        {t('servers.shouldServerBeBilled') as string}
                                     </span>
                                 </div>
                                 <button
@@ -121,7 +123,7 @@ export default ({ server }: { server: Server }) => {
                                         'rounded-l py-3 px-6 font-bold text-white',
                                     )}
                                 >
-                                    Enabled
+                                    {t('servers.enabled') as string}
                                 </button>
                                 <button
                                     type="button"
@@ -131,7 +133,7 @@ export default ({ server }: { server: Server }) => {
                                         'rounded-r py-3 px-6 font-bold text-white',
                                     )}
                                 >
-                                    Disabled
+                                    {t('servers.disabled') as string}
                                 </button>
                             </div>
 
@@ -141,10 +143,10 @@ export default ({ server }: { server: Server }) => {
                                     <div>
                                         <div className={'flex'}>
                                             <Label>
-                                                <CashIcon className={'w-4 inline-flex'} /> Billing Category
+                                                <CashIcon className={'w-4 inline-flex'} /> {t('servers.billingCategory') as string}
                                             </Label>
                                             <span className={'ml-2 italic text-gray-400 text-sm'}>
-                                                Select the category for billing.
+                                                {t('servers.selectCategoryForBilling') as string}
                                             </span>
                                         </div>
                                         {loadingState === 'loading' ? (
@@ -167,10 +169,10 @@ export default ({ server }: { server: Server }) => {
                                     <div>
                                         <div className={'flex'}>
                                             <Label>
-                                                <CashIcon className={'w-4 inline-flex'} /> Billing Product
+                                                <CashIcon className={'w-4 inline-flex'} /> {t('servers.billingProduct') as string}
                                             </Label>
                                             <span className={'ml-2 italic text-gray-400 text-sm'}>
-                                                Select the product to assign to this server.
+                                                {t('servers.selectProductForServer') as string}
                                             </span>
                                         </div>
                                         {loadingState === 'loading' ? (
@@ -198,10 +200,10 @@ export default ({ server }: { server: Server }) => {
                             <div>
                                 <div className={'flex'}>
                                     <Label>
-                                        <ClockIcon className={'w-4 inline-flex'} /> Renewal Date
+                                        <ClockIcon className={'w-4 inline-flex'} /> {t('servers.renewalDate') as string}
                                     </Label>
                                     <span className={'ml-2 italic text-gray-400 text-sm'}>
-                                        Adjust when this server will renew.
+                                        {t('servers.adjustRenewal') as string}
                                     </span>
                                 </div>
                                 <Input
@@ -213,7 +215,7 @@ export default ({ server }: { server: Server }) => {
 
                             <div className={'ml-auto'}>
                                 <Button type="button" onClick={submit}>
-                                    Save Changes
+                                    {t('servers.saveChanges') as string}
                                 </Button>
                             </div>
                         </div>
@@ -222,7 +224,7 @@ export default ({ server }: { server: Server }) => {
             </Dialog>
 
             <Button size={Button.Sizes.Small} onClick={() => setOpen(true)}>
-                Edit <PencilAltIcon className={'ml-1 w-4'} />
+                {t('servers.edit') as string} <PencilAltIcon className={'ml-1 w-4'} />
             </Button>
         </>
     );

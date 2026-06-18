@@ -4,6 +4,7 @@ import type { FormikHelpers } from 'formik';
 import { Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { number, object, string } from 'yup';
 
@@ -51,6 +52,7 @@ export interface Params {
 }
 
 export const InformationContainer = ({ title, initialValues, children, onSubmit }: Params) => {
+    const { t } = useTranslation('admin');
     const submit = (values: Values, helpers: FormikHelpers<Values>) => {
         onSubmit(values, helpers);
     };
@@ -84,29 +86,29 @@ export const InformationContainer = ({ title, initialValues, children, onSubmit 
 
                         <Form css={tw`mb-0`}>
                             <div>
-                                <Field id={'name'} name={'name'} label={'Name'} type={'text'} />
+                                <Field id={'name'} name={'name'} label={t('databases.name') as string} type={'text'} />
                             </div>
 
                             <div css={tw`md:w-full md:flex md:flex-row mt-6`}>
                                 <div css={tw`md:w-full md:flex md:flex-col md:mr-4 mt-6 md:mt-0`}>
-                                    <Field id={'host'} name={'host'} label={'Host'} type={'text'} />
+                                    <Field id={'host'} name={'host'} label={t('databases.host') as string} type={'text'} />
                                 </div>
 
                                 <div css={tw`md:w-full md:flex md:flex-col md:ml-4 mt-6 md:mt-0`}>
-                                    <Field id={'port'} name={'port'} label={'Port'} type={'text'} />
+                                    <Field id={'port'} name={'port'} label={t('databases.port') as string} type={'text'} />
                                 </div>
                             </div>
 
                             <div css={tw`md:w-full md:flex md:flex-row mt-6`}>
                                 <div css={tw`md:w-full md:flex md:flex-col md:mr-4 mt-6 md:mt-0`}>
-                                    <Field id={'username'} name={'username'} label={'Username'} type={'text'} />
+                                    <Field id={'username'} name={'username'} label={t('databases.username') as string} type={'text'} />
                                 </div>
 
                                 <div css={tw`md:w-full md:flex md:flex-col md:ml-4 mt-6 md:mt-0`}>
                                     <Field
                                         id={'password'}
                                         name={'password'}
-                                        label={'Password'}
+                                        label={t('databases.password') as string}
                                         type={'password'}
                                         placeholder={'••••••••'}
                                     />
@@ -117,7 +119,7 @@ export const InformationContainer = ({ title, initialValues, children, onSubmit 
                                 {children}
                                 <div css={tw`flex ml-auto`}>
                                     <Button type="submit" disabled={isSubmitting || !isValid}>
-                                        Save Changes
+                                        {t('databases.saveChanges') as string}
                                     </Button>
                                 </div>
                             </div>
@@ -130,6 +132,7 @@ export const InformationContainer = ({ title, initialValues, children, onSubmit 
 };
 
 const EditInformationContainer = () => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -157,7 +160,7 @@ const EditInformationContainer = () => {
 
     return (
         <InformationContainer
-            title={'Edit Database'}
+            title={t('databases.editDatabase') as string}
             initialValues={{
                 name: database.name,
                 host: database.host,
@@ -175,6 +178,7 @@ const EditInformationContainer = () => {
 };
 
 const DatabaseEditContainer = () => {
+    const { t } = useTranslation('admin');
     const params = useParams<'id'>();
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -210,7 +214,7 @@ const DatabaseEditContainer = () => {
     }
 
     return (
-        <AdminContentBlock title={'Database - ' + database.name}>
+        <AdminContentBlock title={t('databases.pageTitle', { name: database.name })}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
                     <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{database.name}</h2>

@@ -1,6 +1,7 @@
 import type { Actions } from 'easy-peasy';
 import { useStoreActions } from 'easy-peasy';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import deleteEgg from '@/api/routes/admin/eggs/deleteEgg';
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export default ({ eggId, onDeleted }: Props) => {
+    const { t } = useTranslation('admin');
     const [visible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -44,13 +46,13 @@ export default ({ eggId, onDeleted }: Props) => {
         <>
             <ConfirmationModal
                 visible={visible}
-                title={'Delete egg?'}
-                buttonText={'Yes, delete egg'}
+                title={t('nests.deleteEgg') as string}
+                buttonText={t('nests.yesDeleteEgg') as string}
                 onConfirmed={onDelete}
                 showSpinnerOverlay={loading}
                 onModalDismissed={() => setVisible(false)}
             >
-                Are you sure you want to delete this egg? You may only delete an egg with no servers using it.
+                {t('nests.deleteEggConfirmation') as string}
             </ConfirmationModal>
 
             <Button.Danger type="button" shape={Shape.IconSquare} onClick={() => setVisible(true)}>

@@ -1,4 +1,5 @@
 import { useContext, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { type Subuser } from '@definitions/server';
 import { Form, Formik } from 'formik';
 import { array, object, string } from 'yup';
@@ -28,6 +29,7 @@ interface Values {
 }
 
 const EditSubuserModal = ({ subuser }: Props) => {
+    const { t } = useTranslation('server');
     const ref = useRef<HTMLHeadingElement>(null);
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
     const appendSubuser = ServerContext.useStoreActions(actions => actions.subusers.appendSubuser);
@@ -106,12 +108,12 @@ const EditSubuserModal = ({ subuser }: Props) => {
                 <div css={tw`flex justify-between`}>
                     <h2 css={tw`text-2xl`} ref={ref}>
                         {subuser
-                            ? `${canEditUser ? 'Modify' : 'View'} permissions for ${subuser.email}`
-                            : 'Create new subuser'}
+                            ? (canEditUser ? (t('usersPage.modifyPermissions', { email: subuser.email }) as string) : (t('usersPage.viewPermissions', { email: subuser.email }) as string))
+                            : (t('usersPage.createSubuser') as string)}
                     </h2>
                     <div>
                         <Button type={'submit'} css={tw`w-full sm:w-auto`}>
-                            {subuser ? 'Save' : 'Invite User'}
+                            {subuser ? (t('usersPage.save') as string) : (t('usersPage.inviteUser') as string)}
                         </Button>
                     </div>
                 </div>
@@ -119,8 +121,7 @@ const EditSubuserModal = ({ subuser }: Props) => {
                 {!isRootAdmin && loggedInPermissions[0] !== '*' && (
                     <div css={tw`mt-4 pl-4 py-2 border-l-4 border-cyan-400`}>
                         <p css={tw`text-sm text-neutral-300`}>
-                            Only permissions which your account is currently assigned may be selected when creating or
-                            modifying other users.
+                            {t('usersPage.permissionNote') as string}
                         </p>
                     </div>
                 )}
@@ -128,10 +129,8 @@ const EditSubuserModal = ({ subuser }: Props) => {
                     <div css={tw`mt-6`}>
                         <Field
                             name={'email'}
-                            label={'User Email'}
-                            description={
-                                'Enter the email address of the user you wish to invite as a subuser for this server.'
-                            }
+                            label={t('usersPage.email') as string}
+                            description={t('usersPage.emailDesc') as string}
                         />
                     </div>
                 )}
@@ -160,7 +159,7 @@ const EditSubuserModal = ({ subuser }: Props) => {
                 <Can action={subuser ? 'user.update' : 'user.create'}>
                     <div css={tw`pb-6 flex justify-end`}>
                         <Button type={'submit'} css={tw`w-full sm:w-auto`}>
-                            {subuser ? 'Save' : 'Invite User'}
+                            {subuser ? (t('usersPage.save') as string) : (t('usersPage.inviteUser') as string)}
                         </Button>
                     </div>
                 </Can>

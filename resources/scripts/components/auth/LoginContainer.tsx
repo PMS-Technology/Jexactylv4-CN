@@ -3,6 +3,7 @@ import type { FormikHelpers } from 'formik';
 import { Formik } from 'formik';
 import { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Reaptcha from 'reaptcha';
 import tw from 'twin.macro';
 import { object, string } from 'yup';
@@ -23,6 +24,7 @@ interface Values {
 }
 
 function LoginContainer() {
+    const { t } = useTranslation('auth');
     const ref = useRef<Reaptcha>(null);
     const token = useRef('');
 
@@ -61,8 +63,6 @@ function LoginContainer() {
     const onSubmit = (values: Values, { setSubmitting }: FormikHelpers<Values>) => {
         clearFlashes();
 
-        // If there is no token in the state yet, request the token and then abort this submit request
-        // since it will be re-submitted when the recaptcha data is returned by the component.
         if (recaptchaEnabled && !token.current) {
             ref.current!.execute().catch(error => {
                 console.error(error);
@@ -100,29 +100,29 @@ function LoginContainer() {
             onSubmit={onSubmit}
             initialValues={{ username: '', password: '' }}
             validationSchema={object().shape({
-                username: string().required('A username or email must be provided.'),
-                password: string().required('Please enter your account password.'),
+                username: string().required(t('login.usernameRequired') as string),
+                password: string().required(t('login.passwordRequired') as string),
             })}
         >
             {({ isSubmitting, setSubmitting, submitForm }) => (
-                <LoginFormContainer title={`Welcome to ${appName}`}>
+                <LoginFormContainer title={t('login.title', { appName }) as string}>
                     <Field
                         icon={faAt}
                         type={'text'}
-                        label={'Username or Email'}
+                        label={t('login.usernameOrEmail') as string}
                         name={'username'}
                         disabled={isSubmitting}
                         placeholder={'user@jexpanel.com'}
                     />
                     <div css={tw`mt-6`}>
                         <Label>
-                            Password
+                            {t('login.password') as string}
                             <Link
                                 to={'/auth/password'}
                                 tabIndex={-1}
                                 className={'ml-1 text-green-400 hover:text-green-200 duration-300 text-xs'}
                             >
-                                Forgot Password?
+                                {t('login.forgotPassword') as string}
                             </Link>
                         </Label>
                         <Field
@@ -141,7 +141,7 @@ function LoginContainer() {
                             size={Button.Sizes.Large}
                             disabled={isSubmitting}
                         >
-                            Login
+                            {t('login.loginButton') as string}
                         </Button>
                     </div>
                     {recaptchaEnabled && (
@@ -160,17 +160,17 @@ function LoginContainer() {
                         />
                     )}
                     {(modules.discord.enabled || modules.google.enabled || registration) && (
-                        <div className={'w-full text-center my-3 text-gray-400'}>OR</div>
+                        <div className={'w-full text-center my-3 text-gray-400'}>{t('login.or') as string}</div>
                     )}
                     <div className={'mt-4 w-full grid gap-4 grid-cols-2'}>
                         {modules.discord.enabled && (
                             <Button.Info type={'button'} onClick={() => useOauth('discord')} size={Button.Sizes.Small}>
-                                <FontAwesomeIcon icon={faDiscord} className={'mr-2 my-auto'} /> Use Discord SSO
+                                <FontAwesomeIcon icon={faDiscord} className={'mr-2 my-auto'} /> {t('login.useDiscordSSO') as string}
                             </Button.Info>
                         )}
                         {modules.google.enabled && (
                             <Button.Text type={'button'} onClick={() => useOauth('google')} size={Button.Sizes.Small}>
-                                <FontAwesomeIcon icon={faGoogle} className={'mr-2 my-auto'} /> Use Google SSO
+                                <FontAwesomeIcon icon={faGoogle} className={'mr-2 my-auto'} /> {t('login.useGoogleSSO') as string}
                             </Button.Text>
                         )}
                         {registration && (
@@ -179,7 +179,7 @@ function LoginContainer() {
                                 onClick={() => navigate('/auth/register')}
                                 size={Button.Sizes.Small}
                             >
-                                <FontAwesomeIcon icon={faEnvelope} className={'mr-2 my-auto'} /> Register with Email
+                                <FontAwesomeIcon icon={faEnvelope} className={'mr-2 my-auto'} /> {t('login.registerWithEmail') as string}
                             </Button.Text>
                         )}
                     </div>

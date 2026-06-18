@@ -1,5 +1,6 @@
 import { AdjustmentsIcon, ChipIcon, LinkIcon } from '@heroicons/react/outline';
 import { Route, Routes } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import AdminContentBlock from '@/elements/AdminContentBlock';
@@ -10,17 +11,18 @@ import { useStoreState } from '@/state/hooks';
 import ModeSettings from './ModeSettings';
 
 const SettingsRouter = () => {
+    const { t } = useTranslation('admin');
     const appName = useStoreState(state => state.settings.data!.name);
 
     return (
-        <AdminContentBlock title={'Settings'}>
+        <AdminContentBlock title={t('settings.settings') as string}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>Settings</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{t('settings.settings') as string}</h2>
                     <p
                         css={tw`hidden lg:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        Configure and manage settings for {appName}.
+                        {t('settings.configureFor', { name: appName }) as string}
                     </p>
                 </div>
             </div>
@@ -28,13 +30,13 @@ const SettingsRouter = () => {
             <FlashMessageRender byKey={'admin:settings'} css={tw`mb-4`} />
 
             <SubNavigation>
-                <SubNavigationLink to="/admin/settings" name="Core" base>
+                <SubNavigationLink to="/admin/settings" name={t('settings.core') as string} base>
                     <ChipIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to="/admin/settings/mode" name="Modes">
+                <SubNavigationLink to="/admin/settings/mode" name={t('settings.modes') as string}>
                     <AdjustmentsIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to="/admin/settings/webhooks" name="Webhooks">
+                <SubNavigationLink to="/admin/settings/webhooks" name={t('settings.webhooks') as string}>
                     <LinkIcon />
                 </SubNavigationLink>
             </SubNavigation>

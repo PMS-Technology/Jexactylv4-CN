@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ServerContext } from '@/state/server';
 import Modal from '@/elements/Modal';
 import tw from 'twin.macro';
@@ -15,6 +16,7 @@ interface Values {
 }
 
 const GSLTokenModalFeature = () => {
+    const { t } = useTranslation('server');
     const [visible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -75,25 +77,24 @@ const GSLTokenModalFeature = () => {
             >
                 <FlashMessageRender key={'feature:gslToken'} css={tw`mb-4`} />
                 <Form>
-                    <h2 css={tw`text-2xl mb-4 text-neutral-100`}>Invalid GSL token!</h2>
+                    <h2 css={tw`text-2xl mb-4 text-neutral-100`}>{t('featuresPage.invalidGslToken') as string}</h2>
                     <p css={tw`mt-4`}>
-                        It seems like your Gameserver Login Token (GSL token) is invalid or has expired.
+                        {t('featuresPage.gslTokenExpired') as string}
                     </p>
                     <p css={tw`mt-4`}>
-                        You can either generate a new one and enter it below or leave the field blank to remove it
-                        completely.
+                        {t('featuresPage.gslTokenNew') as string}
                     </p>
                     <div css={tw`sm:flex items-center mt-4`}>
                         <Field
                             name={'gslToken'}
-                            label={'GSL Token'}
-                            description={'Visit https://steamcommunity.com/dev/managegameservers to generate a token.'}
+                            label={t('featuresPage.gslToken') as string}
+                            description={t('featuresPage.gslTokenDesc') as string}
                             autoFocus
                         />
                     </div>
                     <div css={tw`mt-8 sm:flex items-center justify-end`}>
                         <Button type={'submit'} css={tw`mt-4 sm:mt-0 sm:ml-4 w-full sm:w-auto`}>
-                            Update GSL Token
+                            {t('featuresPage.updateGslToken') as string}
                         </Button>
                     </div>
                 </Form>

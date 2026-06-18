@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'exceptions' => [
+        'subuser_limit' => 'You cannot add any more subusers to this server.',
+    ],
     'permissions' => [
         'websocket_*' => 'Allows access to the websocket for this server.',
         'control_console' => 'Allows the user to send data to the server console.',

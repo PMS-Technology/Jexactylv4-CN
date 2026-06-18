@@ -14,6 +14,7 @@ import AdminTable, {
 import CopyOnClick from '@/elements/CopyOnClick';
 import tw from 'twin.macro';
 import { useContext, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import useFlash from '@/plugins/useFlash';
 import { formatDistanceToNowStrict } from 'date-fns';
 import Spinner from '@/elements/Spinner';
@@ -63,6 +64,7 @@ function getColor(index: number) {
 }
 
 function OrderTable({ minimal }: { minimal?: boolean }) {
+    const { t } = useTranslation('admin');
     const { data: orders, error } = useGetOrders();
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { setSort, sort, setPage, sortDirection, setFilters } = useContext(OrderContext);
@@ -97,31 +99,31 @@ function OrderTable({ minimal }: { minimal?: boolean }) {
                                 <TableHead>
                                     {!minimal && (
                                         <TableHeader
-                                            name={'ID'}
+                                            name={t('billingModule.id')}
                                             direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                             onClick={() => setSort('id')}
                                         />
                                     )}
                                     <TableHeader
-                                        name={'Total Price'}
+                                        name={t('billingModule.totalPrice')}
                                         direction={sort === 'total' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('total')}
                                     />
-                                    {!minimal && <TableHeader name={'Description'} />}
+                                    {!minimal && <TableHeader name={t('billingModule.description')} />}
                                     <TableHeader
-                                        name={'Created At'}
+                                        name={t('billingModule.createdAt')}
                                         direction={sort === 'created_at' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('created_at')}
                                     />
-                                    <TableHeader name={'Payment State'} />
+                                    <TableHeader name={t('billingModule.paymentState')} />
                                     <TableHeader
-                                        name={'Order Type'}
+                                        name={t('billingModule.orderType')}
                                         direction={sort === 'type' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('type')}
                                     />
                                     {!minimal && (
                                         <TableHeader
-                                            name={'Threat Index'}
+                                            name={t('billingModule.threatIndex')}
                                             direction={sort === 'threat_index' ? (sortDirection ? 1 : 2) : null}
                                             onClick={() => setSort('threat_index')}
                                         />
@@ -179,7 +181,7 @@ function OrderTable({ minimal }: { minimal?: boolean }) {
                                                             {order.threat_index < 0 ? (
                                                                 <span className={'text-xs inline-flex my-1'}>
                                                                     <Spinner size={'small'} />
-                                                                    &nbsp;Processing
+                                                                    &nbsp;{t('billingModule.processing')}
                                                                 </span>
                                                             ) : (
                                                                 `${order.threat_index}/100`

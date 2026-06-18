@@ -62,7 +62,7 @@ class FreeProductController extends ClientApiController
             if ($server->renewal_date->diffInDays(now()) <= 7) {
                 $order->delete();
 
-                throw new DisplayException('You cannot renew a free server more than 7 days in advance.');
+                throw new DisplayException(trans('exceptions.billing.free_renewal_too_early'));
             }
 
             $this->renewalService->handle($server);

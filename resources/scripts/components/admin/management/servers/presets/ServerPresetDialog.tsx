@@ -6,6 +6,7 @@ import Label from '@/elements/Label';
 import { useTypedForm } from '@/plugins/useTypedForm';
 import { CheckCircleIcon, ChevronLeftIcon, ChevronRightIcon, PencilAltIcon, PlusIcon } from '@heroicons/react/outline';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import NestEggSelect from '@admin/management/servers/presets/NestEggSelect';
 import { createServerPreset, updateServerPreset } from '@/api/routes/admin/servers/presets';
 import SpinnerOverlay from '@/elements/SpinnerOverlay';
@@ -23,58 +24,67 @@ export interface NameSelectProps {
     update: <K extends keyof ServerPresetValues>(key: K, value: ServerPresetValues[K]) => void;
 }
 
-const NameSelect = ({ form, update }: NameSelectProps) => (
-    <div className="mb-8 space-y-2">
-        <Input
-            name={'name'}
-            value={form.name}
-            onChange={e => update('name', e.target.value)}
-            placeholder={'Preset Name'}
-        />
-        <Input
-            name="description"
-            value={form.description}
-            onChange={e => update('description', e.target.value)}
-            placeholder="Preset Description"
-        />
-    </div>
-);
+const NameSelect = ({ form, update }: NameSelectProps) => {
+    const { t } = useTranslation('admin');
 
-const ResourceSelect = ({ form, update }: NameSelectProps) => (
-    <div className="mb-8 space-y-2">
-        <div className={'grid lg:grid-cols-3 gap-4'}>
-            <div>
-                <Label>CPU Limit (%)</Label>
-                <Input
-                    name={'cpu'}
-                    type={'number'}
-                    value={form.cpu}
-                    onChange={e => update('cpu', Number(e.target.value))}
-                />
-            </div>
-            <div>
-                <Label>Memory Limit (MiB)</Label>
-                <Input
-                    name={'memory'}
-                    type={'number'}
-                    value={form.memory}
-                    onChange={e => update('memory', Number(e.target.value))}
-                />
-            </div>
-            <div>
-                <Label>Disk Limit (MiB)</Label>
-                <Input
-                    name={'disk'}
-                    type={'number'}
-                    value={form.disk}
-                    onChange={e => update('disk', Number(e.target.value))}
-                />
+    return (
+        <div className="mb-8 space-y-2">
+            <Input
+                name={'name'}
+                value={form.name}
+                onChange={e => update('name', e.target.value)}
+                placeholder={t('servers.presetName') as string}
+            />
+            <Input
+                name="description"
+                value={form.description}
+                onChange={e => update('description', e.target.value)}
+                placeholder={t('servers.presetDescription') as string}
+            />
+        </div>
+    );
+};
+
+const ResourceSelect = ({ form, update }: NameSelectProps) => {
+    const { t } = useTranslation('admin');
+
+    return (
+        <div className="mb-8 space-y-2">
+            <div className={'grid lg:grid-cols-3 gap-4'}>
+                <div>
+                    <Label>{t('servers.cpuLimitPercent') as string}</Label>
+                    <Input
+                        name={'cpu'}
+                        type={'number'}
+                        value={form.cpu}
+                        onChange={e => update('cpu', Number(e.target.value))}
+                    />
+                </div>
+                <div>
+                    <Label>{t('servers.memoryLimitMib') as string}</Label>
+                    <Input
+                        name={'memory'}
+                        type={'number'}
+                        value={form.memory}
+                        onChange={e => update('memory', Number(e.target.value))}
+                    />
+                </div>
+                <div>
+                    <Label>{t('servers.diskLimitMib') as string}</Label>
+                    <Input
+                        name={'disk'}
+                        type={'number'}
+                        value={form.disk}
+                        onChange={e => update('disk', Number(e.target.value))}
+                    />
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 export default function ServerPresetDialog({ preset }: { preset?: ServerPreset }) {
+    const { t } = useTranslation('admin');
     const [page, setPage] = useState<number>(0);
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -158,7 +168,7 @@ export default function ServerPresetDialog({ preset }: { preset?: ServerPreset }
                     )}
                     {page === 2 && (
                         <Button.Success size={Button.Sizes.Small} onClick={submit}>
-                            <CheckCircleIcon className="w-4 h-4 mr-1" /> Finish
+                            <CheckCircleIcon className="w-4 h-4 mr-1" /> {t('servers.finish') as string}
                         </Button.Success>
                     )}
                 </div>
@@ -172,11 +182,11 @@ export default function ServerPresetDialog({ preset }: { preset?: ServerPreset }
             >
                 {preset ? (
                     <>
-                        <PencilAltIcon className={'w-5 h-5 mr-1'} /> Update
+                        <PencilAltIcon className={'w-5 h-5 mr-1'} /> {t('servers.update') as string}
                     </>
                 ) : (
                     <>
-                        <PlusIcon className={'w-5 h-5 mr-1'} /> Create
+                        <PlusIcon className={'w-5 h-5 mr-1'} /> {t('servers.create') as string}
                     </>
                 )}
             </Button>

@@ -10,6 +10,7 @@ import { ApplicationStore } from '@/state';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import tw from 'twin.macro';
+import { useTranslation } from 'react-i18next';
 import { ip } from '@/lib/formatters';
 import { Dialog, DialogProps } from '@/elements/dialog';
 import { Server } from '@definitions/server';
@@ -46,6 +47,7 @@ const SearchWatcher = () => {
 };
 
 export default ({ ...props }: Props) => {
+    const { t } = useTranslation('dashboard');
     const isAdmin = useStoreState(state => state.user.data!.rootAdmin);
     const [servers, setServers] = useState<Server[]>([]);
     const { clearAndAddHttpError, clearFlashes } = useStoreActions(
@@ -55,7 +57,6 @@ export default ({ ...props }: Props) => {
     const search = debounce(({ term }: Values, { setSubmitting }: FormikHelpers<Values>) => {
         clearFlashes('search');
 
-        // if (ref.current) ref.current.focus();
         getServers({ query: term, type: isAdmin ? 'admin-all' : undefined })
             .then(servers => setServers(servers.items.filter((_, index) => index < 5)))
             .catch(error => {
@@ -69,7 +70,7 @@ export default ({ ...props }: Props) => {
         <Formik
             onSubmit={search}
             validationSchema={object().shape({
-                term: string().min(3, 'Please enter at least three characters to begin searching.'),
+                term: string().min(3, t('searchMinChars') as string),
             })}
             initialValues={{ term: '' } as Values}
         >
@@ -78,8 +79,8 @@ export default ({ ...props }: Props) => {
                     <Form>
                         <FormikFieldWrapper
                             name={'term'}
-                            label={'Search term'}
-                            description={'Enter a server name, uuid, or allocation to begin searching.'}
+                            label={t('searchTerm') as string}
+                            description={t('searchDescription') as string}
                         >
                             <SearchWatcher />
                             <InputSpinner visible={isSubmitting}>

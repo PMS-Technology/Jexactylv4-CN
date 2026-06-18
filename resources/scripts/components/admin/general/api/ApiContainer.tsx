@@ -1,4 +1,5 @@
 import tw from 'twin.macro';
+import { useTranslation } from 'react-i18next';
 import AdminTable, {
     ContentWrapper,
     Pagination,
@@ -22,6 +23,7 @@ import { useStoreState } from '@/state/hooks';
 import { PlusIcon } from '@heroicons/react/outline';
 
 function ApiContainer() {
+    const { t } = useTranslation('admin');
     const { data: apiKeys } = useGetApiKeys();
     const { colors } = useStoreState(state => state.theme.data!);
     const { setPage, setFilters, sort, setSort, sortDirection } = useContext(ApiContext);
@@ -41,7 +43,7 @@ function ApiContainer() {
         <>
             <div css={tw`flex ml-auto pl-4 mb-2`}>
                 <Link to={'/admin/api/new'}>
-                    <Button icon={PlusIcon}>New API Key</Button>
+                    <Button icon={PlusIcon}>{t('api.createApiKey') as string}</Button>
                 </Link>
             </div>
             <FlashMessageRender byKey={'api'} className={'my-4'} />
@@ -57,16 +59,16 @@ function ApiContainer() {
                                         onClick={() => setSort('id')}
                                     />
                                     <TableHeader
-                                        name={'Key Identifier'}
+                                        name={t('api.identifier') as string}
                                         direction={sort === 'identifier' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('identifier')}
                                     />
                                     <TableHeader
-                                        name={'Last Used'}
+                                        name={t('api.lastUsed') as string}
                                         direction={sort === 'last_used_at' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('last_used_at')}
                                     />
-                                    <TableHeader name={'Created At'} />
+                                    <TableHeader name={t('api.createdAt') as string} />
                                     <TableHeader />
                                 </TableHead>
                                 <TableBody>
@@ -90,9 +92,9 @@ function ApiContainer() {
                                                     </div>
                                                 </td>
                                                 <td css={tw`px-6 text-sm text-neutral-200 text-left whitespace-nowrap`}>
-                                                    {key.last_used_at && new Date(key.last_used_at).getTime() > 0
-                                                        ? format(key.last_used_at, 'MMM do, yyyy h:mma')
-                                                        : 'Not Used'}
+                                                        {key.last_used_at && new Date(key.last_used_at).getTime() > 0
+                                                            ? format(key.last_used_at, 'MMM do, yyyy h:mma')
+                                                            : (t('api.never') as string)}
                                                 </td>
                                                 <td css={tw`px-6 text-sm text-neutral-200 text-left whitespace-nowrap`}>
                                                     {Math.abs(differenceInHours(key.created_at!, new Date())) > 48

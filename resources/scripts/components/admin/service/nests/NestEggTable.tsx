@@ -1,5 +1,6 @@
 import { useContext, useEffect } from 'react';
 import { NavLink, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import type { Filters } from '@/api/routes/admin/nests/getEggs';
 import getEggs, { Context as EggsContext } from '@/api/routes/admin/nests/getEggs';
@@ -19,6 +20,7 @@ import useFlash from '@/plugins/useFlash';
 import { useStoreState } from '@/state/hooks';
 
 const EggsTable = () => {
+    const { t } = useTranslation('admin');
     const params = useParams<'nestId' | 'id'>();
 
     const { setPage, setFilters, sort, setSort, sortDirection } = useContext(EggsContext);
@@ -56,16 +58,16 @@ const EggsTable = () => {
                         <table css={tw`w-full table-auto`}>
                             <TableHead>
                                 <TableHeader
-                                    name={'ID'}
+                                    name={t('nests.id') as string}
                                     direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('id')}
                                 />
                                 <TableHeader
-                                    name={'Name'}
+                                    name={t('nests.name') as string}
                                     direction={sort === 'name' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('name')}
                                 />
-                                <TableHeader name={'Description'} />
+                                <TableHeader name={t('nests.description') as string} />
                             </TableHead>
 
                             <TableBody>

@@ -20,15 +20,16 @@ const account: RouteDefinition[] = [
     /**
      * Account - General Routes
      */
-    route('', AccountOverviewContainer, { name: 'Account', end: true, icon: Icon.UserIcon }),
-    route('api', AccountApiContainer, { name: 'API Credentials', icon: Icon.CodeIcon }),
-    route('ssh', AccountSSHContainer, { name: 'SSH Keys', icon: Icon.TerminalIcon }),
+    route('', AccountOverviewContainer, { name: 'Account', nameKey: 'nav.account', end: true, icon: Icon.UserIcon }),
+    route('api', AccountApiContainer, { name: 'API Credentials', nameKey: 'nav.apiCredentials', icon: Icon.CodeIcon }),
+    route('ssh', AccountSSHContainer, { name: 'SSH Keys', nameKey: 'nav.sshKeys', icon: Icon.TerminalIcon }),
 
     /**
      * Account - Ticket Routes
      */
     route('tickets', TicketContainer, {
         name: 'Tickets',
+        nameKey: 'nav.tickets',
         icon: Icon.TicketIcon,
         condition: flags => flags.tickets.enabled,
     }),
@@ -39,12 +40,14 @@ const account: RouteDefinition[] = [
      */
     route('billing/order', ProductsContainer, {
         name: 'Billing',
+        nameKey: 'nav.billing',
         icon: Icon.CashIcon,
         condition: flags => flags.billing.enabled,
     }),
     route('billing/order/:id', OrderContainer),
     route('billing/orders', OrdersContainer, {
         name: 'Orders',
+        nameKey: 'nav.orders',
         icon: Icon.ClipboardListIcon,
         condition: flags => flags.billing.enabled,
     }),

@@ -1,5 +1,6 @@
 import { faNetworkWired } from '@fortawesome/free-solid-svg-icons';
 import { useFormikContext } from 'formik';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import getAllocations from '@/api/routes/admin/nodes/getAllocations';
@@ -11,6 +12,7 @@ import type { Option } from '@/elements/SelectField';
 import SelectField, { AsyncSelectField } from '@/elements/SelectField';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { isSubmitting } = useFormikContext();
     const { data: server } = useServerFromRoute();
 
@@ -30,10 +32,10 @@ export default () => {
     };
 
     return (
-        <AdminBox icon={faNetworkWired} title={'Networking'} isLoading={isSubmitting}>
+        <AdminBox icon={faNetworkWired} title={t('servers.networking') as string} isLoading={isSubmitting}>
             <div css={tw`grid grid-cols-1 gap-4 lg:gap-6`}>
                 <div>
-                    <Label htmlFor={'allocationId'}>Primary Allocation</Label>
+                    <Label htmlFor={'allocationId'}>{t('servers.primaryAllocation') as string}</Label>
                     <Select id={'allocationId'} name={'allocationId'}>
                         {server?.relationships.allocations?.map(a => (
                             <option key={a.id} value={a.id}>
@@ -45,14 +47,14 @@ export default () => {
                 <AsyncSelectField
                     id={'addAllocations'}
                     name={'addAllocations'}
-                    label={'Add Allocations'}
+                    label={t('servers.addAllocations') as string}
                     loadOptions={loadOptions}
                     isMulti
                 />
                 <SelectField
                     id={'removeAllocations'}
                     name={'removeAllocations'}
-                    label={'Remove Allocations'}
+                    label={t('servers.removeAllocations') as string}
                     options={
                         server?.relationships.allocations?.map(a => {
                             return { value: a.id.toString(), label: a.getDisplayText() };

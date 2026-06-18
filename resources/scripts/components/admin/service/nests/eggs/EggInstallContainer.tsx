@@ -3,6 +3,7 @@ import { shell } from '@codemirror/legacy-modes/mode/shell';
 import { faScroll } from '@fortawesome/free-solid-svg-icons';
 import type { FormikHelpers } from 'formik';
 import { Form, Formik } from 'formik';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import { useEggFromRoute } from '@/api/routes/admin/egg';
@@ -21,6 +22,7 @@ interface Values {
 }
 
 export default function EggInstallContainer() {
+    const { t } = useTranslation('admin');
     const { clearFlashes, clearAndAddHttpError } = useFlash();
 
     const { data: egg } = useEggFromRoute();
@@ -58,7 +60,7 @@ export default function EggInstallContainer() {
             }}
         >
             {({ isSubmitting, isValid }) => (
-                <AdminBox icon={faScroll} title={'Install Script'} noPadding>
+                <AdminBox icon={faScroll} title={t('nests.installScript') as string} noPadding>
                     <div css={tw`relative pb-4`}>
                         <SpinnerOverlay visible={isSubmitting} />
 
@@ -81,18 +83,18 @@ export default function EggInstallContainer() {
                                     <Field
                                         id={'scriptContainer'}
                                         name={'scriptContainer'}
-                                        label={'Install Container'}
+                                        label={t('nests.installContainer') as string}
                                         type={'text'}
-                                        description={'The Docker image to use for running this installation script.'}
+                                        description={t('nests.installContainerDescription') as string}
                                     />
 
                                     <Field
                                         id={'scriptEntry'}
                                         name={'scriptEntry'}
-                                        label={'Install Entrypoint'}
+                                        label={t('nests.installEntrypoint') as string}
                                         type={'text'}
                                         description={
-                                            'The command that should be used to run this script inside of the installation container.'
+                                            t('nests.installEntrypointDescription') as string
                                         }
                                     />
                                 </div>
@@ -100,7 +102,7 @@ export default function EggInstallContainer() {
 
                             <div css={tw`flex flex-row border-t border-neutral-600`}>
                                 <Button type="submit" css={tw`ml-auto mr-6 mt-4`} disabled={isSubmitting || !isValid}>
-                                    Save Changes
+                                    {t('nests.saveChanges') as string}
                                 </Button>
                             </div>
                         </Form>

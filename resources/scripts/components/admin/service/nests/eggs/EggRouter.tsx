@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link, Route, Routes, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import { useEggFromRoute } from '@/api/routes/admin/egg';
@@ -16,6 +17,7 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const EggRouter = () => {
+    const { t } = useTranslation('admin');
     const { id, nestId } = useParams<'nestId' | 'id'>();
 
     const { clearFlashes, clearAndAddHttpError } = useFlash();
@@ -52,7 +54,7 @@ const EggRouter = () => {
                 <div css={tw`flex flex-row ml-auto pl-4`}>
                     <Link to={`/admin/nests/${egg.nestId}`} className={'mr-4'}>
                         <Button.Text>
-                            <FontAwesomeIcon icon={faArrowLeft} className={'mr-2'} /> Go Back
+                            <FontAwesomeIcon icon={faArrowLeft} className={'mr-2'} /> {t('nests.goBack') as string}
                         </Button.Text>
                     </Link>
                 </div>
@@ -61,7 +63,7 @@ const EggRouter = () => {
             <FlashMessageRender byKey={'egg'} css={tw`mb-4`} />
 
             <SubNavigation>
-                <SubNavigationLink to={`/admin/nests/${nestId ?? ''}/eggs/${id ?? ''}`} name={'About'} base>
+                <SubNavigationLink to={`/admin/nests/${nestId ?? ''}/eggs/${id ?? ''}`} name={t('nests.about') as string} base>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path
                             clipRule="evenodd"
@@ -71,13 +73,13 @@ const EggRouter = () => {
                     </svg>
                 </SubNavigationLink>
 
-                <SubNavigationLink to={`/admin/nests/${nestId ?? ''}/eggs/${id ?? ''}/variables`} name={'Variables'}>
+                <SubNavigationLink to={`/admin/nests/${nestId ?? ''}/eggs/${id ?? ''}/variables`} name={t('nests.variables') as string}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
                     </svg>
                 </SubNavigationLink>
 
-                <SubNavigationLink to={`/admin/nests/${nestId ?? ''}/eggs/${id ?? ''}/install`} name={'Install Script'}>
+                <SubNavigationLink to={`/admin/nests/${nestId ?? ''}/eggs/${id ?? ''}/install`} name={t('nests.installScript') as string}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path
                             clipRule="evenodd"

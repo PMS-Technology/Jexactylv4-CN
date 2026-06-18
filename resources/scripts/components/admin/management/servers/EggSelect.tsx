@@ -1,6 +1,7 @@
 import { useField } from 'formik';
 import type { ChangeEvent } from 'react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { WithRelationships } from '@/api/routes/admin';
 import type { Egg } from '@/api/routes/admin/egg';
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export default ({ nestId, selectedEggId, onEggSelect }: Props) => {
+    const { t } = useTranslation('admin');
     const [, , { setValue: setEnvValue, setTouched: setEnvTouched }] =
         useField<Record<string, string | undefined>>('environment');
     const [, , { setValue: setEggIdValue, setTouched: setEggIdTouched }] = useField<number>('eggId');
@@ -67,10 +69,10 @@ export default ({ nestId, selectedEggId, onEggSelect }: Props) => {
 
     return (
         <>
-            <Label>Egg</Label>
+            <Label>{t('servers.egg') as string}</Label>
             <Select id={'eggId'} name={'eggId'} value={selectedEggId} onChange={onSelectChange}>
                 {!eggs ? (
-                    <option disabled>Loading...</option>
+                    <option disabled>{t('servers.loading') as string}</option>
                 ) : (
                     eggs.map(v => (
                         <option key={v.id} value={v.id.toString()}>

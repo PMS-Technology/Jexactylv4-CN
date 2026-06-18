@@ -1,0 +1,130 @@
+<?php
+
+/**
+ * Contains all of the translation strings for different activity log
+ * events. These should be keyed by the value in front of the colon (:)
+ * in the event name. If there is no colon present, they should live at
+ * the top level.
+ */
+return [
+    'auth' => [
+        'fail' => '登录失败',
+        'success' => '已登录',
+        'password-reset' => '密码已重置',
+        'reset-password' => '已请求重置密码',
+        'checkpoint' => '已请求双重身份验证',
+        'recovery-token' => '使用了双重验证恢复令牌',
+        'token' => '通过了双重验证挑战',
+        'ip-blocked' => '已阻止来自未列出 IP 地址 :identifier 的请求',
+        'sftp' => [
+            'fail' => 'SFTP 登录失败',
+        ],
+    ],
+    'user' => [
+        'account' => [
+            'email-changed' => '邮箱地址从 :old 更改为 :new',
+            'password-changed' => '密码已更改',
+        ],
+        'api-key' => [
+            'create' => '创建了新的 API 密钥 :identifier',
+            'delete' => '删除了 API 密钥 :identifier',
+        ],
+        'ssh-key' => [
+            'create' => '已将 SSH 密钥 :fingerprint 添加到账户',
+            'delete' => '已从账户移除 SSH 密钥 :fingerprint',
+        ],
+        'two-factor' => [
+            'create' => '已启用双重身份验证',
+            'delete' => '已禁用双重身份验证',
+        ],
+    ],
+    'server' => [
+        'reinstall' => '已重装服务器',
+        'console' => [
+            'command' => '在服务器上执行了命令 ":command"',
+        ],
+        'power' => [
+            'start' => '已启动服务器',
+            'stop' => '已停止服务器',
+            'restart' => '已重启服务器',
+            'kill' => '已终止服务器进程',
+        ],
+        'backup' => [
+            'download' => '已下载备份 :name',
+            'delete' => '已删除备份 :name',
+            'restore' => '已恢复备份 :name（删除的文件：:truncate）',
+            'restore-complete' => '已完成备份 :name 的恢复',
+            'restore-failed' => '未能完成备份 :name 的恢复',
+            'start' => '已开始新的备份 :name',
+            'complete' => '已将备份 :name 标记为完成',
+            'fail' => '已将备份 :name 标记为失败',
+            'lock' => '已锁定备份 :name',
+            'unlock' => '已解锁备份 :name',
+        ],
+        'database' => [
+            'create' => '创建了新数据库 :name',
+            'rotate-password' => '已轮换数据库 :name 的密码',
+            'delete' => '已删除数据库 :name',
+        ],
+        'file' => [
+            'compress_one' => '已压缩 :directory:file',
+            'compress_other' => '已压缩 :directory 目录中的 :count 个文件',
+            'read' => '查看了 :file 的内容',
+            'copy' => '创建了 :file 的副本',
+            'create-directory' => '创建了目录 :directory:name',
+            'decompress' => '已在 :directory 目录中解压缩 :files',
+            'delete_one' => '已删除 :directory:files.0',
+            'delete_other' => '已删除 :directory 目录中的 :count 个文件',
+            'download' => '已下载 :file',
+            'pull' => '已从 :url 下载远程文件到 :directory',
+            'rename_one' => '已将 :directory:files.0.from 重命名为 :directory:files.0.to',
+            'rename_other' => '已重命名 :directory 目录中的 :count 个文件',
+            'write' => '已将新内容写入 :file',
+            'upload' => '已开始文件上传',
+            'uploaded' => '已上传 :directory:file',
+        ],
+        'sftp' => [
+            'denied' => '因权限不足，SFTP 访问已被阻止',
+            'create_one' => '已创建 :files.0',
+            'create_other' => '已创建 :count 个新文件',
+            'write_one' => '已修改 :files.0 的内容',
+            'write_other' => '已修改 :count 个文件的内容',
+            'delete_one' => '已删除 :files.0',
+            'delete_other' => '已删除 :count 个文件',
+            'create-directory_one' => '已创建 :files.0 目录',
+            'create-directory_other' => '已创建 :count 个目录',
+            'rename_one' => '已将 :files.0.from 重命名为 :files.0.to',
+            'rename_other' => '已重命名或移动 :count 个文件',
+        ],
+        'allocation' => [
+            'create' => '已将 :allocation 添加到服务器',
+            'notes' => '已将 :allocation 的备注从 ":old" 更新为 ":new"',
+            'primary' => '已将 :allocation 设为服务器主分配',
+            'delete' => '已删除分配 :allocation',
+        ],
+        'schedule' => [
+            'create' => '创建了定时任务 :name',
+            'update' => '已更新定时任务 :name',
+            'execute' => '手动执行了定时任务 :name',
+            'delete' => '已删除定时任务 :name',
+        ],
+        'task' => [
+            'create' => '为定时任务 :name 创建了新的 ":action" 任务',
+            'update' => '已更新定时任务 :name 的 ":action" 任务',
+            'delete' => '已删除定时任务 :name 的任务',
+        ],
+        'settings' => [
+            'rename' => '服务器名称从 :old 更改为 :new',
+            'description' => '服务器描述从 :old 更改为 :new',
+        ],
+        'startup' => [
+            'edit' => '将 :variable 变量从 ":old" 更改为 ":new"',
+            'image' => '服务器 Docker 镜像从 :old 更新为 :new',
+        ],
+        'subuser' => [
+            'create' => '已将 :email 添加为子用户',
+            'update' => '已更新 :email 的子用户权限',
+            'delete' => '已移除 :email 的子用户身份',
+        ],
+    ],
+];

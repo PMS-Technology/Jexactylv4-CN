@@ -1,5 +1,6 @@
 import { lazy } from 'react';
 import '@/assets/tailwind.css';
+import '@/i18n';
 import { store } from '@/state';
 import { SiteTheme } from '@/state/theme';
 import { StoreProvider } from 'easy-peasy';

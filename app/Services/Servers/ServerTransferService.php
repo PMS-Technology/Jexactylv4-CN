@@ -45,12 +45,12 @@ class ServerTransferService
             /** @var Node $node */
             $node = Node::query()->findOrFail($node_id);
         } catch (ModelNotFoundException) {
-            throw new DisplayException('The requested node does not exist.');
+            throw new DisplayException(trans('exceptions.server_transfer.node_not_found'));
         }
 
         // Prevent transferring to the same node.
         if ($server->node_id === $node->id) {
-            throw new DisplayException('The server is already on this node.');
+            throw new DisplayException(trans('exceptions.server_transfer.same_node'));
         }
 
         // Check that the requested allocation belongs to the target node and is available.
@@ -61,7 +61,7 @@ class ServerTransferService
                 ->whereNull('server_id')
                 ->firstOrFail();
         } catch (ModelNotFoundException) {
-            throw new DisplayException('The requested allocation is not available on the target node.');
+            throw new DisplayException(trans('exceptions.server_transfer.allocation_unavailable'));
         }
 
         // Check that additional allocations exist and are available.
@@ -73,7 +73,7 @@ class ServerTransferService
                 ->count();
 
             if ($availableAllocations !== count($additional_allocations)) {
-                throw new DisplayException('One or more of the additional allocations are not available on the target node.');
+                throw new DisplayException(trans('exceptions.server_transfer.additional_allocations_unavailable'));
             }
         }
 

@@ -15,12 +15,14 @@ import { NavLink, useParams } from 'react-router-dom';
 import tw from 'twin.macro';
 import { useStoreState } from '@/state/hooks';
 import { useContext, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import useFlash from '@/plugins/useFlash';
 import { ShoppingBagIcon } from '@heroicons/react/outline';
 import { Context as ProductContext, useGetProducts } from '@/api/routes/admin/billing/products';
 import { ProductFilters } from '@/api/routes/admin/billing/types';
 
 function ProductTable() {
+    const { t } = useTranslation('admin');
     const params = useParams<'id'>();
     const { data: products, error } = useGetProducts(Number(params.id));
     const { clearFlashes, clearAndAddHttpError } = useFlash();
@@ -56,22 +58,22 @@ function ProductTable() {
                             <TableHead>
                                 <TableHeader />
                                 <TableHeader
-                                    name={'ID'}
+                                    name={t('billingModule.id')}
                                     direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('id')}
                                 />
                                 <TableHeader
-                                    name={'Name'}
+                                    name={t('billingModule.name')}
                                     direction={sort === 'name' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('name')}
                                 />
                                 <TableHeader
-                                    name={'Price'}
+                                    name={t('billingModule.price')}
                                     direction={sort === 'price' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('price')}
                                 />
-                                <TableHeader name={'Description'} />
-                                <TableHeader name={'Created At'} />
+                                <TableHeader name={t('billingModule.description')} />
+                                <TableHeader name={t('billingModule.createdAt')} />
                             </TableHead>
                             <TableBody>
                                 {products !== undefined &&
@@ -105,7 +107,7 @@ function ProductTable() {
                                             </td>
                                             <td css={tw`px-6 text-sm text-neutral-200 text-left whitespace-nowrap`}>
                                                 <code css={tw`font-mono bg-neutral-900 rounded py-1 px-2`}>
-                                                    ${product.price.toFixed(2)} / monthly
+                                                    ${product.price.toFixed(2)} / {t('billingModule.monthly')}
                                                 </code>
                                             </td>
                                             <td css={tw`px-6 text-sm text-neutral-200 text-left whitespace-nowrap`}>

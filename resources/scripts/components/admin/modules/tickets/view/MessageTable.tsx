@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import AdminTable, {
     TableBody,
@@ -23,18 +24,19 @@ import { Alert } from '@/elements/alert';
 import { TicketMessageFilters } from '@/api/routes/admin/tickets/types';
 
 const MessagesTable = ({ ticketId }: { ticketId: number }) => {
+    const { t } = useTranslation('admin');
     const { data: messages, error } = getTicketMessages(ticketId);
     const [visible, setVisible] = useState<string | null>(null);
     const { colors } = useStoreState(state => state.theme.data!);
     const { setPage, sort, setSort, sortDirection } = useContext(TicketMessageContext);
 
-    if (error) return <Alert type={'danger'}>Unable to render messages: {error}</Alert>;
+    if (error) return <Alert type={'danger'}>{t('ticketsModule.unableToRenderMessages') as string} {error}</Alert>;
 
     return (
         <>
             {/* this is a really dumb comparison but TS is dumber. */}
             {visible !== null && (
-                <Dialog open={Boolean(visible)} onClose={() => setVisible(null)} title={'Message Content'}>
+                <Dialog open={Boolean(visible)} onClose={() => setVisible(null)} title={t('ticketsModule.messageContent') as string}>
                     <p className={'text-gray-300 italic'}>{visible.toString()}</p>
                 </Dialog>
             )}
@@ -45,13 +47,13 @@ const MessagesTable = ({ ticketId }: { ticketId: number }) => {
                             <table css={tw`w-full table-auto`}>
                                 <TableHead>
                                     <TableHeader
-                                        name={'ID'}
+                                        name={t('ticketsModule.id') as string}
                                         direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('id')}
                                     />
-                                    <TableHeader name={'Author'} />
-                                    <TableHeader name={'Message'} />
-                                    <TableHeader name={'Sent At'} />
+                                    <TableHeader name={t('ticketsModule.author') as string} />
+                                    <TableHeader name={t('ticketsModule.message') as string} />
+                                    <TableHeader name={t('ticketsModule.sentAt') as string} />
                                     <TableHeader />
                                 </TableHead>
 
@@ -91,7 +93,7 @@ const MessagesTable = ({ ticketId }: { ticketId: number }) => {
                                                                 style={{ color: colors.primary }}
                                                                 className={'hover:brightness-125 duration-300'}
                                                             >
-                                                                Ticket Owner
+                                                                {t('ticketsModule.ticketOwner') as string}
                                                             </Link>
                                                         </td>
                                                     )}
@@ -115,12 +117,13 @@ const MessagesTable = ({ ticketId }: { ticketId: number }) => {
                                                         css={tw`px-6 text-sm text-neutral-200 text-left whitespace-nowrap`}
                                                     >
                                                         <Button onClick={() => setVisible(message.message)}>
-                                                            Read Message
+                                                            {t('ticketsModule.readMessage') as string}
                                                         </Button>
                                                     </td>
                                                 </TableRow>
                                             ))
-                                            .toReversed()}
+                                            .slice()
+                                            .reverse()}
                                 </TableBody>
                             </table>
 

@@ -24,6 +24,7 @@ import { getEgg } from '@/api/routes/admin/egg';
 import { Category } from '@definitions/admin';
 import { CategoryValues } from '@/api/routes/admin/billing/types';
 import { useSWRConfig } from 'swr';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     visible: boolean;
@@ -32,6 +33,7 @@ interface Props {
 }
 
 function InternalForm({ category, visible, setVisible }: Props) {
+    const { t } = useTranslation('admin');
     const [_egg, setEgg] = useState<WithRelationships<Egg, 'variables'> | undefined>();
     const { values, isSubmitting } = useFormikContext<CategoryValues>();
     const { secondary } = useStoreState(state => state.theme.data!.colors);
@@ -50,33 +52,33 @@ function InternalForm({ category, visible, setVisible }: Props) {
         <Form>
             <div css={tw`grid grid-cols-1 lg:grid-cols-2 gap-4`}>
                 <div css={tw`w-full flex flex-col mr-0 lg:mr-2`}>
-                    <AdminBox title={'Category Details'} icon={faShoppingBasket} isLoading={isSubmitting}>
+                    <AdminBox title={t('billingModule.categoryDetails')} icon={faShoppingBasket} isLoading={isSubmitting}>
                         <FieldRow>
                             <Field
                                 id={'name'}
                                 name={'name'}
                                 type={'text'}
                                 placeholder={'Minecraft Java'}
-                                label={'Category Name'}
-                                description={'A simple title for this category.'}
+                                label={t('billingModule.categoryName')}
+                                description={t('billingModule.simpleTitleForCategory')}
                             />
                             <Field
                                 id={'description'}
                                 name={'description'}
                                 type={'text'}
                                 placeholder={'With support for 1.21'}
-                                label={'Description'}
-                                description={'A tagline or description for this product category.'}
+                                label={t('billingModule.description')}
+                                description={t('billingModule.taglineOrDescriptionForCategory')}
                             />
                             <Field
                                 id={'icon'}
                                 name={'icon'}
                                 type={'text'}
-                                label={'Icon'}
-                                description={'An icon to be displayed with this category.'}
+                                label={t('billingModule.icon')}
+                                description={t('billingModule.iconDisplayedWithCategory')}
                             />
                             <div className={'mt-1'}>
-                                <Label htmlFor={'visible'}>Visible on creation</Label>
+                                <Label htmlFor={'visible'}>{t('billingModule.visibleOnCreation')}</Label>
                                 <div className={'mt-1'}>
                                     <label css={tw`inline-flex items-center mr-2`}>
                                         <Field
@@ -86,7 +88,7 @@ function InternalForm({ category, visible, setVisible }: Props) {
                                             checked={!visible}
                                             onClick={() => setVisible(false)}
                                         />
-                                        <span css={tw`text-neutral-300 ml-2`}>No</span>
+                                        <span css={tw`text-neutral-300 ml-2`}>{t('billingModule.no')}</span>
                                     </label>
 
                                     <label css={tw`inline-flex items-center ml-2`}>
@@ -97,10 +99,10 @@ function InternalForm({ category, visible, setVisible }: Props) {
                                             checked={visible}
                                             onClick={() => setVisible(true)}
                                         />
-                                        <span css={tw`text-neutral-300 ml-2`}>Yes</span>
+                                        <span css={tw`text-neutral-300 ml-2`}>{t('billingModule.yes')}</span>
                                     </label>
                                 </div>
-                                <p className={'mt-3 text-xs'}>Should this category be visible instantly?</p>
+                                <p className={'mt-3 text-xs'}>{t('billingModule.shouldCategoryBeVisibleInstantly')}</p>
                             </div>
                         </FieldRow>
                     </AdminBox>
@@ -116,7 +118,7 @@ function InternalForm({ category, visible, setVisible }: Props) {
                         <div css={tw`text-right`}>
                             {category && <CategoryDeleteButton category={category} />}
                             <Button type={'submit'} css={tw`ml-4`}>
-                                {category ? 'Update' : 'Create'}
+                                {category ? t('billingModule.update') : t('billingModule.create')}
                             </Button>
                         </div>
                     </div>
@@ -127,6 +129,7 @@ function InternalForm({ category, visible, setVisible }: Props) {
 }
 
 export default ({ category }: { category?: Category }) => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
     const params = useParams<'id'>();
     const { mutate } = useSWRConfig();
@@ -167,7 +170,7 @@ export default ({ category }: { category?: Category }) => {
     };
 
     return (
-        <AdminContentBlock title={'New Category'}>
+        <AdminContentBlock title={t('billingModule.newCategory')}>
             <div css={tw`w-full flex flex-row items-center m-8`}>
                 {category?.icon ? (
                     <img src={category.icon} className={'ww-8 h-8 mr-4'} />
@@ -176,12 +179,12 @@ export default ({ category }: { category?: Category }) => {
                 )}
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
                     <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>
-                        {category?.name ?? 'New Product Category'}
+                        {category?.name ?? t('billingModule.newProductCategory')}
                     </h2>
                     <p
                         css={tw`hidden lg:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        {category?.uuid ?? 'Add a new category to the billing interface.'}
+                        {category?.uuid ?? t('billingModule.addNewCategoryToBilling')}
                     </p>
                 </div>
             </div>

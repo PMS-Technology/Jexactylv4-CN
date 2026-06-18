@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ServerContext } from '@/state/server';
 import { SocketEvent } from '@server/events';
 import useWebsocketEvent from '@/plugins/useWebsocketEvent';
@@ -13,6 +14,7 @@ import Tooltip from '@/elements/tooltip/Tooltip';
 import { useStoreState } from '@/state/hooks';
 
 export default () => {
+    const { t } = useTranslation('server');
     const { primary } = useStoreState(state => state.theme.data!.colors);
     const status = ServerContext.useStoreState(state => state.status.value);
     const limits = ServerContext.useStoreState(state => state.server.data!.limits);
@@ -36,7 +38,7 @@ export default () => {
         callback(opts, index) {
             return {
                 ...opts,
-                label: !index ? 'Network In' : 'Network Out',
+                label: !index ? (t('consolePage.networkIn') as string) : (t('consolePage.networkOut') as string),
                 borderColor: !index ? theme('colors.cyan.400') : primary,
                 backgroundColor: hexToRgba(!index ? theme('colors.cyan.700') : primary, 0.5),
             };
@@ -70,20 +72,20 @@ export default () => {
 
     return (
         <>
-            <ChartBlock title={'CPU'}>
+            <ChartBlock title={t('consolePage.cpu') as string}>
                 <Line {...cpu.props} />
             </ChartBlock>
-            <ChartBlock title={'Memory'}>
+            <ChartBlock title={t('consolePage.memory') as string}>
                 <Line {...memory.props} />
             </ChartBlock>
             <ChartBlock
-                title={'Network'}
+                title={t('consolePage.networkChart') as string}
                 legend={
                     <>
-                        <Tooltip arrow content={'Inbound'}>
+                        <Tooltip arrow content={t('consolePage.inbound') as string}>
                             <CloudDownloadIcon className={'mr-2 h-4 w-4 text-green-400'} />
                         </Tooltip>
-                        <Tooltip arrow content={'Outbound'}>
+                        <Tooltip arrow content={t('consolePage.outbound') as string}>
                             <CloudUploadIcon className={'h-4 w-4 text-cyan-400'} />
                         </Tooltip>
                     </>

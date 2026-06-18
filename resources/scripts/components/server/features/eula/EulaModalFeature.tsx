@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ServerContext } from '@/state/server';
 import Modal from '@/elements/Modal';
 import tw from 'twin.macro';
@@ -9,6 +10,7 @@ import useFlash from '@/plugins/useFlash';
 import { SocketEvent, SocketRequest } from '@server/events';
 
 const EulaModalFeature = () => {
+    const { t } = useTranslation('server');
     const [visible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -65,25 +67,16 @@ const EulaModalFeature = () => {
             showSpinnerOverlay={loading}
         >
             <FlashMessageRender key={'feature:eula'} css={tw`mb-4`} />
-            <h2 css={tw`text-2xl mb-4 text-neutral-100`}>Accept Minecraft&reg; EULA</h2>
+            <h2 css={tw`text-2xl mb-4 text-neutral-100`}>{t('featuresPage.acceptEula') as string}</h2>
             <p css={tw`text-neutral-200`}>
-                By pressing {'"I Accept"'} below you are indicating your agreement to the&nbsp;
-                <a
-                    target={'_blank'}
-                    css={tw`text-primary-300 underline transition-colors duration-150 hover:text-primary-400`}
-                    rel={'noreferrer noopener'}
-                    href="https://account.mojang.com/documents/minecraft_eula"
-                >
-                    Minecraft&reg; EULA
-                </a>
-                .
+                {t('featuresPage.eulaAgreement') as string}
             </p>
             <div css={tw`mt-8 sm:flex items-center justify-end`}>
                 <Button onClick={() => setVisible(false)} css={tw`w-full sm:w-auto border-transparent`}>
-                    Cancel
+                    {t('featuresPage.cancel') as string}
                 </Button>
                 <Button onClick={onAcceptEULA} css={tw`mt-4 sm:mt-0 sm:ml-4 w-full sm:w-auto`}>
-                    I Accept
+                    {t('featuresPage.iAccept') as string}
                 </Button>
             </div>
         </Modal>

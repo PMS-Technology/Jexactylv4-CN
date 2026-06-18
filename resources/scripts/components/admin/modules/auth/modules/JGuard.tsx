@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import useFlash from '@/plugins/useFlash';
 import Label from '@/elements/Label';
 import Input from '@/elements/Input';
@@ -12,6 +13,7 @@ import { faDoorOpen } from '@fortawesome/free-solid-svg-icons';
 import { useStoreState } from '@/state/hooks';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [confirm, setConfirm] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [success, setSuccess] = useState<boolean>(false);
@@ -46,24 +48,24 @@ export default () => {
     };
 
     return (
-        <AdminBox title={'jGuard'} icon={faDoorOpen}>
+        <AdminBox title={t('authModule.jGuard') as string} icon={faDoorOpen}>
             <FlashMessageRender byKey={'auth:modules:jguard'} className={'my-2'} />
             {loading && <Spinner className={'absolute top-0 right-8 m-3.5'} size={'small'} />}
             {success && <CheckCircleIcon className={'w-5 h-5 absolute top-0 right-8 m-3.5 text-green-500'} />}
             <Dialog.Confirm
                 open={confirm}
-                title={'Confirm module removal'}
+                title={t('authModule.confirmModuleRemoval') as string}
                 onConfirmed={() => doDeletion()}
                 onClose={() => setConfirm(false)}
             >
-                Are you sure you wish to delete this module?
+                {t('authModule.confirmModuleDeletion') as string}
             </Dialog.Confirm>
             <TrashIcon
                 className={'w-5 h-5 absolute top-0 right-0 m-3.5 text-red-500 hover:text-red-300 duration-300'}
                 onClick={() => setConfirm(true)}
             />
             <div>
-                <Label>Automatic approval delay</Label>
+                <Label>{t('authModule.automaticApprovalDelay') as string}</Label>
                 <Input
                     autoComplete={'off'}
                     id={'delay'}
@@ -73,8 +75,7 @@ export default () => {
                     onChange={e => update('delay', parseInt(e.target.value))}
                 />
                 <p className={'text-xs text-gray-400 mt-1'}>
-                    If you wish to automatically approve user signups, this variable can make it so that users cannot
-                    access the Panel for a certain period of time in order to prevent bot attacks.
+                    {t('authModule.jguardDelayDescription') as string}
                 </p>
             </div>
         </AdminBox>

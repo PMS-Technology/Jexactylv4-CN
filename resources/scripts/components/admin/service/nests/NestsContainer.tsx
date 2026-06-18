@@ -1,5 +1,6 @@
 import { useContext, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import type { Filters } from '@/api/routes/admin/nests/getNests';
 import getNests, { Context as NestsContext } from '@/api/routes/admin/nests/getNests';
@@ -24,6 +25,7 @@ import { TerminalIcon, AdjustmentsIcon, ArchiveIcon } from '@heroicons/react/out
 import { SubNavigation, SubNavigationLink } from '../../SubNavigation';
 
 const NestsContainer = () => {
+    const { t } = useTranslation('admin');
     const { setPage, setFilters, sort, setSort, sortDirection } = useContext(NestsContext);
     const { colors } = useStoreState(state => state.theme.data!);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
@@ -52,14 +54,14 @@ const NestsContainer = () => {
     };
 
     return (
-        <AdminContentBlock title={'Nests'}>
+        <AdminContentBlock title={t('nests.nests') as string}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>Nests</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{t('nests.nests') as string}</h2>
                     <p
                         css={tw`hidden md:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        All nests currently available on this system.
+                        {t('nests.allNestsAvailable') as string}
                     </p>
                 </div>
 
@@ -69,13 +71,13 @@ const NestsContainer = () => {
             </div>
 
             <SubNavigation>
-                <SubNavigationLink to="/admin/servers" name="All Servers" base>
+                <SubNavigationLink to="/admin/servers" name={t('nests.allServers') as string} base>
                     <TerminalIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to="/admin/servers/presets" name="Presets">
+                <SubNavigationLink to="/admin/servers/presets" name={t('nests.presets') as string}>
                     <AdjustmentsIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to="/admin/nests" name="Nests">
+                <SubNavigationLink to="/admin/nests" name={t('nests.nests') as string}>
                     <ArchiveIcon />
                 </SubNavigationLink>
             </SubNavigation>
@@ -89,16 +91,16 @@ const NestsContainer = () => {
                             <table css={tw`w-full table-auto`}>
                                 <TableHead>
                                     <TableHeader
-                                        name={'ID'}
+                                        name={t('nests.id') as string}
                                         direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('id')}
                                     />
                                     <TableHeader
-                                        name={'Name'}
+                                        name={t('nests.name') as string}
                                         direction={sort === 'name' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('name')}
                                     />
-                                    <TableHeader name={'Description'} />
+                                    <TableHeader name={t('nests.description') as string} />
                                 </TableHead>
 
                                 <TableBody>

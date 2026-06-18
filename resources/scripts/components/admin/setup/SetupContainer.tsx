@@ -1,4 +1,5 @@
 import { Button } from '@/elements/button';
+import { useTranslation } from 'react-i18next';
 import { useStoreState } from '@/state/hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faArrowRight, faCheckCircle, faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -9,6 +10,7 @@ import ModeSelection from './ModeSelection';
 import { finishSetup } from '@/api/setup';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [stage, setStage] = useState<number>(1);
     const { primary } = useStoreState(s => s.theme.data!.colors);
     const [fadeIn, setFadeIn] = useState(false);
@@ -33,10 +35,10 @@ export default () => {
                 {stage === 1 && (
                     <div>
                         <h1 className={'text-5xl lg:text-8xl'}>
-                            Welcome to <span style={{ color: primary }}>Jexactyl</span>
+                            {t('setup.welcome') as string} <span style={{ color: primary }}>Jexactyl</span>
                         </h1>
                         <p className={'italic text-gray-400 text-center'}>
-                            It&apos;s great to have you here. Let&apos;s get started.
+                            {t('setup.welcomeDescription') as string}
                         </p>
                     </div>
                 )}
@@ -46,30 +48,30 @@ export default () => {
                 {stage === 5 && (
                     <div>
                         <h1 className={'text-5xl lg:text-8xl'}>
-                            Thanks for choosing <span style={{ color: primary }}>Jexactyl</span>
+                            {t('setup.thanks') as string} <span style={{ color: primary }}>Jexactyl</span>
                         </h1>
                         <p className={'italic text-gray-400 text-center'}>
-                            Your instance has been configured and is ready for use.
+                            {t('setup.thanksDescription') as string}
                         </p>
                     </div>
                 )}
                 <div className={'absolute bottom-12 right-12 space-x-2'}>
                     {stage > 1 ? (
                         <Button.Text onClick={() => setStage(stage - 1)} variant={Button.Variants.Secondary}>
-                            Go Back <FontAwesomeIcon icon={faArrowLeft} className={'ml-2 mt-1'} />
+                            {t('setup.goBack') as string} <FontAwesomeIcon icon={faArrowLeft} className={'ml-2 mt-1'} />
                         </Button.Text>
                     ) : (
                         <Button.Text onClick={doFinish} variant={Button.Variants.Secondary}>
-                            Skip Setup <FontAwesomeIcon icon={faXmark} className={'ml-2 mt-1'} />
+                            {t('setup.skipSetup') as string} <FontAwesomeIcon icon={faXmark} className={'ml-2 mt-1'} />
                         </Button.Text>
                     )}
                     {stage < 5 ? (
                         <Button onClick={() => setStage(stage + 1)}>
-                            Continue <FontAwesomeIcon icon={faArrowRight} className={'ml-2 mt-1'} />
+                            {t('setup.continue') as string} <FontAwesomeIcon icon={faArrowRight} className={'ml-2 mt-1'} />
                         </Button>
                     ) : (
                         <Button onClick={doFinish}>
-                            Finish <FontAwesomeIcon icon={faCheckCircle} className={'ml-2 mt-1'} />
+                            {t('setup.finish') as string} <FontAwesomeIcon icon={faCheckCircle} className={'ml-2 mt-1'} />
                         </Button>
                     )}
                 </div>

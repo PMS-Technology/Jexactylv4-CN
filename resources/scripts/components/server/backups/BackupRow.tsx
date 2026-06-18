@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArchive, faLock } from '@fortawesome/free-solid-svg-icons';
 import { format, formatDistanceToNow } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 import Spinner from '@/elements/Spinner';
 import { bytesToString } from '@/lib/formatters';
 import Can from '@/elements/Can';
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export default ({ backup }: Props) => {
+    const { t } = useTranslation('server');
     const { mutate } = getBackups();
     const [visible, setVisible] = useState<boolean>(false);
 
@@ -68,7 +70,7 @@ export default ({ backup }: Props) => {
                             <span
                                 css={tw`bg-red-500 py-px px-2 rounded-full text-white text-xs uppercase border border-red-600 mr-2`}
                             >
-                                Failed
+                                {t('backupsPage.failed') as string}
                             </span>
                         )}
                         <p css={tw`break-words truncate font-semibold`}>{backup.name}</p>
@@ -85,7 +87,7 @@ export default ({ backup }: Props) => {
                 <p title={format(backup.createdAt, 'ddd, MMMM do, yyyy HH:mm:ss')} css={tw`text-sm`}>
                     {formatDistanceToNow(backup.createdAt, { includeSeconds: true, addSuffix: true })}
                 </p>
-                <p css={tw`text-2xs text-neutral-500 uppercase mt-1`}>Created</p>
+                <p css={tw`text-2xs text-neutral-500 uppercase mt-1`}>{t('backupsPage.created') as string}</p>
             </div>
             <Can action={['backup.download', 'backup.restore', 'backup.delete']} matchAny>
                 <div css={tw`mr-3 text-gray-400 hover:text-white duration-300`}>

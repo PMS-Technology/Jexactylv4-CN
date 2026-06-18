@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useFormikContext } from 'formik';
 import { useEffect, useState } from 'react';
 
@@ -7,6 +8,7 @@ import SearchableSelect, { Option } from '@/elements/SearchableSelect';
 import getDatabase from '@/api/routes/admin/databases/getDatabase';
 
 export default ({ selected }: { selected: number | null }) => {
+    const { t } = useTranslation('admin');
     const context = useFormikContext();
 
     const [database, setDatabase] = useState<Database | null>(null);
@@ -42,8 +44,8 @@ export default ({ selected }: { selected: number | null }) => {
         <SearchableSelect
             id={'databaseId'}
             name={'databaseId'}
-            label={'Database Host'}
-            placeholder={'Select a database host...'}
+            label={t('nodes.databaseHost') as string}
+            placeholder={t('nodes.selectDatabaseHost') as string}
             items={databases}
             selected={database}
             setSelected={setDatabase}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { Actions } from 'easy-peasy';
 import { useStoreActions } from 'easy-peasy';
 import type { FormikHelpers } from 'formik';
@@ -41,6 +42,7 @@ interface Values {
 }
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
         (actions: Actions<ApplicationStore>) => actions.flashes,
     );
@@ -141,7 +143,7 @@ export default () => {
                                 <div css={tw`flex flex-row`}>
                                     <NodeDeleteButton nodeId={node?.id} onDeleted={() => navigate('/admin/nodes')} />
                                     <Button type={'submit'} css={tw`ml-auto`} disabled={isSubmitting || !isValid}>
-                                        Save Changes
+                                        {t('nodes.saveChanges') as string}
                                     </Button>
                                 </div>
                             </div>

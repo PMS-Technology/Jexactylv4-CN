@@ -4,8 +4,10 @@ import useFlash from '@/plugins/useFlash';
 import FlashMessageRender from '@/elements/FlashMessageRender';
 import SuspendUserBox from './SuspendUserBox';
 import DeleteUserBox from './DeleteUserBox';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { clearFlashes } = useFlash();
 
     useEffect(() => {

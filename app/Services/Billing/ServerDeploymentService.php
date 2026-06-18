@@ -69,7 +69,7 @@ class ServerDeploymentService
                 'description' => $ex->getMessage(),
             ]);
 
-            throw new DisplayException('Unable to create server: ' . $ex->getMessage());
+            throw new DisplayException(trans('exceptions.billing.unable_to_create_server', ['message' => $ex->getMessage()]));
         }
 
         return $server;

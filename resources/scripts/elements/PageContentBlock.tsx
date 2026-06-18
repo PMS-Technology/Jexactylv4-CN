@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 import tw from 'twin.macro';
+import { useTranslation } from 'react-i18next';
 import ContentContainer from '@/elements/ContentContainer';
 import FlashMessageRender from '@/elements/FlashMessageRender';
 
@@ -15,6 +16,8 @@ export interface PageContentBlockProps {
 }
 
 function PageContentBlock({ title, header, description, showFlashKey, className, children }: PageContentBlockProps) {
+    const { t } = useTranslation('common');
+
     useEffect(() => {
         if (title) {
             document.title = title;
@@ -36,7 +39,7 @@ function PageContentBlock({ title, header, description, showFlashKey, className,
 
             <ContentContainer css={tw`mb-4`}>
                 <p css={tw`text-center text-neutral-500 text-xs`}>
-                    Powered by&nbsp;
+                    {t('poweredBy') as string}&nbsp;
                     <a
                         rel={'noopener nofollow noreferrer'}
                         href={'https://jexpanel.com'}

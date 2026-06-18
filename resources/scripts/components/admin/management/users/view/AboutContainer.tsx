@@ -6,8 +6,10 @@ import { updateUser } from '@/api/routes/admin/users';
 import { Context } from '@admin/management/users/UserRouter';
 import type { ApplicationStore } from '@/state';
 import UserForm from './UserForm';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
         (actions: Actions<ApplicationStore>) => actions.flashes,
     );
@@ -33,7 +35,7 @@ export default () => {
 
     return (
         <UserForm
-            title={'Edit User'}
+            title={t('users.editUser') as string}
             initialValues={{
                 externalId: user.externalId,
                 username: user.username,

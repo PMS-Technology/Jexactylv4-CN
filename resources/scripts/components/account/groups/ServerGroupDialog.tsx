@@ -1,6 +1,7 @@
 import { Dialog } from '@/elements/dialog';
 import { Button } from '@/elements/button';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { faPlus, faPlusCircle, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { addServerToGroup, deleteServerGroup, getServerGroups } from '@/api/routes/server/groups';
@@ -24,6 +25,7 @@ interface Props {
 }
 
 export default ({ open, setOpen, groups, setGroups }: Props) => {
+    const { t } = useTranslation('dashboard');
     const { clearAndAddHttpError, clearFlashes, addFlash } = useFlash();
     const [group, setGroup] = useState<ServerGroup | undefined>();
 
@@ -36,7 +38,7 @@ export default ({ open, setOpen, groups, setGroups }: Props) => {
 
         deleteServerGroup(id)
             .then(() => {
-                addFlash({ type: 'success', key: 'dashboard:groups', message: 'Server group deleted successfully.' });
+                addFlash({ type: 'success', key: 'dashboard:groups', message: t('groups.deleted') });
                 setOpen({ open: 'none' });
             })
             .catch(error => clearAndAddHttpError({ key: 'dashboard:groups', error }));
@@ -47,7 +49,7 @@ export default ({ open, setOpen, groups, setGroups }: Props) => {
 
         addServerToGroup(id, open.serverId!)
             .then(() => {
-                addFlash({ type: 'success', key: 'dashboard:groups', message: 'Server group added successfully.' });
+                addFlash({ type: 'success', key: 'dashboard:groups', message: t('groups.added') });
                 setOpen({ open: 'none', serverId: undefined });
 
                 window.location.reload();
@@ -61,7 +63,7 @@ export default ({ open, setOpen, groups, setGroups }: Props) => {
         <>
             <FlashMessageRender byKey={'dashboard:groups'} />
             <ModifyServerGroup open={open.open === 'modify'} group={group} setOpen={setOpen} />
-            <Dialog open={open.open === 'add'} onClose={() => setOpen({ open: 'none' })} title={'Add group to server'}>
+            <Dialog open={open.open === 'add'} onClose={() => setOpen({ open: 'none' })} title={t('groups.addGroupToServer')}>
                 {groups ? (
                     <div className={'my-3 grid grid-cols-2 lg:grid-cols-3 gap-4 cursor-pointer'}>
                         {groups?.map(group => (
@@ -83,18 +85,18 @@ export default ({ open, setOpen, groups, setGroups }: Props) => {
                     </div>
                 ) : (
                     <div className={'text-gray-400 mt-4 text-center font-semibold'}>
-                        No groups exist on this account.
+                        {t('groups.noGroups')}
                     </div>
                 )}
             </Dialog>
             <Dialog
                 open={open.open === 'index'}
                 onClose={() => setOpen({ open: 'none' })}
-                title={'Server Group Configuration'}
+                title={t('groups.configuration')}
             >
                 <div className={'absolute top-4 right-16'}>
                     <Button size={Button.Sizes.Small} onClick={() => setOpen({ open: 'modify' })}>
-                        <FontAwesomeIcon icon={faPlus} className={'mr-1'} /> Create
+                        <FontAwesomeIcon icon={faPlus} className={'mr-1'} /> {t('groups.create')}
                     </Button>
                 </div>
                 {groups ? (
@@ -123,7 +125,7 @@ export default ({ open, setOpen, groups, setGroups }: Props) => {
                     </div>
                 ) : (
                     <div className={'text-gray-400 mt-4 text-center font-semibold'}>
-                        No groups exist on this account.
+                        {t('groups.noGroups')}
                     </div>
                 )}
             </Dialog>

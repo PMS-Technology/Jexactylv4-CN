@@ -2,6 +2,7 @@ import type { Action } from 'easy-peasy';
 import { action, createContextStore } from 'easy-peasy';
 import type { FormikHelpers } from 'formik';
 import { Form, Formik } from 'formik';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { bool, object, string } from 'yup';
 
@@ -47,6 +48,7 @@ export interface Params {
 }
 
 export default function UserForm({ title, initialValues, children, onSubmit, uuid, admin_role_id }: Params) {
+    const { t } = useTranslation('admin');
     const { colors } = useStoreState(state => state.theme.data!);
 
     const [currentRole, setCurrentRole] = useState<UserRole | undefined>();
@@ -90,7 +92,7 @@ export default function UserForm({ title, initialValues, children, onSubmit, uui
                         <FieldRow>
                             {uuid && (
                                 <div>
-                                    <Label>UUID</Label>
+                                    <Label>{t('users.uuid') as string}</Label>
                                     <CopyOnClick text={uuid}>
                                         <Input type={'text'} value={uuid} readOnly />
                                     </CopyOnClick>
@@ -100,42 +102,41 @@ export default function UserForm({ title, initialValues, children, onSubmit, uui
                                 <Field
                                     id={'externalId'}
                                     name={'externalId'}
-                                    label={'External ID'}
+                                    label={t('users.externalId') as string}
                                     type={'text'}
                                     description={
-                                        'Used by external integrations, this field should not be modified unless you know what you are doing.'
+                                        t('users.externalIdDescription') as string
                                     }
                                 />
                             )}
                             <Field
                                 id={'username'}
                                 name={'username'}
-                                label={'Username'}
+                                label={t('users.username') as string}
                                 type={'text'}
-                                description={"The user's username, what else would go here?"}
+                                description={t('users.usernameDescription') as string}
                             />
                             <Field
                                 id={'email'}
                                 name={'email'}
-                                label={'Email Address'}
+                                label={t('users.emailAddress') as string}
                                 type={'email'}
-                                description={"The user's email address, what else would go here?"}
+                                description={t('users.emailDescription') as string}
                             />
                             <Field
                                 id={'password'}
                                 name={'password'}
-                                label={'Password'}
+                                label={t('users.password') as string}
                                 type={'password'}
                                 placeholder={'••••••••'}
                                 autoComplete={'new-password'}
-                                /* TODO: Change description depending on if user is being created or updated. */
                                 description={
-                                    'Leave empty to email the user a link where they will be required to set a password.'
+                                    t('users.passwordDescription') as string
                                 }
                             />
                         </FieldRow>
                     </AdminBox>
-                    <AdminBox title={'Permission Control'} css={tw`relative mt-6`} icon={faToggleOn}>
+                    <AdminBox title={t('users.permissionControl') as string} css={tw`relative mt-6`} icon={faToggleOn}>
                         <SpinnerOverlay visible={isSubmitting} />
                         <div className={'grid lg:grid-cols-2 gap-4'}>
                             <div css={tw`w-full flex flex-row mb-6`}>
@@ -145,19 +146,18 @@ export default function UserForm({ title, initialValues, children, onSubmit, uui
                                 >
                                     <FormikSwitch
                                         name={'rootAdmin'}
-                                        label={'Root Admin'}
-                                        description={'Should this user be a root administrator?'}
+                                        label={t('users.rootAdmin') as string}
+                                        description={t('users.rootAdminDescription') as string}
                                     />
                                     <Alert type={'warning'} className={'mt-2'} small>
-                                        Enabling RootAdmin gives the user full access. It is recommended to keep this
-                                        off, but assign an admin role to the user to grant specific permissions.
+                                        {t('users.rootAdminWarning') as string}
                                     </Alert>
                                 </div>
                             </div>
                             <div>
                                 <RoleSelect selected={currentRole} />
                                 <p className={'mt-1 text-xs'}>
-                                    If you wish, you can assign an administrator role to restrict permissions.
+                                    {t('users.assignRoleDescription') as string}
                                 </p>
                             </div>
                         </div>
@@ -166,7 +166,7 @@ export default function UserForm({ title, initialValues, children, onSubmit, uui
                         {children}
                         <div css={tw`flex ml-auto`}>
                             <Button type={'submit'} disabled={isSubmitting || !isValid}>
-                                Save Changes
+                                {t('users.saveChanges') as string}
                             </Button>
                         </div>
                     </div>

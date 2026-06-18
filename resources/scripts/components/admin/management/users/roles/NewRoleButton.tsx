@@ -1,5 +1,6 @@
 import { Form, Formik, FormikHelpers } from 'formik';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { object, string } from 'yup';
 import { getRoles, createRole } from '@/api/routes/admin/roles';
@@ -23,6 +24,7 @@ const schema = object().shape({
 });
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [visible, setVisible] = useState(false);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { mutate } = getRoles();
@@ -60,14 +62,14 @@ export default () => {
                     >
                         <SpinnerOverlay visible={isSubmitting} />
                         <FlashMessageRender byKey={'role:create'} css={tw`mb-6`} />
-                        <h2 css={tw`mb-6 text-2xl text-neutral-100`}>New Role</h2>
+                        <h2 css={tw`mb-6 text-2xl text-neutral-100`}>{t('users.newRole') as string}</h2>
                         <Form css={tw`m-0`}>
                             <Field
                                 type={'text'}
                                 id={'name'}
                                 name={'name'}
-                                label={'Name'}
-                                description={'A short name used to identify this role.'}
+                                label={t('users.name') as string}
+                                description={t('users.shortNameDescription') as string}
                                 autoFocus
                             />
 
@@ -76,8 +78,8 @@ export default () => {
                                     type={'text'}
                                     id={'description'}
                                     name={'description'}
-                                    label={'Description'}
-                                    description={'A description for this role.'}
+                                    label={t('users.description') as string}
+                                    description={t('users.roleDescription') as string}
                                 />
                             </div>
                             <div css={tw`mt-6`}>
@@ -85,8 +87,8 @@ export default () => {
                                     type={'color'}
                                     id={'color'}
                                     name={'color'}
-                                    label={'Role Color'}
-                                    description={'Set a color for this role. (optional)'}
+                                    label={t('users.roleColor') as string}
+                                    description={t('users.roleColorDescription') as string}
                                 />
                             </div>
 
@@ -97,10 +99,10 @@ export default () => {
                                     css={tw`w-full sm:w-auto sm:mr-2`}
                                     onClick={() => setVisible(false)}
                                 >
-                                    Cancel
+                                    {t('users.cancel') as string}
                                 </Button>
                                 <Button css={tw`w-full mt-4 sm:w-auto sm:mt-0`} type={'submit'}>
-                                    Create Role
+                                    {t('users.createRole') as string}
                                 </Button>
                             </div>
                         </Form>
@@ -114,7 +116,7 @@ export default () => {
                 css={tw`h-10 px-4 py-0 whitespace-nowrap`}
                 onClick={() => setVisible(true)}
             >
-                New Role
+                {t('users.newRole') as string}
             </Button>
         </>
     );

@@ -1,6 +1,7 @@
 import stripAnsi from 'strip-ansi';
 import useFlash from '@/plugins/useFlash';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ServerContext } from '@/state/server';
 import { SocketEvent } from '@server/events';
 import { saveFileContents } from '@/api/routes/server/files';
@@ -8,6 +9,7 @@ import classNames from 'classnames';
 import { DownloadIcon } from '@heroicons/react/outline';
 
 export default () => {
+    const { t } = useTranslation('server');
     const [log, setLog] = useState<string[]>([]);
 
     const { addFlash, clearFlashes, clearAndAddHttpError } = useFlash();
@@ -28,7 +30,7 @@ export default () => {
                 addFlash({
                     key: 'console:share',
                     type: 'success',
-                    message: 'Your server logs have been saved to the .console-logs folder.',
+                    message: t('consolePage.logsSaved') as string,
                 });
             })
             .catch(error => {
@@ -54,7 +56,7 @@ export default () => {
             )}
             onClick={submit}
         >
-            <DownloadIcon className={'w-5 mr-1'} /> Save
+            <DownloadIcon className={'w-5 mr-1'} /> {t('consolePage.saveLogs') as string}
         </div>
     );
 };

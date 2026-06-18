@@ -1,5 +1,6 @@
 import type { ChangeEvent } from 'react';
 import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import { httpErrorToHuman } from '@/api/http';
@@ -81,6 +82,7 @@ const filterFiles = (files: FileObject[], searchTerm: string): FileObject[] => {
 };
 
 export default () => {
+    const { t } = useTranslation('server');
     const id = ServerContext.useStoreState(state => state.server.data!.id);
     const { hash } = useLocation();
     const { data: files, error, mutate } = useFileManagerSwr();
@@ -154,9 +156,9 @@ export default () => {
 
     return (
         <PageContentBlock
-            title={'File Manager'}
+            title={t('filesPage.title') as string}
             header
-            description={'Control your files and folders via the UI.'}
+            description={t('filesPage.description') as string}
             showFlashKey={'files'}
         >
             <ErrorBoundary>
@@ -177,7 +179,7 @@ export default () => {
                             <NewDirectoryButton />
                             <UploadButton />
                             <NavLink to={`/server/${id}/files/new${window.location.hash}`}>
-                                <Button>New File</Button>
+                                <Button>{t('filesPage.newFile') as string}</Button>
                             </NavLink>
                             <Button onClick={() => setGridView(!gridView)}>
                                 <FontAwesomeIcon icon={gridView ? faList : faBorderAll} fixedWidth />
@@ -198,8 +200,8 @@ export default () => {
                             {!filteredFiles.length ? (
                                 <p css={tw`text-sm text-neutral-400 text-center`}>
                                     {searchTerm
-                                        ? 'No files found matching your search.'
-                                        : 'This directory seems to be empty.'}
+                                        ? (t('filesPage.noSearchResults') as string)
+                                        : (t('filesPage.emptyDirectory') as string)}
                                 </p>
                             ) : (
                                 <FadeTransition duration="duration-150" appear show>
@@ -208,8 +210,8 @@ export default () => {
                                             <div css={tw`rounded bg-yellow-400 mb-px p-3`}>
                                                 <p css={tw`text-yellow-900 text-sm text-center`}>
                                                     {searchTerm
-                                                        ? `Found ${filteredFiles.length} files matching your search, showing first 250.`
-                                                        : 'This directory is too large to display in the browser, limiting the output to the first 250 files.'}
+                                                        ? (t('filesPage.foundFiles', { count: filteredFiles.length }) as string)
+                                                        : (t('filesPage.directoryTooLarge') as string)}
                                                 </p>
                                             </div>
                                         )}
@@ -219,9 +221,7 @@ export default () => {
                                                 style={{ backgroundColor: colors.primary }}
                                             >
                                                 <p css={tw`text-white text-sm text-center`}>
-                                                    Found {filteredFiles.length}{' '}
-                                                    {filteredFiles.length === 1 ? 'file' : 'files'} matching &quot;
-                                                    {searchTerm}&quot;
+                                                    {t('filesPage.foundFilesCount', { count: filteredFiles.length, type: filteredFiles.length === 1 ? (t('filesPage.file') as string) : (t('filesPage.files') as string), searchTerm }) as string}
                                                 </p>
                                             </div>
                                         )}
@@ -246,15 +246,15 @@ export default () => {
                     )}
                 </div>
                 <Can action={'file.sftp'}>
-                    <TitledGreyBox title={'SFTP Details'} icon={faFolderPlus} css={tw`xl:mt-0 mt-6 h-auto`}>
+                    <TitledGreyBox title={t('filesPage.sftpDetails') as string} icon={faFolderPlus} css={tw`xl:mt-0 mt-6 h-auto`}>
                         <div>
-                            <Label>Server Address</Label>
+                            <Label>{t('filesPage.serverAddress') as string}</Label>
                             <CopyOnClick text={`sftp://${ip(sftp.ip)}:${sftp.port}`}>
                                 <Input type={'text'} value={`sftp://${ip(sftp.ip)}:${sftp.port}`} readOnly />
                             </CopyOnClick>
                         </div>
                         <div css={tw`mt-6`}>
-                            <Label>Username</Label>
+                            <Label>{t('filesPage.username') as string}</Label>
                             <CopyOnClick text={`${username}.${id}`}>
                                 <Input type={'text'} value={`${username}.${id}`} readOnly />
                             </CopyOnClick>
@@ -263,13 +263,13 @@ export default () => {
                             <div css={tw`flex-1`}>
                                 <div css={tw`border-l-4 border-cyan-500 p-3`}>
                                     <p css={tw`text-xs text-neutral-200`}>
-                                        Your SFTP password is the same as the password you use to access this panel.
+                                        {t('filesPage.sftpPassword') as string}
                                     </p>
                                 </div>
                             </div>
                             <div css={tw`ml-4`}>
                                 <a href={`sftp://${username}.${id}@${ip(sftp.ip)}:${sftp.port}`}>
-                                    <Button.Text variant={Button.Variants.Secondary}>Launch SFTP</Button.Text>
+                                    <Button.Text variant={Button.Variants.Secondary}>{t('filesPage.launchSftp') as string}</Button.Text>
                                 </a>
                             </div>
                         </div>

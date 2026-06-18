@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { rotateDatabasePassword } from '@/api/routes/server/databases';
 import { Actions, useStoreActions } from 'easy-peasy';
 import { ApplicationStore } from '@/state';
@@ -9,6 +10,7 @@ import { Button } from '@/elements/button';
 import tw from 'twin.macro';
 
 export default ({ databaseId, onUpdate }: { databaseId: string; onUpdate: (database: Database) => void }) => {
+    const { t } = useTranslation('server');
     const [loading, setLoading] = useState(false);
     const { addFlash, clearFlashes } = useStoreActions((actions: Actions<ApplicationStore>) => actions.flashes);
     const server = ServerContext.useStoreState(state => state.server.data!);
@@ -27,7 +29,7 @@ export default ({ databaseId, onUpdate }: { databaseId: string; onUpdate: (datab
                 console.error(error);
                 addFlash({
                     type: 'error',
-                    title: 'Error',
+                    title: t('databasesPage.error') as string,
                     message: httpErrorToHuman(error),
                     key: 'database-connection-modal',
                 });
@@ -37,7 +39,7 @@ export default ({ databaseId, onUpdate }: { databaseId: string; onUpdate: (datab
 
     return (
         <Button color={'primary'} css={tw`mr-2`} onClick={rotate} disabled={loading}>
-            Rotate Password
+            {t('databasesPage.rotatePassword') as string}
         </Button>
     );
 };

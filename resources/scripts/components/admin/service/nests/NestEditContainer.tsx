@@ -4,6 +4,7 @@ import type { FormikHelpers } from 'formik';
 import { Form, Formik } from 'formik';
 import { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { object, string } from 'yup';
 
@@ -67,6 +68,7 @@ interface Values {
 }
 
 const EditInformationContainer = () => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -106,13 +108,13 @@ const EditInformationContainer = () => {
         >
             {({ isSubmitting, isValid }) => (
                 <>
-                    <AdminBox title={'Edit Nest'} css={tw`flex-1 self-start w-full relative mb-8 lg:mb-0 mr-0 lg:mr-4`}>
+                    <AdminBox title={t('nests.editNest') as string} css={tw`flex-1 self-start w-full relative mb-8 lg:mb-0 mr-0 lg:mr-4`}>
                         <SpinnerOverlay visible={isSubmitting} />
 
                         <Form>
-                            <Field id={'name'} name={'name'} label={'Name'} type={'text'} css={tw`mb-6`} />
+                            <Field id={'name'} name={'name'} label={t('nests.name') as string} type={'text'} css={tw`mb-6`} />
 
-                            <Field id={'description'} name={'description'} label={'Description'} type={'text'} />
+                            <Field id={'description'} name={'description'} label={t('nests.description') as string} type={'text'} />
 
                             <div css={tw`w-full flex flex-row items-center mt-6`}>
                                 <div css={tw`flex`}>
@@ -121,7 +123,7 @@ const EditInformationContainer = () => {
 
                                 <div css={tw`flex ml-auto`}>
                                     <Button type="submit" disabled={isSubmitting || !isValid}>
-                                        Save Changes
+                                        {t('nests.saveChanges') as string}
                                     </Button>
                                 </div>
                             </div>
@@ -134,6 +136,7 @@ const EditInformationContainer = () => {
 };
 
 const ViewDetailsContainer = () => {
+    const { t } = useTranslation('admin');
     const nest = Context.useStoreState(state => state.nest);
 
     if (nest === undefined) {
@@ -141,25 +144,25 @@ const ViewDetailsContainer = () => {
     }
 
     return (
-        <AdminBox title={'Nest Details'} css={tw`flex-1 w-full relative ml-0 lg:ml-4`}>
+        <AdminBox title={t('nests.nestDetails') as string} css={tw`flex-1 w-full relative ml-0 lg:ml-4`}>
             <div>
                 <div>
                     <div>
-                        <Label>ID</Label>
+                        <Label>{t('nests.id') as string}</Label>
                         <CopyOnClick text={nest.id.toString()}>
                             <Input type={'text'} value={nest.id} readOnly />
                         </CopyOnClick>
                     </div>
 
                     <div css={tw`mt-6`}>
-                        <Label>UUID</Label>
+                        <Label>{t('nests.uuid') as string}</Label>
                         <CopyOnClick text={nest.uuid}>
                             <Input type={'text'} value={nest.uuid} readOnly />
                         </CopyOnClick>
                     </div>
 
                     <div css={tw`mt-6 mb-2`}>
-                        <Label>Author</Label>
+                        <Label>{t('nests.author') as string}</Label>
                         <CopyOnClick text={nest.author}>
                             <Input type={'text'} value={nest.author} readOnly />
                         </CopyOnClick>
@@ -171,6 +174,7 @@ const ViewDetailsContainer = () => {
 };
 
 const NestEditContainer = () => {
+    const { t } = useTranslation('admin');
     const params = useParams<'nestId'>();
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -212,7 +216,7 @@ const NestEditContainer = () => {
                     <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{nest.name}</h2>
                     {(nest.description || '').length < 1 ? (
                         <p css={tw`text-base text-neutral-400`}>
-                            <span css={tw`italic`}>No description</span>
+                            <span css={tw`italic`}>{t('nests.noDescription') as string}</span>
                         </p>
                     ) : (
                         <p
@@ -226,14 +230,14 @@ const NestEditContainer = () => {
                 <div css={tw`flex flex-row ml-auto pl-4`}>
                     <Link to={'/admin/nests'} className={'mr-4'}>
                         <Button.Text>
-                            <FontAwesomeIcon icon={faArrowLeft} className={'mr-2'} /> Go Back
+                            <FontAwesomeIcon icon={faArrowLeft} className={'mr-2'} /> {t('nests.goBack') as string}
                         </Button.Text>
                     </Link>
                     <ImportEggButton css={tw`mr-4`} />
 
                     <NavLink to={`/admin/nests/${params.nestId}/new`}>
                         <Button type={'button'} size={Size.Large} css={tw`h-10 px-4 py-0 whitespace-nowrap`}>
-                            New Egg
+                            {t('nests.newEgg') as string}
                         </Button>
                     </NavLink>
                 </div>

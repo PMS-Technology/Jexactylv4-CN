@@ -16,17 +16,17 @@ class DiscountService
         $discount_code = DiscountCode::where('code', $code)->first();
 
         if (!$discount_code) {
-            throw new DisplayException('The selected discount code does not exist.');
+            throw new DisplayException(trans('exceptions.billing.discount_not_found'));
         }
 
         if (!$discount_code->isValid()) {
-            throw new DisplayException('The selected discount code is invalid.');
+            throw new DisplayException(trans('exceptions.billing.discount_invalid'));
         }
 
         return match($discount_code->type) {
             'percentage' => max(0, $product->price - ($product->price * $discount_code->value / 100)),
             'numeric' => max(0, $product->price - $discount_code->value),
-            default => throw new DisplayException('The discount code has an unknown type.'),
+            default => throw new DisplayException(trans('exceptions.billing.discount_unknown_type')),
         };
     }
 }

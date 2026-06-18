@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Spinner from '@/elements/Spinner';
 import { useFlashKey } from '@/plugins/useFlash';
 import { ServerContext } from '@/state/server';
@@ -13,6 +14,7 @@ import { useDeepCompareEffect } from '@/plugins/useDeepCompareEffect';
 import PageContentBlock from '@/elements/PageContentBlock';
 
 const NetworkContainer = () => {
+    const { t } = useTranslation('server');
     const [loading, setLoading] = useState(false);
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
     const allocationLimit = ServerContext.useStoreState(state => state.server.data!.featureLimits.allocations);
@@ -52,9 +54,9 @@ const NetworkContainer = () => {
     return (
         <PageContentBlock
             showFlashKey={'server:network'}
-            title={'Network'}
+            title={t('networkPage.title') as string}
             header
-            description={'Assign, edit and remove ports from this server.'}
+            description={t('networkPage.description') as string}
         >
             {!data ? (
                 <Spinner size={'large'} centered />
@@ -68,12 +70,11 @@ const NetworkContainer = () => {
                             <SpinnerOverlay visible={loading} />
                             <div css={tw`mt-6 sm:flex items-center justify-end`}>
                                 <p css={tw`text-sm text-neutral-300 mb-4 sm:mr-6 sm:mb-0`}>
-                                    You are currently using {data.length} of {allocationLimit} allowed allocations for
-                                    this server.
+                                    {t('networkPage.allocatedCount', { count: data.length, limit: allocationLimit }) as string}
                                 </p>
                                 {allocationLimit > data.length && (
                                     <Button css={tw`w-full sm:w-auto`} color={'primary'} onClick={onCreateAllocation}>
-                                        Create Allocation
+                                        {t('networkPage.createAllocation') as string}
                                     </Button>
                                 )}
                             </div>

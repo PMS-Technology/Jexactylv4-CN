@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Spinner from '@/elements/Spinner';
 import useFlash from '@/plugins/useFlash';
 import Can from '@/elements/Can';
@@ -12,6 +13,7 @@ import Pagination from '@/elements/Pagination';
 import PageContentBlock from '@/elements/PageContentBlock';
 
 const BackupContainer = () => {
+    const { t } = useTranslation('server');
     const { page, setPage } = useContext(Context);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { data: backups, error, isValidating } = getBackups();
@@ -33,18 +35,16 @@ const BackupContainer = () => {
     }
 
     return (
-        <PageContentBlock title={'Backups'} header description={'Keep your data safe with backups.'}>
+        <PageContentBlock title={t('backupsPage.title') as string} header description={t('backupsPage.description') as string}>
             <FlashMessageRender byKey={'backups'} css={tw`mb-4`} />
             <Pagination data={backups} onPageSelect={setPage}>
                 {({ items }) =>
                     !items.length ? (
-                        // Don't show any error messages if the server has no backups and the user cannot
-                        // create additional ones for the server.
                         !backupLimit ? null : (
                             <p css={tw`text-center text-sm text-neutral-300`}>
                                 {page > 1
-                                    ? "Looks like we've run out of backups to show you, try going back a page."
-                                    : 'It looks like there are no backups currently stored for this server.'}
+                                    ? (t('backupsPage.noMoreBackups') as string)
+                                    : (t('backupsPage.noBackups') as string)}
                             </p>
                         )
                     ) : (
@@ -56,14 +56,14 @@ const BackupContainer = () => {
             </Pagination>
             {backupLimit === 0 && (
                 <p css={tw`text-center text-sm text-neutral-300`}>
-                    Backups cannot be created for this server because the backup limit is set to 0.
+                    {t('backupsPage.cannotCreate') as string}
                 </p>
             )}
             <Can action={'backup.create'}>
                 <div css={tw`mt-6 sm:flex items-center justify-end`}>
                     {backupLimit > 0 && backups.backupCount > 0 && (
                         <p css={tw`text-sm text-neutral-300 mb-4 sm:mr-6 sm:mb-0`}>
-                            {backups.backupCount} of {backupLimit} backups have been created for this server.
+                            {t('backupsPage.allocatedCount', { count: backups.backupCount, limit: backupLimit }) as string}
                         </p>
                     )}
                     {backupLimit > 0 && backupLimit > backups.backupCount && (

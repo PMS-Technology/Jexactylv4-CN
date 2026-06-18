@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { faClipboard, faCode } from '@fortawesome/free-solid-svg-icons';
 import type { Actions } from 'easy-peasy';
 import { useStoreActions } from 'easy-peasy';
@@ -11,6 +12,7 @@ import type { ApplicationStore } from '@/state';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
         (actions: Actions<ApplicationStore>) => actions.flashes,
     );
@@ -36,7 +38,7 @@ export default () => {
 
     return (
         <>
-            <AdminBox title={'Configuration'} icon={faCode} css={tw`mb-4`}>
+            <AdminBox title={t('nodes.nodeConfiguration') as string} icon={faCode} css={tw`mb-4`}>
                 <div css={tw`relative`}>
                     <div css={tw`absolute top-0 right-0`}>
                         <CopyOnClick text={configuration} showInNotification={false}>

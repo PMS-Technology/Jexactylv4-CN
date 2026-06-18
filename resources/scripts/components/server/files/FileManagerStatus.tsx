@@ -1,5 +1,6 @@
 import { CloudUploadIcon, XIcon } from '@heroicons/react/solid';
 import { useContext, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/elements/button/index';
 import { Dialog, DialogWrapperContext } from '@/elements/dialog';
@@ -31,12 +32,21 @@ const Spinner = ({ progress, className }: { progress: number; className?: string
 );
 
 const FileUploadList = () => {
-    const { close } = useContext(DialogWrapperContext);
+    const { t } = useTranslation('server');
+    const { close, setProps } = useContext(DialogWrapperContext);
     const cancelFileUpload = ServerContext.useStoreActions(actions => actions.files.cancelFileUpload);
     const clearFileUploads = ServerContext.useStoreActions(actions => actions.files.clearFileUploads);
     const uploads = ServerContext.useStoreState(state =>
         Object.entries(state.files.uploads).sort(([a], [b]) => a.localeCompare(b)),
     );
+
+    useEffect(() => {
+        setProps(state => ({
+            ...state,
+            title: t('filesPage.fileUploads'),
+            description: t('filesPage.fileUploadsDescription'),
+        }));
+    }, [setProps, t]);
 
     return (
         <div className={'mt-6 space-y-2'}>
@@ -58,20 +68,21 @@ const FileUploadList = () => {
             ))}
             <Dialog.Footer>
                 <Button.Danger variant={Button.Variants.Secondary} onClick={() => clearFileUploads()}>
-                    Cancel Uploads
+                    {t('filesPage.cancelUploads')}
                 </Button.Danger>
-                <Button.Text onClick={close}>Close</Button.Text>
+                <Button.Text onClick={close}>{t('filesPage.close')}</Button.Text>
             </Dialog.Footer>
         </div>
     );
 };
 
 const FileUploadListDialog = asDialog({
-    title: 'File Uploads',
-    description: 'The following files are being uploaded to your server.',
+    title: '',
+    description: '',
 })(FileUploadList);
 
 export default () => {
+    const { t } = useTranslation('server');
     const [open, setOpen] = useState(false);
 
     const count = ServerContext.useStoreState(state => Object.keys(state.files.uploads).length);
@@ -89,7 +100,7 @@ export default () => {
     return (
         <>
             {count > 0 && (
-                <Tooltip content={`${count} files are uploading, click to view`}>
+                <Tooltip content={t('filesPage.uploadingFilesTooltip', { count }) as string}>
                     <button className={'flex h-10 w-10 items-center justify-center'} onClick={() => setOpen(true)}>
                         <Spinner progress={(progress.uploaded / progress.total) * 100} className={'h-8 w-8'} />
                         <CloudUploadIcon className={'absolute mx-auto h-3 animate-pulse'} />

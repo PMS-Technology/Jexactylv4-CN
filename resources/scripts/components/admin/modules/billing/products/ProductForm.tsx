@@ -21,8 +21,10 @@ import { getCategory } from '@/api/routes/admin/billing/categories';
 import { Product } from '@definitions/admin';
 import { ProductValues } from '@/api/routes/admin/billing/types';
 import { Alert } from '@/elements/alert';
+import { useTranslation } from 'react-i18next';
 
 export default ({ product }: { product?: Product }) => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
     const params = useParams<'id'>();
     const [uuid, setUuid] = useState<string>();
@@ -63,7 +65,7 @@ export default ({ product }: { product?: Product }) => {
     }, [params.id]);
 
     return (
-        <AdminContentBlock title={product ? 'Edit Product' : 'New Product'}>
+        <AdminContentBlock title={product ? t('billingModule.editProduct') : t('billingModule.newProduct')}>
             <div css={tw`w-full flex flex-row items-center m-8`}>
                 {product?.icon ? (
                     <img src={product.icon} className={'ww-8 h-8 mr-4'} />
@@ -71,11 +73,11 @@ export default ({ product }: { product?: Product }) => {
                     <CubeIcon className={'w-8 h-8 mr-4'} />
                 )}
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{product?.name ?? 'New Product'}</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{product?.name ?? t('billingModule.newProduct')}</h2>
                     <p
                         css={tw`hidden lg:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        {product?.uuid ?? 'Add a new product to the billing interface.'}
+                        {product?.uuid ?? t('billingModule.addNewProductToBilling')}
                     </p>
                 </div>
                 {product && (
@@ -83,7 +85,7 @@ export default ({ product }: { product?: Product }) => {
                         <Link to={`/admin/billing/categories/${Number(params.id)}`}>
                             <Button>
                                 <FontAwesomeIcon icon={faArrowLeft} className={'mr-2'} />
-                                Return to Category
+                                {t('billingModule.returnToCategory')}
                             </Button>
                         </Link>
                     </div>
@@ -126,111 +128,109 @@ export default ({ product }: { product?: Product }) => {
                     <Form>
                         <div css={tw`grid grid-cols-1 lg:grid-cols-2 gap-4`}>
                             <div css={tw`w-full flex flex-col mr-0 lg:mr-2`}>
-                                <AdminBox title={'General Details'} icon={faPuzzlePiece}>
+                                <AdminBox title={t('billingModule.generalDetails')} icon={faPuzzlePiece}>
                                     <FieldRow>
                                         <Field
                                             id={'name'}
                                             name={'name'}
                                             type={'text'}
-                                            label={'Name'}
-                                            description={'A simple name to identify this product.'}
+                                            label={t('billingModule.name')}
+                                            description={t('billingModule.simpleNameToIdentifyProduct')}
                                         />
                                         <Field
                                             id={'description'}
                                             name={'description'}
                                             type={'text'}
-                                            label={'Description'}
-                                            description={'A tagline or description for this product.'}
+                                            label={t('billingModule.description')}
+                                            description={t('billingModule.taglineOrDescriptionForProduct')}
                                         />
                                         <Field
                                             id={'icon'}
                                             name={'icon'}
                                             type={'text'}
-                                            label={'Icon'}
-                                            description={'An icon to be displayed with this product.'}
+                                            label={t('billingModule.icon')}
+                                            description={t('billingModule.iconDisplayedWithProduct')}
                                         />
                                         <Field
                                             id={'price'}
                                             name={'price'}
                                             type={'text'} // changed from number to text
                                             onChange={handleChange}
-                                            label={'Monthly Cost'}
+                                            label={t('billingModule.monthlyCost')}
                                             description={
-                                                'The cost of this product monthly in the selected billing currency.'
+                                                t('billingModule.costOfProductMonthly')
                                             }
                                         />
                                     </FieldRow>
                                 </AdminBox>
-                                <AdminBox title={'Resource Limits'} className={'lg:mt-4'} icon={faMicrochip}>
+                                <AdminBox title={t('billingModule.resourceLimits')} className={'lg:mt-4'} icon={faMicrochip}>
                                     <FieldRow>
                                         <Field
                                             id={'limits.cpu'}
                                             name={'limits.cpu'}
                                             type={'text'}
-                                            label={'CPU Limit (%)'}
-                                            description={'The amount of a CPU thread a server can use.'}
+                                            label={t('billingModule.cpuLimit')}
+                                            description={t('billingModule.cpuThreadServerCanUse')}
                                         />
                                         <Field
                                             id={'limits.memory'}
                                             name={'limits.memory'}
                                             type={'text'}
-                                            label={'Memory Limit (MB)'}
-                                            description={'The amount of memory a server is allowed to use.'}
+                                            label={t('billingModule.memoryLimit')}
+                                            description={t('billingModule.memoryServerAllowedToUse')}
                                         />
                                         <Field
                                             id={'limits.disk'}
                                             name={'limits.disk'}
                                             type={'text'}
-                                            label={'Disk Limit (MB)'}
-                                            description={'The amount of disk a server is allowed to use.'}
+                                            label={t('billingModule.diskLimit')}
+                                            description={t('billingModule.diskServerAllowedToUse')}
                                         />
                                     </FieldRow>
                                 </AdminBox>
                             </div>
                             <div css={tw`w-full flex flex-col mr-0 lg:mr-2`}>
-                                <AdminBox title={'Feature Limits'} icon={faBell}>
+                                <AdminBox title={t('billingModule.featureLimits')} icon={faBell}>
                                     <FieldRow>
                                         <Field
                                             id={'limits.backup'}
                                             name={'limits.backup'}
                                             type={'text'}
-                                            label={'Backup Limit'}
-                                            description={'The amount of backups this product can have.'}
+                                            label={t('billingModule.backupLimit')}
+                                            description={t('billingModule.backupsProductCanHave')}
                                         />
                                         <Field
                                             id={'limits.database'}
                                             name={'limits.database'}
                                             type={'text'}
-                                            label={'Database Limit'}
-                                            description={'The amount of databases this product can have.'}
+                                            label={t('billingModule.databaseLimit')}
+                                            description={t('billingModule.databasesProductCanHave')}
                                         />
                                         <Field
                                             id={'limits.allocation'}
                                             name={'limits.allocation'}
                                             type={'text'}
-                                            label={'Allocation (Port) Limit'}
-                                            description={'The amount of ports this product can have.'}
+                                            label={t('billingModule.allocationPortLimit')}
+                                            description={t('billingModule.portsProductCanHave')}
                                         />
                                     </FieldRow>
                                 </AdminBox>
                                 {/* Dynamic alerts based on price */}
                                 {Number(values.price) === 0 && (
                                     <Alert type={'warning'} className={'mt-4'}>
-                                        You have set this product to be free. Please confirm this choice before
-                                        proceeding, otherwise users will be able to use this plan without payment.
+                                        {t('billingModule.productSetToFreeConfirmChoice')}
                                     </Alert>
                                 )}
                                 {Number(values.price) === 0 && (
                                     <Alert type={'info'} className={'mt-4'}>
-                                        As this product is free, users will only be able to use it once to prevent
-                                        abuse.
+                                        {t('billingModule.productFreeUsersCanOnlyUseOnce')}
                                     </Alert>
                                 )}
                                 <div css={tw`rounded shadow-md mt-4 py-2 pr-6`} style={{ backgroundColor: secondary }}>
                                     <div css={tw`text-right`}>
                                         {product && <ProductDeleteButton product={product} />}
                                         <Button type={'submit'} disabled={isSubmitting || !isValid}>
-                                            {product ? 'Update Product' : 'Create Product'}
+                                            {product ? t('billingModule.updateProduct') : t('billingModule.createProduct')}
                                         </Button>
                                     </div>
                                 </div>

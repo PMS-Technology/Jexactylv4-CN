@@ -90,7 +90,7 @@ class EggImporterService
                     throw new BadYamlFormatException('There was an error while attempting to parse the YAML: ' . $exception->getMessage() . '.');
                 }
             default:
-                throw new DisplayException('unknown content type');
+                throw new DisplayException(trans('exceptions.nest.importer.unknown_content_type'));
         }
     }
 

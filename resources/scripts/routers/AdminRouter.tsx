@@ -1,5 +1,6 @@
 import { useStoreState } from 'easy-peasy';
 import { NavLink, Route, Routes } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Avatar from '@/elements/Avatar';
 import Sidebar from '@/elements/Sidebar';
 import AdminIndicators from '@admin/AdminIndicators';
@@ -14,6 +15,8 @@ import { PuzzleIcon, ReplyIcon } from '@heroicons/react/outline';
 import { Fragment } from 'react';
 
 function AdminRouter() {
+    const { t } = useTranslation('common');
+    const { t: tAdmin } = useTranslation('admin');
     const theme = useStoreState(state => state.theme.data!);
     const user = useStoreState(state => state.user.data!);
     const settings = useStoreState(state => state.settings.data!);
@@ -34,7 +37,7 @@ function AdminRouter() {
                         <MobileSidebar.Link
                             key={route.route}
                             icon={route.icon ?? PuzzleIcon}
-                            text={route.name}
+                            text={route.nameKey ? tAdmin(route.nameKey) : route.name}
                             linkTo={route.path}
                             end={route.end}
                         />
@@ -58,15 +61,15 @@ function AdminRouter() {
                 <Sidebar.Wrapper theme={theme} $admin>
                     <NavLink to="/" className={'mb-[18px]'}>
                         <Sidebar.Icon icon={ReplyIcon} />
-                        <span>Return</span>
+                        <span>{t('return')}</span>
                     </NavLink>
                     {categories.map(category => {
                         const categoryRoutes = routes.admin.filter(route => route.category === category && route.name);
                         if (categoryRoutes.length === 0) return null;
 
-                        return (
-                            <Fragment key={category}>
-                                <Sidebar.Section>{category[0]!.toUpperCase() + category.slice(1)}</Sidebar.Section>
+                            return (
+                                <Fragment key={category}>
+                                <Sidebar.Section>{tAdmin(`categories.${category}`)}</Sidebar.Section>
                                 {categoryRoutes
                                     .filter(
                                         route =>
@@ -75,7 +78,7 @@ function AdminRouter() {
                                     .map(route => (
                                         <NavLink to={route.path} key={route.path} end={route.end}>
                                             <Sidebar.Icon icon={route.icon ?? PuzzleIcon} />
-                                            <span>{route.name}</span>
+                                            <span>{route.nameKey ? tAdmin(route.nameKey) : route.name}</span>
                                         </NavLink>
                                     ))}
                             </Fragment>
@@ -89,9 +92,9 @@ function AdminRouter() {
                     <div className={'flex flex-col ml-3'}>
                         <span className={'font-sans font-normal text-xs text-gray-300 leading-tight select-none'}>
                             <div className={'w-full flex justify-between mb-1'}>
-                                <p className={'text-sm text-gray-400'}>Welcome,</p>
+                                <p className={'text-sm text-gray-400'}>{t('welcome')}</p>
                                 <Pill size={'xsmall'} type={'info'}>
-                                    {user.roleName === 'None' ? 'Root Admin' : user.roleName}
+                                    {user.roleName === 'None' ? t('rootAdmin') : user.roleName}
                                 </Pill>
                             </div>
                             {user.email}

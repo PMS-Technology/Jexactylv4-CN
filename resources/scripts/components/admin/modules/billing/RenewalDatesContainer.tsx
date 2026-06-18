@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import AdminBox from '@/elements/AdminBox';
 import { Button } from '@/elements/button';
 import { useStoreActions, useStoreState } from '@/state/hooks';
@@ -10,6 +11,7 @@ import FlashMessageRender from '@/elements/FlashMessageRender';
 import useFlash from '@/plugins/useFlash';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [loading, setLoading] = useState(false);
     const { clearFlashes, addFlash } = useFlash();
 
@@ -41,14 +43,14 @@ export default () => {
             addFlash({
                 key: 'admin:billing',
                 type: 'success',
-                message: 'Renewal settings updated successfully.',
+                message: t('billingModule.renewalSettingsUpdated'),
             });
         } catch (error) {
             console.error(error);
             addFlash({
                 key: 'admin:billing',
                 type: 'error',
-                message: 'Failed to update renewal settings.',
+                message: t('billingModule.renewalSettingsFailed'),
             });
         } finally {
             setLoading(false);
@@ -60,13 +62,12 @@ export default () => {
             <FlashMessageRender byKey={'admin:billing'} className={'mb-4'} />
 
             <div className={'grid lg:grid-cols-2 gap-4'}>
-                <AdminBox title={'Renewal Days Addition'} icon={faCalendar}>
+                <AdminBox title={t('billingModule.renewalDaysAddition') as string} icon={faCalendar}>
                     <p className={'text-gray-400 mb-4'}>
-                        Number of days that should be added to a billable server when a renewal is processed, by default
-                        30 days.
+                        {t('billingModule.renewalDaysDescription') as string}
                     </p>
                     <div>
-                        <Label>Days</Label>
+                        <Label>{t('billingModule.days') as string}</Label>
                         <Input
                             type={'number'}
                             min={1}
@@ -76,17 +77,17 @@ export default () => {
                             disabled={loading}
                         />
                         <p className={'text-xs text-gray-500 mt-2'}>
-                            When a billable server is purchased or renewed, it will be active for this many days.
+                            {t('billingModule.renewalDaysHelp') as string}
                         </p>
                     </div>
                 </AdminBox>
 
-                <AdminBox title={'Deletion Threshold'} icon={faClock}>
+                <AdminBox title={t('billingModule.deletionThreshold') as string} icon={faClock}>
                     <p className={'text-gray-400 mb-4'}>
-                        Number of days after expiration before a billable server is automatically deleted.
+                        {t('billingModule.deletionThresholdDescription') as string}
                     </p>
                     <div>
-                        <Label>Days</Label>
+                        <Label>{t('billingModule.days') as string}</Label>
                         <Input
                             type={'number'}
                             min={0}
@@ -96,7 +97,7 @@ export default () => {
                             disabled={loading}
                         />
                         <p className={'text-xs text-gray-500 mt-2'}>
-                            Billable servers will be deleted after this many days of missing the renewal.
+                            {t('billingModule.deletionThresholdHelp') as string}
                         </p>
                     </div>
                 </AdminBox>
@@ -104,7 +105,7 @@ export default () => {
 
             <div className={'flex justify-end mt-6'}>
                 <Button onClick={handleSaveAll} disabled={loading}>
-                    {loading ? 'Saving...' : 'Save All Settings'}
+                    {loading ? (t('billingModule.saving') as string) : (t('billingModule.saveAllSettings') as string)}
                 </Button>
             </div>
         </div>

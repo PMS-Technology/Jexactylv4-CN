@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Spinner from '@/elements/Spinner';
 import { getEvents, sendTestEvent, toggleEventStatus, WebhookEvent } from '@/api/routes/admin/webhooks';
 import EventsTable from './EventsTable';
@@ -9,6 +10,7 @@ import Input from '@/elements/Input';
 import WebhookSettings from '../WebhookSettings';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { colors } = useStoreState(s => s.theme.data!);
     const [events, setEvents] = useState<WebhookEvent[]>();
     const [filteredEvents, setFilteredEvents] = useState<WebhookEvent[]>();
@@ -49,7 +51,7 @@ export default () => {
 
         sendTestEvent()
             .then(() => {
-                addFlash({ key: 'admin:webhooks', type: 'success', message: 'Webhook sent successfully!' });
+                addFlash({ key: 'admin:webhooks', type: 'success', message: t('settings.webhookSent') as string });
             })
             .catch(error => clearAndAddHttpError({ key: 'admin:webhooks', error }));
     };
@@ -62,17 +64,17 @@ export default () => {
             <div className={'w-full h-px bg-white/50 rounded-full my-10'} />
             <div className={'flex grid lg:grid-cols-2 mb-6'}>
                 <Input
-                    placeholder={'Search for a webhook event...'}
+                    placeholder={t('settings.searchEvents') as string}
                     value={searchTerm}
                     onChange={e => handleSearch(e.target.value)}
                 />
                 <div className={'flex justify-end'}>
                     <div className={'p-2 w-fit rounded-lg space-x-3'} style={{ background: colors.secondary }}>
                         <Button.Text onClick={doTest} variant={Button.Variants.Secondary}>
-                            Send Test
+                            {t('settings.sendTest') as string}
                         </Button.Text>
-                        <Button.Danger onClick={doDisable}>Disable All</Button.Danger>
-                        <Button onClick={doEnable}>Enable All</Button>
+                        <Button.Danger onClick={doDisable}>{t('settings.disableAll') as string}</Button.Danger>
+                        <Button onClick={doEnable}>{t('settings.enableAll') as string}</Button>
                     </div>
                 </div>
             </div>

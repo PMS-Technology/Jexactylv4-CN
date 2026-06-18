@@ -11,8 +11,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faKey } from '@fortawesome/free-solid-svg-icons';
 import CreateSSHKeyForm from '@account/ssh/CreateSSHKeyForm';
 import DeleteSSHKeyButton from '@account/ssh/DeleteSSHKeyButton';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('dashboard');
     const { clearAndAddHttpError } = useFlashKey('account');
     const { data, isValidating, error } = useSSHKeys({
         revalidateOnMount: true,
@@ -27,17 +29,17 @@ export default () => {
     }, [error, data]);
 
     return (
-        <PageContentBlock title={'SSH Keys'} header description={'Create, use and delete SSH keys to access servers.'}>
+        <PageContentBlock title={t('account.sshKeys')} header description={t('account.sshKeysDescription')}>
             <FlashMessageRender byKey={'account'} />
             <div css={tw`md:flex flex-nowrap my-10`}>
-                <ContentBox title={'Add SSH Key'} css={tw`flex-none w-full md:w-1/2`}>
+                <ContentBox title={t('account.addSshKey')} css={tw`flex-none w-full md:w-1/2`}>
                     <CreateSSHKeyForm />
                 </ContentBox>
-                <ContentBox title={'SSH Keys'} css={tw`flex-1 overflow-hidden mt-8 md:mt-0 md:ml-8`}>
+                <ContentBox title={t('account.sshKeys')} css={tw`flex-1 overflow-hidden mt-8 md:mt-0 md:ml-8`}>
                     <SpinnerOverlay visible={!data && isValidating} />
                     {!data || !data.length ? (
                         <p css={tw`text-center text-sm`}>
-                            {!data ? 'Loading...' : 'No SSH Keys exist for this account.'}
+                            {!data ? t('account.loading') : t('account.noSshKeys')}
                         </p>
                     ) : (
                         data.map((key, index) => (
@@ -52,7 +54,7 @@ export default () => {
                                         SHA256:{key.fingerprint}
                                     </p>
                                     <p css={tw`text-xs mt-1 text-gray-400 uppercase`}>
-                                        Added on:&nbsp;
+                                        {t('account.addedOn')}:&nbsp;
                                         {key.created_at.toLocaleString()}
                                     </p>
                                 </div>

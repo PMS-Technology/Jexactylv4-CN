@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { useTranslation } from 'react-i18next';
 import useEventListener from '@/plugins/useEventListener';
 import SearchModal from '@account/search/SearchModal';
 
 export default () => {
+    const { t } = useTranslation('dashboard');
     const [visible, setVisible] = useState(false);
 
     useEventListener('keydown', (e: KeyboardEvent) => {
@@ -21,7 +23,7 @@ export default () => {
 
             <div className={'navigation-link'} onClick={() => setVisible(true)}>
                 <FontAwesomeIcon icon={faSearch} />
-                Search
+                {t('search')}
             </div>
         </>
     );

@@ -3,6 +3,7 @@ import { useStoreActions } from 'easy-peasy';
 import type { FormikHelpers } from 'formik';
 import { Form, Formik, useField, useFormikContext } from 'formik';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { object } from 'yup';
 
 import type { Egg, EggVariable, LoadedEgg } from '@/api/routes/admin/egg';
@@ -26,6 +27,7 @@ import { useStoreState } from '@/state/hooks';
 import { faLayerGroup } from '@fortawesome/free-solid-svg-icons';
 
 function ServerStartupLineContainer({ egg, server }: { egg?: Egg; server: Server }) {
+    const { t } = useTranslation('admin');
     const { isSubmitting, setFieldValue } = useFormikContext();
 
     useEffect(() => {
@@ -45,24 +47,24 @@ function ServerStartupLineContainer({ egg, server }: { egg?: Egg; server: Server
     }, [egg]);
 
     return (
-        <AdminBox title={'Startup Command'} className="relative w-full">
+        <AdminBox title={t('servers.startupCommand') as string} className="relative w-full">
             <SpinnerOverlay visible={isSubmitting} />
 
             <div className="mb-6">
                 <Field
                     id={'startup'}
                     name={'startup'}
-                    label={'Startup Command'}
+                    label={t('servers.startupCommand') as string}
                     type={'text'}
                     description={
-                        "Edit your server's startup command here. The following variables are available by default: {{SERVER_MEMORY}}, {{SERVER_IP}}, and {{SERVER_PORT}}."
+                        t('servers.startupCommandDescription') as string
                     }
                     placeholder={egg?.startup || ''}
                 />
             </div>
 
             <div>
-                <Label>Default Startup Command</Label>
+                <Label>{t('servers.defaultStartupCommand') as string}</Label>
                 <Input value={egg?.startup || ''} readOnly />
             </div>
         </AdminBox>
@@ -80,12 +82,13 @@ export function ServerServiceContainer({
     nestId: number;
     noToggle?: boolean;
 }) {
+    const { t } = useTranslation('admin');
     const { isSubmitting } = useFormikContext();
 
     const [nestId, setNestId] = useState<number>(_nestId);
 
     return (
-        <AdminBox title={'Service Configuration'} isLoading={isSubmitting} className="w-full" icon={faLayerGroup}>
+        <AdminBox title={t('servers.serviceConfiguration') as string} isLoading={isSubmitting} className="w-full" icon={faLayerGroup}>
             <div className="mb-6">
                 <NestSelector selectedNestId={nestId} onNestSelect={setNestId} />
             </div>
@@ -94,7 +97,11 @@ export function ServerServiceContainer({
             </div>
             {!noToggle && (
                 <div className="bg-neutral-800 border border-neutral-900 shadow-inner p-4 rounded">
-                    <FormikSwitch name={'skipScripts'} label={'Skip Egg Install Script'} description={'Soon™'} />
+                    <FormikSwitch
+                        name={'skipScripts'}
+                        label={t('servers.skipEggInstallScript') as string}
+                        description={t('servers.comingSoon') as string}
+                    />
                 </div>
             )}
         </AdminBox>
@@ -102,16 +109,17 @@ export function ServerServiceContainer({
 }
 
 export function ServerImageContainer() {
+    const { t } = useTranslation('admin');
     const { isSubmitting } = useFormikContext();
 
     return (
-        <AdminBox title={'Image Configuration'} className="relative w-full">
+        <AdminBox title={t('servers.imageConfiguration') as string} className="relative w-full">
             <SpinnerOverlay visible={isSubmitting} />
 
             <div className="md:w-full md:flex md:flex-col">
                 <div>
                     {/* TODO: make this a proper select but allow a custom image to be specified if needed. */}
-                    <Field id={'image'} name={'image'} label={'Docker Image'} type={'text'} />
+                    <Field id={'image'} name={'image'} label={t('servers.dockerImage') as string} type={'text'} />
                 </div>
             </div>
         </AdminBox>
@@ -160,6 +168,7 @@ function ServerStartupForm({
     setEgg: (value: LoadedEgg | undefined) => void;
     server: Server;
 }) {
+    const { t } = useTranslation('admin');
     const {
         isSubmitting,
         isValid,
@@ -205,7 +214,7 @@ function ServerStartupForm({
                 <div className="rounded shadow-md py-2 pr-6 mt-6" style={{ backgroundColor: secondary }}>
                     <div className="flex flex-row">
                         <Button type="submit" className="ml-auto" disabled={isSubmitting || !isValid}>
-                            Save Changes
+                            {t('servers.saveChanges') as string}
                         </Button>
                     </div>
                 </div>

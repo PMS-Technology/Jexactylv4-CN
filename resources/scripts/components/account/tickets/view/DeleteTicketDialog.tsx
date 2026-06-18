@@ -9,8 +9,10 @@ import FlashMessageRender from '@/elements/FlashMessageRender';
 import { deleteTicket, useTicketFromRoute } from '@/api/routes/account/tickets';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('dashboard');
     const navigate = useNavigate();
     const { data: ticket } = useTicketFromRoute();
     const [open, setOpen] = useState<boolean>(false);
@@ -41,10 +43,10 @@ export default () => {
                 open={open}
                 onConfirmed={submit}
                 onClose={() => setOpen(false)}
-                title={'Confirm ticket deletion'}
+                title={t('tickets.confirmDeletion')}
             >
                 <FlashMessageRender byKey={'account:tickets:view'} />
-                Are you sure you want to delete this ticket and the associated messages?
+                {t('tickets.confirmDeletionDescription')}
             </Dialog.Confirm>
         </>
     );

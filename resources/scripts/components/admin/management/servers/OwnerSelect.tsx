@@ -1,11 +1,13 @@
 import { useFormikContext } from 'formik';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { searchUserAccounts } from '@/api/routes/admin/users';
 import SearchableSelect, { Option } from '@/elements/SearchableSelect';
 import type { User } from '@definitions/admin';
 
 export default ({ selected }: { selected?: User }) => {
+    const { t } = useTranslation('admin');
     const { setFieldValue } = useFormikContext();
 
     const [user, setUser] = useState<User | null>(selected || null);
@@ -32,8 +34,8 @@ export default ({ selected }: { selected?: User }) => {
         <SearchableSelect
             id={'ownerId'}
             name={'ownerId'}
-            label={'Owner'}
-            placeholder={'Select a user...'}
+            label={t('servers.owner') as string}
+            placeholder={t('servers.selectUser') as string}
             items={users}
             selected={user}
             setSelected={setUser}

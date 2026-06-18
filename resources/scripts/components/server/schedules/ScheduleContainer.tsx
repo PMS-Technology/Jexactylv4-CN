@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getSchedules } from '@/api/routes/server/schedules';
 import { ServerContext } from '@/state/server';
 import Spinner from '@/elements/Spinner';
@@ -13,6 +14,7 @@ import { Button } from '@/elements/button/index';
 import PageContentBlock from '@/elements/PageContentBlock';
 
 function ScheduleContainer() {
+    const { t } = useTranslation('server');
     const server = ServerContext.useStoreState(state => state.server.data!);
     const { clearFlashes, addError } = useFlash();
     const [loading, setLoading] = useState(true);
@@ -34,7 +36,7 @@ function ScheduleContainer() {
     }, []);
 
     return (
-        <PageContentBlock title={'Schedules'} header description={'Create and edit automatic tasks for your server.'}>
+        <PageContentBlock title={t('schedulesPage.title') as string} header description={t('schedulesPage.description') as string}>
             <FlashMessageRender byKey={'schedules'} css={tw`mb-4`} />
             {!schedules.length && loading ? (
                 <Spinner size={'large'} centered />
@@ -42,7 +44,7 @@ function ScheduleContainer() {
                 <>
                     {schedules.length === 0 ? (
                         <p css={tw`text-sm text-center text-neutral-300`}>
-                            There are no schedules configured for this server.
+                            {t('schedulesPage.noSchedules') as string}
                         </p>
                     ) : (
                         schedules.map(schedule => (
@@ -57,7 +59,7 @@ function ScheduleContainer() {
                         <div css={tw`mt-8 flex justify-end`}>
                             <EditScheduleModal visible={visible} onModalDismissed={() => setVisible(false)} />
                             <Button type={'button'} onClick={() => setVisible(true)}>
-                                Create schedule
+                                {t('schedulesPage.createSchedule') as string}
                             </Button>
                         </div>
                     </Can>

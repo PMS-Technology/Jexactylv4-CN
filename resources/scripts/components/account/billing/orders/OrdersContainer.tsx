@@ -21,6 +21,7 @@ import { Context as OrderContext } from '@/api/routes/account/billing/orders/ind
 import { OrderFilters } from '@/api/routes/account/billing/orders/types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle, faXmarkCircle } from '@fortawesome/free-solid-svg-icons';
+import { useTranslation } from 'react-i18next';
 
 export function format(date: number): string {
     let prefix = 'th';
@@ -60,6 +61,7 @@ export function type(state: string): PillStatus {
 }
 
 function OrderTable({ server_id }: { server_id?: number }) {
+    const { t } = useTranslation('dashboard');
     const { data: orders, error } = useGetOrders();
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { setPage, setFilters, sort, setSort, sortDirection } = useContext(OrderContext);
@@ -97,28 +99,28 @@ function OrderTable({ server_id }: { server_id?: number }) {
                         <table className={`w-full table-auto`}>
                             <TableHead>
                                 <TableHeader
-                                    name={'ID'}
+                                    name={t('billing.orderId')}
                                     direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('id')}
                                 />
                                 <TableHeader
-                                    name={'Total Price'}
+                                    name={t('billing.totalPrice')}
                                     direction={sort === 'total' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('total')}
                                 />
-                                <TableHeader name={'Description'} />
+                                <TableHeader name={t('billing.description')} />
                                 <TableHeader
-                                    name={'Created At'}
+                                    name={t('billing.createdAt')}
                                     direction={sort === 'created_at' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('created_at')}
                                 />
-                                <TableHeader name={'Payment State'} />
+                                <TableHeader name={t('billing.paymentState')} />
                                 <TableHeader
-                                    name={'Order Type'}
+                                    name={t('billing.orderType')}
                                     direction={sort === 'type' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('type')}
                                 />
-                                {!server_id && <TableHeader name={'Active Service'} />}
+                                {!server_id && <TableHeader name={t('billing.activeService')} />}
                             </TableHead>
                             <TableBody>
                                 {orders !== undefined &&
@@ -175,15 +177,14 @@ function OrderTable({ server_id }: { server_id?: number }) {
 }
 
 export default ({ server_id }: { server_id?: number }) => {
+    const { t } = useTranslation('dashboard');
     const hooks = useTableHooks<OrderFilters>();
 
     return !server_id ? (
         <PageContentBlock>
             <div className={'text-3xl lg:text-5xl font-bold mt-8 mb-12'}>
-                Billing Activity
-                <p className={'text-gray-400 font-normal text-sm mt-1'}>
-                    View and manage the active and previous subscriptions you&apos;ve created.
-                </p>
+                {t('billing.billingActivity')}
+                <p className={'text-gray-400 font-normal text-sm mt-1'}>{t('billing.billingActivityDescription')}</p>
                 <FlashMessageRender byKey={'billing:orders'} className={'mt-4'} />
             </div>
             <OrderContext.Provider value={hooks}>

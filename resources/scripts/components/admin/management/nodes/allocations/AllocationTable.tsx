@@ -1,4 +1,5 @@
 import { useContext, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import tw from 'twin.macro';
 
@@ -25,6 +26,7 @@ interface Props {
 }
 
 function AllocationsTable({ nodeId, filters }: Props) {
+    const { t } = useTranslation('admin');
     const { colors } = useStoreState(state => state.theme.data!);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
 
@@ -61,17 +63,17 @@ function AllocationsTable({ nodeId, filters }: Props) {
                         <table css={tw`w-full table-auto`}>
                             <TableHead>
                                 <TableHeader
-                                    name={'IP Address'}
+                                    name={t('nodes.ipAddress') as string}
                                     direction={sort === 'ip' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('ip')}
                                 />
-                                <TableHeader name={'Alias'} />
+                                <TableHeader name={t('nodes.alias') as string} />
                                 <TableHeader
-                                    name={'Port'}
+                                    name={t('nodes.port') as string}
                                     direction={sort === 'port' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('port')}
                                 />
-                                <TableHeader name={'Assigned To'} />
+                                <TableHeader name={t('nodes.assignedTo') as string} />
                                 <TableHeader />
                             </TableHead>
 

@@ -3,6 +3,7 @@ import type { Actions } from 'easy-peasy';
 import { useStoreActions } from 'easy-peasy';
 import type { FormikHelpers } from 'formik';
 import type { ApplicationStore } from '@/state';
+import { useTranslation } from 'react-i18next';
 import { Dialog } from '@/elements/dialog';
 import SpinnerOverlay from '@/elements/SpinnerOverlay';
 import { useState } from 'react';
@@ -13,6 +14,7 @@ import { createMessage } from '@/api/routes/admin/tickets/messages';
 import { CreateTicketMessageValues as Values } from '@/api/routes/admin/tickets/types';
 
 export default ({ ticketId }: { ticketId: number }) => {
+    const { t } = useTranslation('admin');
     const [open, setOpen] = useState<boolean>(false);
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -38,17 +40,17 @@ export default ({ ticketId }: { ticketId: number }) => {
 
     return (
         <>
-            <Button.Info onClick={() => setOpen(true)}>New Message</Button.Info>
+            <Button.Info onClick={() => setOpen(true)}>{t('ticketsModule.newMessage') as string}</Button.Info>
             <Formik onSubmit={submit} initialValues={{ ticket_id: ticketId, message: '' }} enableReinitialize>
                 {({ isSubmitting, isValid, submitForm }) => (
                     <Form>
                         <SpinnerOverlay visible={isSubmitting} />
-                        <Dialog title={'New message'} open={open} onClose={() => setOpen(false)}>
+                        <Dialog title={t('ticketsModule.newMessage') as string} open={open} onClose={() => setOpen(false)}>
                             <FlashMessageRender byKey={'ticket:message:create'} />
                             <TextareaField id={'message'} name={'message'} className={'my-4'} rows={5} />
                             <div className={'text-right'}>
                                 <Button type={'button'} onClick={submitForm} disabled={isSubmitting || !isValid}>
-                                    Send
+                                    {t('ticketsModule.send') as string}
                                 </Button>
                             </div>
                         </Dialog>

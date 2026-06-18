@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import * as React from 'react';
+import { useTranslation } from 'react-i18next';
 import TitledGreyBox from '@/elements/TitledGreyBox';
 import tw from 'twin.macro';
 import VariableBox from '@server/startup/VariableBox';
@@ -17,6 +18,7 @@ import useFlash from '@/plugins/useFlash';
 import PageContentBlock from '@/elements/PageContentBlock';
 
 const StartupContainer = () => {
+    const { t } = useTranslation('server');
     const [loading, setLoading] = useState(false);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
 
@@ -81,22 +83,22 @@ const StartupContainer = () => {
         !error || (error && isValidating) ? (
             <Spinner centered size={Spinner.Size.LARGE} />
         ) : (
-            <ServerError title={'Oops!'} message={httpErrorToHuman(error)} onRetry={() => mutate()} />
+            <ServerError title={t('startupPage.oops') as string} message={httpErrorToHuman(error)} onRetry={() => mutate()} />
         )
     ) : (
         <PageContentBlock
-            title={'Startup Settings'}
+            title={t('startupPage.title') as string}
             header
-            description={'Control startup variables for your server.'}
+            description={t('startupPage.description') as string}
             showFlashKey={'startup:image'}
         >
             <div css={tw`md:flex`}>
-                <TitledGreyBox title={'Startup Command'} css={tw`flex-1`}>
+                <TitledGreyBox title={t('startupPage.startupCommand') as string} css={tw`flex-1`}>
                     <div css={tw`px-1 py-2`}>
                         <p css={tw`font-mono bg-neutral-900 rounded py-2 px-4`}>{invo}</p>
                     </div>
                 </TitledGreyBox>
-                <TitledGreyBox title={'Docker Image'} css={tw`flex-1 lg:flex-none lg:w-1/3 mt-8 md:mt-0 md:ml-10`}>
+                <TitledGreyBox title={t('startupPage.dockerImage') as string} css={tw`flex-1 lg:flex-none lg:w-1/3 mt-8 md:mt-0 md:ml-10`}>
                     {Object.keys(data.dockerImages).length > 1 && !isCustomImage ? (
                         <>
                             <InputSpinner visible={loading}>
@@ -113,8 +115,7 @@ const StartupContainer = () => {
                                 </Select>
                             </InputSpinner>
                             <p css={tw`text-xs text-neutral-300 mt-2`}>
-                                This is an advanced feature allowing you to select a Docker image to use when running
-                                this server instance.
+                                {t('startupPage.dockerImageAdvanced') as string}
                             </p>
                         </>
                     ) : (
@@ -122,15 +123,14 @@ const StartupContainer = () => {
                             <Input disabled readOnly value={variables.dockerImage} />
                             {isCustomImage && (
                                 <p css={tw`text-xs text-neutral-300 mt-2`}>
-                                    This {"server's"} Docker image has been manually set by an administrator and cannot
-                                    be changed through this UI.
+                                    {t('startupPage.dockerImageCustom') as string}
                                 </p>
                             )}
                         </>
                     )}
                 </TitledGreyBox>
             </div>
-            <h3 css={tw`mt-8 mb-2 text-2xl`}>Variables</h3>
+            <h3 css={tw`mt-8 mb-2 text-2xl`}>{t('startupPage.variables') as string}</h3>
             <div css={tw`grid gap-8 md:grid-cols-2`}>
                 {data.variables.map(variable => (
                     <VariableBox key={variable.envVariable} variable={variable} />

@@ -4,11 +4,13 @@ import { Button } from '@/elements/button';
 import { faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { Dialog } from '@/elements/dialog';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useServerFromRoute } from '@/api/routes/admin/server';
 import useFlash from '@/plugins/useFlash';
 import suspendServer from '@/api/routes/admin/servers/manage/suspendServer';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { data: server } = useServerFromRoute();
     const [visible, setVisible] = useState<boolean>(false);
     const { addFlash, clearAndAddHttpError } = useFlash();
@@ -37,22 +39,21 @@ export default () => {
     return (
         <>
             <Dialog.Confirm
-                title={'Confirm suspension request'}
+                title={t('servers.confirmSuspensionRequest') as string}
                 onConfirmed={submit}
                 open={visible}
                 onClose={() => setVisible(false)}
-                confirm={'I understand, proceed'}
+                confirm={t('servers.iUnderstandProceed') as string}
             >
-                Are you sure you wish to suspend this server? It will become instantly inaccessible to the owner.
+                {t('servers.areYouSureSuspendServer') as string}
             </Dialog.Confirm>
             <div css={tw`h-auto flex flex-col`}>
-                <AdminBox icon={faEyeSlash} title={'Suspend Server'} css={tw`relative w-full`}>
+                <AdminBox icon={faEyeSlash} title={t('servers.suspendServer') as string} css={tw`relative w-full`}>
                     <Button.Warn size={Button.Sizes.Large} css={tw`w-full`} onClick={() => setVisible(true)}>
-                        Suspend Server
+                        {t('servers.suspendServer') as string}
                     </Button.Warn>
                     <p css={tw`text-xs text-neutral-400 mt-2`}>
-                        This will suspend the server, stop any running processes, and immediately block the user from
-                        being able to manage their server through the panel.
+                        {t('servers.suspendServerDescription') as string}
                     </p>
                 </AdminBox>
             </div>

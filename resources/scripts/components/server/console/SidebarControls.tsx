@@ -6,12 +6,14 @@ import { ServerContext } from '@/state/server';
 import { PowerAction } from '@server/console/ServerConsoleContainer';
 import { Dialog } from '@/elements/dialog';
 import { PlayIcon, StopIcon, BanIcon, RefreshIcon } from '@heroicons/react/outline';
+import { useTranslation } from 'react-i18next';
 
 interface PowerButtonProps {
     className?: string;
 }
 
 export default ({ className }: PowerButtonProps) => {
+    const { t } = useTranslation('server');
     const [open, setOpen] = useState(false);
     const status = ServerContext.useStoreState(state => state.status.value);
     const instance = ServerContext.useStoreState(state => state.socket.instance);
@@ -44,11 +46,11 @@ export default ({ className }: PowerButtonProps) => {
                 open={open}
                 hideCloseIcon
                 onClose={() => setOpen(false)}
-                title={'Forcibly Stop Process'}
-                confirm={'Continue'}
+                title={t('consolePage.forciblyStop') as string}
+                confirm={t('consolePage.continue') as string}
                 onConfirmed={onButtonClick.bind(this, 'kill-confirmed')}
             >
-                Forcibly stopping a server can lead to data corruption.
+                {t('consolePage.forciblyStopWarning') as string}
             </Dialog.Confirm>
             <div className={'mx-6'}>
                 <div className={'grid grid-cols-3 gap-4'}>

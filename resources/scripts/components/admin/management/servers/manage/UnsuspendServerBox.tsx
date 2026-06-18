@@ -4,11 +4,13 @@ import { Button } from '@/elements/button';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { Dialog } from '@/elements/dialog';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useServerFromRoute } from '@/api/routes/admin/server';
 import useFlash from '@/plugins/useFlash';
 import unsuspendServer from '@/api/routes/admin/servers/manage/unsuspendServer';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { data: server } = useServerFromRoute();
     const [visible, setVisible] = useState<boolean>(false);
     const { addFlash, clearAndAddHttpError } = useFlash();
@@ -37,21 +39,21 @@ export default () => {
     return (
         <>
             <Dialog.Confirm
-                title={'Confirm suspension removal'}
+                title={t('servers.confirmSuspensionRemoval') as string}
                 onConfirmed={submit}
                 open={visible}
                 onClose={() => setVisible(false)}
-                confirm={'I understand, proceed'}
+                confirm={t('servers.iUnderstandProceed') as string}
             >
-                Are you sure you wish to unsuspend this server? Users will now be able to reconnect as usual.
+                {t('servers.areYouSureUnsuspendServer') as string}
             </Dialog.Confirm>
             <div css={tw`h-auto flex flex-col`}>
-                <AdminBox icon={faEye} title={'Unuspend Server'} css={tw`relative w-full`}>
+                <AdminBox icon={faEye} title={t('servers.unsuspendServer') as string} css={tw`relative w-full`}>
                     <Button.Warn size={Button.Sizes.Large} css={tw`w-full`} onClick={() => setVisible(true)}>
-                        Unsuspend Server
+                        {t('servers.unsuspendServer') as string}
                     </Button.Warn>
                     <p css={tw`text-xs text-neutral-400 mt-2`}>
-                        This action will allow users to access the server like normal.
+                        {t('servers.unsuspendServerDescription') as string}
                     </p>
                 </AdminBox>
             </div>

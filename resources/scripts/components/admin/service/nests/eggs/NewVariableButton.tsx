@@ -1,6 +1,7 @@
 import type { FormikHelpers } from 'formik';
 import { Form, Formik, useFormikContext } from 'formik';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import type { CreateEggVariable } from '@/api/routes/admin/eggs/createEggVariable';
@@ -14,6 +15,7 @@ import useFlash from '@/plugins/useFlash';
 import { Variant } from '@/elements/button/types';
 
 export default function NewVariableButton() {
+    const { t } = useTranslation('admin');
     const { setValues } = useFormikContext();
     const [visible, setVisible] = useState(false);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
@@ -69,7 +71,7 @@ export default function NewVariableButton() {
                     >
                         <FlashMessageRender byKey={'variable:create'} css={tw`mb-6`} />
 
-                        <h2 css={tw`mb-6 text-2xl text-neutral-100`}>New Variable</h2>
+                        <h2 css={tw`mb-6 text-2xl text-neutral-100`}>{t('nests.newVariable') as string}</h2>
 
                         <Form css={tw`m-0`}>
                             <EggVariableForm prefix={''} />
@@ -81,14 +83,14 @@ export default function NewVariableButton() {
                                     css={tw`w-full sm:w-auto sm:mr-2`}
                                     onClick={() => setVisible(false)}
                                 >
-                                    Cancel
+                                    {t('nests.cancel') as string}
                                 </Button>
                                 <Button
                                     type="submit"
                                     css={tw`w-full mt-4 sm:w-auto sm:mt-0`}
                                     disabled={isSubmitting || !isValid}
                                 >
-                                    Create Variable
+                                    {t('nests.createVariable') as string}
                                 </Button>
                             </div>
                         </Form>
@@ -98,7 +100,7 @@ export default function NewVariableButton() {
 
             {/* TODO: make button green */}
             <Button type="button" onClick={() => setVisible(true)}>
-                New Variable
+                {t('nests.newVariable') as string}
             </Button>
         </>
     );

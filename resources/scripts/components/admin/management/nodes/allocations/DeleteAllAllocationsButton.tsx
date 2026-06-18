@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Dialog } from '@/elements/dialog';
 import { Button } from '@/elements/button';
 import { deleteAllAllocations } from '@/api/routes/admin/nodes/allocations/deleteAllocation';
@@ -6,6 +7,7 @@ import useFlash from '@/plugins/useFlash';
 import SpinnerOverlay from '@/elements/SpinnerOverlay';
 
 export default ({ nodeId }: { nodeId: number }) => {
+    const { t } = useTranslation('admin');
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
@@ -29,14 +31,13 @@ export default ({ nodeId }: { nodeId: number }) => {
                 buttonType={'danger'}
                 onClose={() => setOpen(false)}
                 onConfirmed={doDeleteAll}
-                confirm={'Yes, delete all'}
-                title={'Delete all unused allocations?'}
+                confirm={t('nodes.yesDeleteAll') as string}
+                title={t('nodes.deleteAllUnusedAllocations') as string}
             >
                 <SpinnerOverlay visible={loading} />
-                Are you sure you wish to remove all unused allocations? You can re-create them at any time by using the
-                form above. This action will not delete allocations which are currently assigned to servers.
+                {t('nodes.confirmDeleteAllAllocations') as string}
             </Dialog.Confirm>
-            <Button.Danger onClick={() => setOpen(true)}>Delete All Unused Allocations</Button.Danger>
+            <Button.Danger onClick={() => setOpen(true)}>{t('nodes.deleteAllUnusedAllocations') as string}</Button.Danger>
         </>
     );
 };

@@ -7,8 +7,10 @@ import { useState } from 'react';
 import useFlash from '@/plugins/useFlash';
 import { Context } from '@admin/management/users/UserRouter';
 import { suspendUser } from '@/api/routes/admin/users';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { addFlash, clearAndAddHttpError } = useFlash();
     const [visible, setVisible] = useState<boolean>(false);
     const user = Context.useStoreState(state => state.user);
@@ -37,26 +39,28 @@ export default () => {
     return (
         <>
             <Dialog.Confirm
-                title={`Confirm ${action} request`}
+                title={t('users.confirmActionRequest', { action }) as string}
                 onConfirmed={submit}
                 open={visible}
                 onClose={() => setVisible(false)}
-                confirm={'I understand, proceed'}
+                confirm={t('users.iUnderstandProceed') as string}
             >
-                Are you sure you wish to {action} this user?
+                {t('users.confirmSuspendAction', { action }) as string}
             </Dialog.Confirm>
             <div css={tw`h-auto flex flex-col`}>
                 <AdminBox
                     icon={action === 'suspend' ? faEyeSlash : faEye}
-                    title={`${action} user`}
+                    title={t('users.actionUser', { action }) as string}
                     css={tw`relative w-full`}
                 >
                     <Button.Warn size={Button.Sizes.Large} css={tw`w-full capitalize`} onClick={() => setVisible(true)}>
-                        {action} User
+                        {t('users.actionUserButton', { action }) as string}
                     </Button.Warn>
                     <p css={tw`text-xs text-neutral-400 mt-2`}>
-                        This will {action} the user instantly. This account is currently&nbsp;
-                        {user?.state === 'suspended' ? 'suspended' : 'active'}.
+                        {t('users.suspendUserDescription', {
+                            action,
+                            state: user?.state === 'suspended' ? t('users.suspended') as string : t('users.active') as string,
+                        }) as string}
                     </p>
                 </AdminBox>
             </div>

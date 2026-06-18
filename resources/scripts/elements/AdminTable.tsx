@@ -1,6 +1,7 @@
 import { debounce } from 'debounce';
 import type { MouseEvent, ReactNode } from 'react';
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw, { styled } from 'twin.macro';
 
 import type { ListContext as TableHooks } from '@/api/routes/admin';
@@ -125,6 +126,7 @@ const PaginationArrow = styled.button`
 `;
 
 export function Pagination<T>({ data, onPageSelect, children }: Props<T>) {
+    const { t } = useTranslation('common');
     let pagination: PaginationDataSet;
     if (data === undefined) {
         pagination = {
@@ -148,6 +150,8 @@ export function Pagination<T>({ data, onPageSelect, children }: Props<T>) {
 
     const isFirstPage = pagination.currentPage === 1;
     const isLastPage = pagination.currentPage >= pagination.totalPages;
+    const firstResult = (pagination.currentPage - 1) * pagination.perPage + (pagination.total > 0 ? 1 : 0);
+    const lastResult = (pagination.currentPage - 1) * pagination.perPage + pagination.count;
 
     const pages = [];
 
@@ -179,15 +183,7 @@ export function Pagination<T>({ data, onPageSelect, children }: Props<T>) {
 
             <div css={tw`h-12 flex flex-row items-center w-full px-6 py-3 border-t border-neutral-500`}>
                 <p css={tw`text-sm leading-5 text-neutral-400`}>
-                    Showing{' '}
-                    <span css={tw`text-neutral-300`}>
-                        {(pagination.currentPage - 1) * pagination.perPage + (pagination.total > 0 ? 1 : 0)}
-                    </span>{' '}
-                    to{' '}
-                    <span css={tw`text-neutral-300`}>
-                        {(pagination.currentPage - 1) * pagination.perPage + pagination.count}
-                    </span>{' '}
-                    of <span css={tw`text-neutral-300`}>{pagination.total}</span> results
+                    {t('pagination.showingResults', { from: firstResult, to: lastResult, total: pagination.total })}
                 </p>
 
                 {isFirstPage && isLastPage ? null : (
@@ -196,7 +192,7 @@ export function Pagination<T>({ data, onPageSelect, children }: Props<T>) {
                             <PaginationArrow
                                 type="button"
                                 css={tw`rounded-l-md`}
-                                aria-label="Previous"
+                                aria-label={t('pagination.previous') as string}
                                 disabled={pagination.currentPage === 1}
                                 onClick={() => setPage(pagination.currentPage - 1)}
                             >
@@ -228,7 +224,7 @@ export function Pagination<T>({ data, onPageSelect, children }: Props<T>) {
                             <PaginationArrow
                                 type="button"
                                 css={tw`-ml-px rounded-r-md`}
-                                aria-label="Next"
+                                aria-label={t('pagination.next') as string}
                                 disabled={pagination.currentPage === pagination.totalPages}
                                 onClick={() => setPage(pagination.currentPage + 1)}
                             >
@@ -262,6 +258,7 @@ export const Loading = () => {
 };
 
 export const NoItems = ({ className }: { className?: string }) => {
+    const { t } = useTranslation('common');
     const { colors } = useStoreState(state => state.theme.data!);
 
     return (
@@ -271,11 +268,11 @@ export const NoItems = ({ className }: { className?: string }) => {
             style={{ backgroundColor: colors.secondary }}
         >
             <div css={tw`h-48 flex`}>
-                <img src={'/assets/svgs/not_found.svg'} alt={'No Items'} css={tw`h-full select-none`} />
+                <img src={'/assets/svgs/not_found.svg'} alt={t('table.noItemsAlt') as string} css={tw`h-full select-none`} />
             </div>
 
             <p css={tw`text-lg text-neutral-300 text-center font-normal sm:mt-8`}>
-                No items could be found, it&apos;s almost like they are hiding.
+                {t('table.noItems')}
             </p>
         </div>
     );
@@ -288,6 +285,7 @@ interface Params {
 }
 
 export const ContentWrapper = ({ onSearch, children }: Params) => {
+    const { t } = useTranslation('common');
     const [loading, setLoading] = useState(false);
     const [inputText, setInputText] = useState('');
 
@@ -311,7 +309,7 @@ export const ContentWrapper = ({ onSearch, children }: Params) => {
                         <Input
                             value={inputText}
                             css={tw`h-8`}
-                            placeholder="Search..."
+                            placeholder={t('search') as string}
                             onChange={e => {
                                 setInputText(e.currentTarget.value);
                                 search(e.currentTarget.value);

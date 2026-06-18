@@ -1,4 +1,5 @@
 import { Button } from '@/elements/button';
+import { useTranslation } from 'react-i18next';
 import SpinnerOverlay from '@/elements/SpinnerOverlay';
 import { Form, useFormikContext, FormikHelpers, Formik } from 'formik';
 import tw from 'twin.macro';
@@ -14,6 +15,7 @@ interface Values {
 }
 
 const LinksForm = () => {
+    const { t } = useTranslation('admin');
     const { isSubmitting } = useFormikContext<Values>();
     const settings = useStoreState(s => s.everest.data!.billing);
 
@@ -24,19 +26,19 @@ const LinksForm = () => {
                 <Field
                     id={'terms'}
                     name={'terms'}
-                    label={'Terms of Service URL'}
+                    label={t('billingModule.termsOfServiceUrl') as string}
                     placeholder={settings.links.terms}
                     type={'text'}
                 />
                 <Field
                     id={'privacy'}
                     name={'privacy'}
-                    label={'Privacy Policy URL'}
+                    label={t('billingModule.privacyPolicyUrl') as string}
                     placeholder={settings.links.privacy}
                     type={'text'}
                 />
                 <div css={tw`lg:col-span-2 flex items-center justify-end`}>
-                    <Button type={'submit'}>Save</Button>
+                    <Button type={'submit'}>{t('billingModule.save') as string}</Button>
                 </div>
             </Form>
         </>
@@ -44,6 +46,7 @@ const LinksForm = () => {
 };
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { clearFlashes } = useFlash();
     const settings = useStoreState(s => s.everest.data!.billing);
     const updateEverest = useStoreActions(s => s.everest.updateEverest);

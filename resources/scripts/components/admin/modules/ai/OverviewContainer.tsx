@@ -1,4 +1,5 @@
 import AdminBox from '@/elements/AdminBox';
+import { useTranslation } from 'react-i18next';
 import ToggleFeatureButton from '@admin/modules/ai/ToggleFeatureButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronRight } from '@fortawesome/free-solid-svg-icons';
@@ -18,6 +19,7 @@ interface Props {
 }
 
 function DisplayMessage({ primary, result, loading }: Props) {
+    const { t } = useTranslation('admin');
     if (result && result !== 'error') {
         return (
             <>
@@ -30,8 +32,7 @@ function DisplayMessage({ primary, result, loading }: Props) {
     if (result && result === 'error') {
         return (
             <>
-                <XCircleIcon className={'w-4 h-4 inline-flex text-red-400'} /> An error occurred. Please try again
-                later.
+                <XCircleIcon className={'w-4 h-4 inline-flex text-red-400'} /> {t('aiModule.errorOccurred') as string}
             </>
         );
     }
@@ -47,12 +48,13 @@ function DisplayMessage({ primary, result, loading }: Props) {
 
     return (
         <>
-            <SparklesIcon className={'w-4 h-4 inline-flex'} style={{ color: primary }} /> waiting for query
+            <SparklesIcon className={'w-4 h-4 inline-flex'} style={{ color: primary }} /> {t('aiModule.waitingForQuery') as string}
         </>
     );
 }
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [result, setResult] = useState<string>();
     const [loading, setLoading] = useState<boolean>(false);
     const { primary } = useStoreState(s => s.theme.data!.colors);
@@ -86,21 +88,18 @@ export default () => {
                 </div>
                 <div className={'w-full bg-zinc-800 rounded-b px-4 py-2 inline-flex'}>
                     <FontAwesomeIcon icon={faChevronRight} className={'my-auto mr-4'} />
-                    <Input className={'font-mono'} placeholder={'Ask Jexactyl AI a question'} onKeyDown={submit} />
+                    <Input className={'font-mono'} placeholder={t('aiModule.askQuestion') as string} onKeyDown={submit} />
                 </div>
             </div>
             <div className={'col-span-2 space-y-4'}>
                 <Alert type={'warning'} className={'mt-16 md:mt-0'}>
-                    Jexactyl AI relies on Google Gemini models for requests. Information provided could be inaccurate or
-                    outdated. Use with caution!
+                    {t('aiModule.aiWarning') as string}
                 </Alert>
                 <Alert type={'info'}>
-                    API requests are limited on Gemini&apos;s public API to 120/second - if you experience ratelimiting,
-                    you may need to upgrade your license.
+                    {t('aiModule.apiLimitInfo') as string}
                 </Alert>
-                <AdminBox title={'Disable Jexactyl AI'} className={'col-span-2 h-min'}>
-                    Clicking the button below will disable Jexactyl AI for both clients and administrators. Your API key
-                    will remain in the database unless you choose to delete it manually.
+                <AdminBox title={t('aiModule.disableJexactylAI') as string} className={'col-span-2 h-min'}>
+                    {t('aiModule.disableDescription') as string}
                     <div className={'text-right mt-2'}>
                         <ToggleFeatureButton />
                     </div>

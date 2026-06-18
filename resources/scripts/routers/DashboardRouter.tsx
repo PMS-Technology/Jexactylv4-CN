@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { NavLink, Route, Routes } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { NotFound } from '@/elements/ScreenBlock';
 import Spinner from '@/elements/Spinner';
 import routes from '@/routers/routes';
@@ -16,6 +17,8 @@ import NavigationBar from '@/elements/NavigationBar';
 import DashboardContainer from '@account/DashboardContainer';
 
 function DashboardRouter() {
+    const { t } = useTranslation('common');
+    const { t: tDashboard } = useTranslation('dashboard');
     const user = useStoreState(s => s.user.data!);
     const { name, logo } = useStoreState(s => s.settings.data!);
     const theme = useStoreState(state => state.theme.data!);
@@ -45,13 +48,13 @@ function DashboardRouter() {
                         <MobileSidebar.Link
                             key={route.route}
                             icon={route.icon ?? PuzzleIcon}
-                            text={route.name}
+                            text={route.nameKey ? tDashboard(route.nameKey) : route.name}
                             linkTo={route.path !== '' ? `/account/${route.path}` : ''}
                             end={route.end}
                         />
                     ))}
                 {(user.rootAdmin || user.admin_role_id) && (
-                    <MobileSidebar.Link icon={CogIcon} text={'Admin'} linkTo={'/admin'} />
+                    <MobileSidebar.Link icon={CogIcon} text={t('admin') as string} linkTo={'/admin'} />
                 )}
             </MobileSidebar>
             <Sidebar className={'flex-none'} $collapsed={collapsed} theme={theme}>
@@ -74,14 +77,14 @@ function DashboardRouter() {
                 <Sidebar.Wrapper theme={theme}>
                     <NavLink to={'/'} end className={'mb-[18px]'}>
                         <DesktopComputerIcon />
-                        <span>Dashboard</span>
+                        <span>{t('dashboard')}</span>
                     </NavLink>
                     {routes.account
                         .filter(route => route.name && (!route.condition || route.condition(flags)))
                         .map(route => (
                             <NavLink to={`/account/${route.path}`} key={route.path} end={route.end}>
                                 <Sidebar.Icon icon={route.icon ?? PuzzleIcon} />
-                                <span>{route.name}</span>
+                                <span>{route.nameKey ? tDashboard(route.nameKey) : route.name}</span>
                             </NavLink>
                         ))}
                 </Sidebar.Wrapper>
@@ -99,12 +102,12 @@ function DashboardRouter() {
                     {(user.rootAdmin || user.admin_role_id) && (
                         <NavLink to={'/admin'}>
                             <CogIcon />
-                            <span className={collapsed ? 'hidden' : ''}>Settings</span>
+                            <span className={collapsed ? 'hidden' : ''}>{t('settings')}</span>
                         </NavLink>
                     )}
                     <NavLink to={'/'} onClick={onTriggerLogout}>
                         <LogoutIcon />
-                        <span className={collapsed ? 'hidden' : ''}>Logout</span>
+                        <span className={collapsed ? 'hidden' : ''}>{t('logout')}</span>
                     </NavLink>
                 </span>
                 <Sidebar.User>
@@ -117,7 +120,7 @@ function DashboardRouter() {
                                 'font-sans font-normal text-xs text-gray-300 whitespace-nowrap leading-tight select-none'
                             }
                         >
-                            <div className={'text-gray-400 text-sm'}>Welcome back,</div>
+                            <div className={'text-gray-400 text-sm'}>{t('welcomeBack')}</div>
                             {user.email}
                         </span>
                     </div>

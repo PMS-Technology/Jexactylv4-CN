@@ -2,6 +2,7 @@ import useFileManagerSwr from '@/plugins/useFileManagerSwr';
 import Modal, { RequiredModalProps } from '@/elements/Modal';
 import { Form, Formik, FormikHelpers } from 'formik';
 import Field from '@/elements/Field';
+import { useTranslation } from 'react-i18next';
 import { chmodFiles } from '@/api/routes/server/files';
 import { ServerContext } from '@/state/server';
 import tw from 'twin.macro';
@@ -21,6 +22,7 @@ interface File {
 type OwnProps = RequiredModalProps & { files: File[] };
 
 const ChmodFileModal = ({ files, ...props }: OwnProps) => {
+    const { t } = useTranslation('server');
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
     const { mutate } = useFileManagerSwr();
     const { clearFlashes, clearAndAddHttpError } = useFlash();
@@ -58,10 +60,10 @@ const ChmodFileModal = ({ files, ...props }: OwnProps) => {
                     <Form css={tw`m-0`}>
                         <div css={tw`flex flex-wrap items-end`}>
                             <div css={tw`w-full sm:flex-1 sm:mr-4`}>
-                                <Field type={'string'} id={'file_mode'} name={'mode'} label={'File Mode'} autoFocus />
+                                <Field type={'string'} id={'file_mode'} name={'mode'} label={t('filesPage.fileMode') as string} autoFocus />
                             </div>
                             <div css={tw`w-full sm:w-auto mt-4 sm:mt-0`}>
-                                <Button css={tw`w-full`}>Update</Button>
+                                <Button css={tw`w-full`}>{t('filesPage.update') as string}</Button>
                             </div>
                         </div>
                     </Form>

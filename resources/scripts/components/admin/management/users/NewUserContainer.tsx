@@ -1,4 +1,5 @@
 import type { Actions } from 'easy-peasy';
+import { useTranslation } from 'react-i18next';
 import { useStoreActions } from 'easy-peasy';
 import type { FormikHelpers } from 'formik';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +13,7 @@ import FlashMessageRender from '@/elements/FlashMessageRender';
 import type { ApplicationStore } from '@/state';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -31,21 +33,21 @@ export default () => {
     };
 
     return (
-        <AdminContentBlock title={'New User'}>
+        <AdminContentBlock title={t('users.newUser') as string}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>New User</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{t('users.newUser') as string}</h2>
                     <p
                         css={tw`hidden md:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        Add a new user to the panel.
+                        {t('users.addNewUserToPanel') as string}
                     </p>
                 </div>
             </div>
 
             <FlashMessageRender byKey={'user:create'} css={tw`mb-4`} />
 
-            <UserForm title={'Create User'} onSubmit={submit} />
+            <UserForm title={t('users.createUser') as string} onSubmit={submit} />
         </AdminContentBlock>
     );
 };

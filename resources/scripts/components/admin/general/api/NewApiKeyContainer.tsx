@@ -4,6 +4,7 @@ import type { FormikHelpers } from 'formik';
 import { Form, Formik } from 'formik';
 import Field from '@/elements/Field';
 import tw from 'twin.macro';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/elements/button';
 import FlashMessageRender from '@/elements/FlashMessageRender';
 import type { ApplicationStore } from '@/state';
@@ -36,6 +37,7 @@ const initialValues: Values = {
 };
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [visible, setVisible] = useState<string | null>();
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -59,13 +61,13 @@ export default () => {
         <>
             <div css={tw`flex ml-auto pl-4 mb-2`}>
                 <Link to={'/admin/api'}>
-                    <Button.Text icon={XIcon}>Cancel</Button.Text>
+                    <Button.Text icon={XIcon}>{t('api.cancel') as string}</Button.Text>
                 </Link>
             </div>
             <FlashMessageRender byKey={'api:create'} />
             {visible && (
-                <Dialog open={Boolean(visible)} onClose={() => setVisible(null)} title={'Your API Key'}>
-                    Do not lose this key, it is impossible to recover. Click the key below to copy it.
+                <Dialog open={Boolean(visible)} onClose={() => setVisible(null)} title={t('api.yourApiKey') as string}>
+                    {t('api.keyWarning') as string}
                     <CopyOnClick text={visible}>
                         <div className={'px-4 py-2 bg-black/50 rounded-lg mt-1 font-mono'}>
                             {visible.slice(0, 48) ?? ''}...
@@ -100,20 +102,20 @@ export default () => {
                     <Form>
                         <div css={tw`flex flex-col lg:flex-row`}>
                             <div css={tw`w-full lg:w-1/2 flex flex-col mr-0 lg:mr-2`}>
-                                <AdminBox icon={faCog} title={'Settings'} css={tw`w-full relative`}>
+                                <AdminBox icon={faCog} title={t('settings.settings') as string} css={tw`w-full relative`}>
                                     <SpinnerOverlay visible={isSubmitting} />
 
                                     <div css={tw`mb-6`}>
-                                        <Field id={'memo'} name={'memo'} label={'Key Memo'} type={'text'} />
+                                        <Field id={'memo'} name={'memo'} label={t('api.memo') as string} type={'text'} />
                                         <p className={'text-gray-400 text-xs mt-1'}>
-                                            A simple name or description to identify your API key.
+                                            {t('api.memoDesc') as string}
                                         </p>
                                     </div>
                                 </AdminBox>
                                 <div css={tw`rounded shadow-md mt-4 py-2 pr-6`} style={{ backgroundColor: secondary }}>
                                     <div css={tw`flex flex-row`}>
                                         <Button type={'submit'} css={tw`ml-auto`} disabled={isSubmitting || !isValid}>
-                                            Create
+                                            {t('api.create') as string}
                                         </Button>
                                     </div>
                                 </div>
@@ -121,18 +123,18 @@ export default () => {
 
                             <div css={tw`w-full lg:w-1/2 flex flex-col ml-0 lg:ml-2 mt-4 lg:mt-0`}>
                                 <div css={tw`flex w-full`}>
-                                    <AdminBox icon={faElevator} title={'Access Permissions'} css={tw`w-full relative`}>
-                                        <SpinnerOverlay visible={isSubmitting} />
-                                        <PermissionRow name={'Allocations'} id={'r_allocations'} />
-                                        <PermissionRow name={'Database Hosts'} id={'r_database_hosts'} />
-                                        <PermissionRow name={'Eggs'} id={'r_eggs'} />
-                                        <PermissionRow name={'Locations'} id={'r_locations'} />
-                                        <PermissionRow name={'Nests'} id={'r_nests'} />
-                                        <PermissionRow name={'Nodes'} id={'r_nodes'} />
-                                        <PermissionRow name={'Server Databases'} id={'r_server_databases'} />
-                                        <PermissionRow name={'Servers'} id={'r_servers'} />
-                                        <PermissionRow name={'User Accounts'} id={'r_users'} />
-                                    </AdminBox>
+                                <AdminBox icon={faElevator} title={t('api.accessPermissions') as string} css={tw`w-full relative`}>
+                                    <SpinnerOverlay visible={isSubmitting} />
+                                    <PermissionRow name={t('api.allocations') as string} id={'r_allocations'} />
+                                    <PermissionRow name={t('api.databaseHosts') as string} id={'r_database_hosts'} />
+                                    <PermissionRow name={t('api.eggs') as string} id={'r_eggs'} />
+                                    <PermissionRow name={t('api.locations') as string} id={'r_locations'} />
+                                    <PermissionRow name={t('api.nests') as string} id={'r_nests'} />
+                                    <PermissionRow name={t('api.nodes') as string} id={'r_nodes'} />
+                                    <PermissionRow name={t('api.serverDatabases') as string} id={'r_server_databases'} />
+                                    <PermissionRow name={t('api.servers') as string} id={'r_servers'} />
+                                    <PermissionRow name={t('api.userAccounts') as string} id={'r_users'} />
+                                </AdminBox>
                                 </div>
                             </div>
                         </div>

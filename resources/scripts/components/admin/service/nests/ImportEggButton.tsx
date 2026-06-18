@@ -2,6 +2,7 @@ import { LanguageDescription } from '@codemirror/language';
 import { json } from '@codemirror/lang-json';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import getEggs from '@/api/routes/admin/nests/getEggs';
@@ -14,6 +15,7 @@ import Modal from '@/elements/Modal';
 import FlashMessageRender from '@/elements/FlashMessageRender';
 
 export default ({ className }: { className?: string }) => {
+    const { t } = useTranslation('admin');
     const [visible, setVisible] = useState(false);
     const [file, setFile] = useState<File | null>(null);
 
@@ -76,7 +78,7 @@ export default ({ className }: { className?: string }) => {
             <Modal visible={visible} onDismissed={() => setVisible(false)}>
                 <FlashMessageRender byKey={'egg:import'} css={tw`mb-6`} />
 
-                <h2 css={tw`mb-6 text-2xl text-neutral-100`}>Import Egg</h2>
+                <h2 css={tw`mb-6 text-2xl text-neutral-100`}>{t('nests.importEgg') as string}</h2>
 
                 <Editor
                     childClassName={tw`h-64 rounded`}
@@ -94,13 +96,13 @@ export default ({ className }: { className?: string }) => {
                         css={tw`w-full sm:w-auto sm:mr-2`}
                         onClick={() => setVisible(false)}
                     >
-                        Cancel
+                        {t('nests.cancel') as string}
                     </Button.Text>
 
                     <input type="file" accept=".json" onChange={handleFileChange} className={'mt-4'} />
 
                     <Button css={tw`w-full sm:w-auto mt-4 sm:mt-0`} onClick={submit}>
-                        Import Egg
+                        {t('nests.importEgg') as string}
                     </Button>
                 </div>
             </Modal>
@@ -113,7 +115,7 @@ export default ({ className }: { className?: string }) => {
                 className={className}
                 onClick={() => setVisible(true)}
             >
-                Import
+                {t('nests.import') as string}
             </Button>
         </>
     );

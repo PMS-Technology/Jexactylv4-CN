@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Route, Routes, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import ServerManageContainer from '@admin/management/servers/manage/ServerManageContainer';
@@ -27,6 +28,7 @@ import ServerBillingContainer from './billing/ServerBillingContainer';
 import Pill from '@/elements/Pill';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const params = useParams<'id'>();
 
     const { clearFlashes, clearAndAddHttpError } = useFlash();
@@ -51,7 +53,7 @@ export default () => {
     }
 
     return (
-        <AdminContentBlock title={'Server - ' + server.name}>
+        <AdminContentBlock title={t('servers.pageTitle', { name: server.name })}>
             <FlashMessageRender byKey={'backups'} css={tw`mb-4`} />
             <div css={tw`w-full flex flex-row items-center mb-4`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
@@ -68,11 +70,11 @@ export default () => {
                     </Pill>
                     {billing.enabled && server.billingProductId && (
                         <Pill type={'info'}>
-                            <CurrencyDollarIcon className={'w-3 mr-1'} /> Billable
+                            <CurrencyDollarIcon className={'w-3 mr-1'} /> {t('servers.billable') as string}
                         </Pill>
                     )}
                     <Pill type={'success'}>
-                        <InformationCircleIcon className={'w-3 mr-1'} /> {server.status ?? 'Active'}
+                        <InformationCircleIcon className={'w-3 mr-1'} /> {server.status ?? (t('servers.active') as string)}
                     </Pill>
                 </div>
             </div>
@@ -80,27 +82,27 @@ export default () => {
             <FlashMessageRender byKey={'server'} css={tw`mb-4`} />
 
             <SubNavigation>
-                <SubNavigationLink to={`/admin/servers/${params.id}`} name={'Settings'} icon={CogIcon} base />
-                <SubNavigationLink to={`/admin/servers/${params.id}/startup`} name={'Startup'} icon={AdjustmentsIcon} />
+                <SubNavigationLink to={`/admin/servers/${params.id}`} name={t('servers.settings') as string} icon={CogIcon} base />
+                <SubNavigationLink to={`/admin/servers/${params.id}/startup`} name={t('servers.startup') as string} icon={AdjustmentsIcon} />
                 <SubNavigationLink
                     to={`/admin/servers/${params.id}/databases`}
-                    name={'Databases'}
+                    name={t('servers.databases') as string}
                     icon={DatabaseIcon}
                 />
                 <SubNavigationLink
                     to={`/admin/servers/${params.id}/billing`}
-                    name={'Billing'}
+                    name={t('servers.billing') as string}
                     icon={CurrencyDollarIcon}
                     disabled={!billing.enabled || !server.billingProductId}
                 />
                 <SubNavigationLink
                     to={`/admin/servers/${params.id}/manage`}
-                    name={'Manage'}
+                    name={t('servers.manage') as string}
                     icon={ShieldExclamationIcon}
                 />
                 <SubNavigationLink
                     to={`/server/${server.uuid.split('-')[0]}`}
-                    name={'View as user'}
+                    name={t('servers.viewAsUser') as string}
                     icon={ExternalLinkIcon}
                 />
             </SubNavigation>

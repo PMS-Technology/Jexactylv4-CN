@@ -92,4 +92,11 @@ return [
     'disable' => 'Disable',
     'save' => 'Save',
     'copyright' => '&copy; 2015 - :year Pterodactyl Software',
+    'mail' => [
+        'whoops' => 'Whoops!',
+        'hello' => 'Hello!',
+        'regards' => 'Regards,',
+        'action_trouble' => 'If you’re having trouble clicking the ":action" button, copy and paste the URL below into your web browser:',
+        'rights_reserved' => 'All rights reserved.',
+    ],
 ];

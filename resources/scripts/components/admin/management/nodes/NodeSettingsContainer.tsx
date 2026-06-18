@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { faDatabase } from '@fortawesome/free-solid-svg-icons';
 import { Field as FormikField, useFormikContext } from 'formik';
 import tw from 'twin.macro';
@@ -10,14 +11,15 @@ import Field from '@/elements/Field';
 import SpinnerOverlay from '@/elements/SpinnerOverlay';
 
 export default function NodeSettingsContainer({ node }: { node?: Node }) {
+    const { t } = useTranslation('admin');
     const { isSubmitting } = useFormikContext();
 
     return (
-        <AdminBox icon={faDatabase} title={'Settings'} css={tw`w-full relative`}>
+        <AdminBox icon={faDatabase} title={t('nodes.nodeSettings') as string} css={tw`w-full relative`}>
             <SpinnerOverlay visible={isSubmitting} />
 
             <div css={tw`mb-6`}>
-                <Field id={'name'} name={'name'} label={'Name'} type={'text'} />
+                <Field id={'name'} name={'name'} label={t('nodes.name') as string} type={'text'} />
             </div>
 
             <div css={tw`mb-6`}>
@@ -25,63 +27,63 @@ export default function NodeSettingsContainer({ node }: { node?: Node }) {
             </div>
 
             <div css={tw`mb-6`}>
-                <Field id={'fqdn'} name={'fqdn'} label={'FQDN'} type={'text'} />
+                <Field id={'fqdn'} name={'fqdn'} label={t('nodes.fqdn') as string} type={'text'} />
             </div>
 
             <div css={tw`mb-6`}>
                 <Field
                     id={'daemonBase'}
                     name={'daemonBase'}
-                    label={'Data Directory'}
+                    label={t('nodes.dataDirectory') as string}
                     type={'text'}
                     disabled={node !== undefined}
                 />
             </div>
 
             <div css={tw`mt-6`}>
-                <Label htmlFor={'scheme'}>SSL</Label>
+                <Label htmlFor={'scheme'}>{t('nodes.ssl') as string}</Label>
 
                 <div>
                     <label css={tw`inline-flex items-center mr-2`}>
                         <FormikField name={'scheme'} type={'radio'} value={'https'} />
-                        <span css={tw`text-neutral-300 ml-2`}>Enabled</span>
+                        <span css={tw`text-neutral-300 ml-2`}>{t('nodes.enabled') as string}</span>
                     </label>
 
                     <label css={tw`inline-flex items-center ml-2`}>
                         <FormikField name={'scheme'} type={'radio'} value={'http'} />
-                        <span css={tw`text-neutral-300 ml-2`}>Disabled</span>
+                        <span css={tw`text-neutral-300 ml-2`}>{t('nodes.disabled') as string}</span>
                     </label>
                 </div>
             </div>
 
             <div css={tw`mt-6`}>
-                <Label htmlFor={'behindProxy'}>Behind Proxy</Label>
+                <Label htmlFor={'behindProxy'}>{t('nodes.behindProxy') as string}</Label>
 
                 <div>
                     <label css={tw`inline-flex items-center mr-2`}>
                         <FormikField name={'behindProxy'} type={'radio'} value={'false'} />
-                        <span css={tw`text-neutral-300 ml-2`}>No</span>
+                        <span css={tw`text-neutral-300 ml-2`}>{t('common.no') as string}</span>
                     </label>
 
                     <label css={tw`inline-flex items-center ml-2`}>
                         <FormikField name={'behindProxy'} type={'radio'} value={'true'} />
-                        <span css={tw`text-neutral-300 ml-2`}>Yes</span>
+                        <span css={tw`text-neutral-300 ml-2`}>{t('common.yes') as string}</span>
                     </label>
                 </div>
             </div>
 
             <div css={tw`mt-6`}>
-                <Label htmlFor={'public'}>Automatic Allocation</Label>
+                <Label htmlFor={'public'}>{t('nodes.automaticAllocation') as string}</Label>
 
                 <div>
                     <label css={tw`inline-flex items-center mr-2`}>
                         <FormikField name={'public'} type={'radio'} value={'false'} />
-                        <span css={tw`text-neutral-300 ml-2`}>Disabled</span>
+                        <span css={tw`text-neutral-300 ml-2`}>{t('nodes.disabled') as string}</span>
                     </label>
 
                     <label css={tw`inline-flex items-center ml-2`}>
                         <FormikField name={'public'} type={'radio'} value={'true'} />
-                        <span css={tw`text-neutral-300 ml-2`}>Enabled</span>
+                        <span css={tw`text-neutral-300 ml-2`}>{t('nodes.enabled') as string}</span>
                     </label>
                 </div>
             </div>

@@ -22,6 +22,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ReactElement, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface LimitProps {
     icon: IconDefinition;
@@ -36,6 +37,7 @@ const LimitBox = ({ icon, limit }: LimitProps) => (
 );
 
 export default () => {
+    const { t } = useTranslation('server');
     const settings = useStoreState(state => state.everest.data!.billing);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { colors } = useStoreState(state => state.theme.data!);
@@ -72,19 +74,20 @@ export default () => {
 
     return (
         <PageContentBlock
-            title={'Upgrade Options'}
+            title={t('billingPage.upgradeOptions')}
             header
-            description={'View your current product and upgrade to a new option.'}
+            description={t('billingPage.upgradeOptionsDescription')}
         >
             {open && (
                 <Dialog
                     open
                     onClose={() => setOpen(null)}
-                    title={`Confirm Upgrade to ${open.name} - ${settings.currency.symbol}${open.price} / mo`}
+                    title={t('billingPage.confirmUpgradeTitle', {
+                        name: open.name,
+                        price: `${settings.currency.symbol}${open.price}`,
+                    })}
                 >
-                    To upgrade in between your billing cycle, you must pay a one off charge specified below. Your server
-                    will then instantly be upgraded to the selected package, and will renew at the new package monthly
-                    cost.
+                    {t('billingPage.confirmUpgradeDescription')}
                     <div className={'my-3 w-full'}>
                         <code className={'px-2 py-1 w-full bg-black/50 rounded-lg'}>
                             {charge !== null ? (
@@ -96,14 +99,15 @@ export default () => {
                                 <FontAwesomeIcon icon={faSpinner} className={'animate-spin'} />
                             )}
                         </code>
-                        <span className={'ml-2 italic text-gray-400'}>one-time charge to upgrade early, taken now</span>
+                        <span className={'ml-2 italic text-gray-400'}>{t('billingPage.oneTimeCharge')}</span>
                     </div>
-                    Then, from {new Date(server.renewalDate!).toLocaleDateString()}, your renewal cost will be{' '}
-                    {settings.currency.symbol}
-                    {open.price}/mo.
+                    {t('billingPage.newRenewalCost', {
+                        date: new Date(server.renewalDate!).toLocaleDateString(),
+                        price: `${settings.currency.symbol}${open.price}`,
+                    })}
                     <div className={'mt-4 text-right'}>
                         <Button onClick={submit} disabled={!charge}>
-                            Upgrade Now
+                            {t('billingPage.upgradeNow')}
                         </Button>
                     </div>
                 </Dialog>
@@ -113,8 +117,7 @@ export default () => {
                 {!options ||
                     (options.length === 0 && (
                         <Alert type={'info'} className={'xl:col-span-3'}>
-                            There are no packages available to upgrade to. If you wish to upgrade, please speak to an
-                            administrator.
+                            {t('billingPage.noUpgradePackages')}
                         </Alert>
                     ))}
                 {options?.map(product => (
@@ -139,20 +142,32 @@ export default () => {
                                     &nbsp;
                                     {settings.currency.code.toUpperCase()}
                                 </span>
-                                <span className={'text-base'}>/ monthly</span>
+                                <span className={'text-base'}>{t('billingPage.monthly')}</span>
                             </p>
                             <div className={'grid justify-center items-center'}>
                                 <LimitBox icon={faMicrochip} limit={<>{product.limits.cpu}% CPU</>} />
-                                <LimitBox icon={faMemory} limit={<>{product.limits.memory / 1024} GiB of RAM</>} />
-                                <LimitBox icon={faHdd} limit={<>{product.limits.disk / 1024} GiB of Storage</>} />
+                                <LimitBox
+                                    icon={faMemory}
+                                    limit={<>{t('billingPage.ram', { amount: product.limits.memory / 1024 })}</>}
+                                />
+                                <LimitBox
+                                    icon={faHdd}
+                                    limit={<>{t('billingPage.storage', { amount: product.limits.disk / 1024 })}</>}
+                                />
                                 <div className={'border border-dashed border-gray-500 my-4'} />
                                 {product.limits.backup ? (
-                                    <LimitBox icon={faArchive} limit={<>{product.limits.backup} backup slots</>} />
+                                    <LimitBox
+                                        icon={faArchive}
+                                        limit={<>{t('billingPage.backupSlots', { count: product.limits.backup })}</>}
+                                    />
                                 ) : (
                                     <></>
                                 )}
                                 {product.limits.database ? (
-                                    <LimitBox icon={faDatabase} limit={<>{product.limits.database} database slots</>} />
+                                    <LimitBox
+                                        icon={faDatabase}
+                                        limit={<>{t('billingPage.databaseSlots', { count: product.limits.database })}</>}
+                                    />
                                 ) : (
                                     <></>
                                 )}
@@ -160,15 +175,14 @@ export default () => {
                                     icon={faEthernet}
                                     limit={
                                         <>
-                                            {product.limits.allocation} network port
-                                            {product.limits.allocation > 1 && 's'}
+                                            {t('billingPage.networkPorts', { count: product.limits.allocation })}
                                         </>
                                     }
                                 />
                             </div>
                             <div className={'text-center mt-6'} onClick={() => setOpen(product)}>
                                 <Button size={Button.Sizes.Large} className={'w-full'}>
-                                    Configure
+                                    {t('billingPage.configure')}
                                 </Button>
                             </div>
                         </div>

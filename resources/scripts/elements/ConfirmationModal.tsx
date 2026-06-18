@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import { Button } from '@/elements/button';
@@ -16,6 +17,7 @@ interface Props {
 }
 
 function ConfirmationModal({ title, children, buttonText, onConfirmed }: Props) {
+    const { t } = useTranslation('common');
     const { dismiss } = useContext(ModalContext);
 
     return (
@@ -25,7 +27,7 @@ function ConfirmationModal({ title, children, buttonText, onConfirmed }: Props) 
 
             <div css={tw`flex flex-wrap items-center justify-end mt-8`}>
                 <Button onClick={() => dismiss()} css={tw`w-full sm:w-auto border-transparent`}>
-                    Cancel
+                    {t('cancel')}
                 </Button>
                 <Button color={'red'} css={tw`w-full sm:w-auto mt-4 sm:mt-0 sm:ml-4`} onClick={() => onConfirmed()}>
                     {buttonText}

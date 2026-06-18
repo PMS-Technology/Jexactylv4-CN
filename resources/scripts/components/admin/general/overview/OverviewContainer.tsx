@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import AdminContentBlock from '@/elements/AdminContentBlock';
 import FlashMessageRender from '@/elements/FlashMessageRender';
@@ -19,7 +19,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import AdminBox from '@/elements/AdminBox';
 import Spinner from '@/elements/Spinner';
-import CopyOnClick from '@/elements/CopyOnClick';
 import { useStoreState } from '@/state/hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
@@ -36,15 +35,8 @@ interface SuggestionProps {
     action?: string;
 }
 
-const Code = ({ children }: { children: ReactNode }) => {
-    return (
-        <code css={tw`text-sm font-mono bg-neutral-900 rounded`} style={{ padding: '2px 6px' }}>
-            {children}
-        </code>
-    );
-};
-
 const SuggestionCard = ({ icon, title, description, link, action }: SuggestionProps) => {
+    const { t } = useTranslation('admin');
     const { colors } = useStoreState(state => state.theme.data!);
 
     return (
@@ -55,7 +47,7 @@ const SuggestionCard = ({ icon, title, description, link, action }: SuggestionPr
             <p className={'text-gray-300'}>{description}</p>
             <p className={'mt-2 text-right text-sm'} style={{ color: colors.primary }}>
                 <Link to={link}>
-                    {action ?? 'Manage'} <FontAwesomeIcon icon={faArrowRight} />
+                    {action ?? (t('overview.manage') as string)} <FontAwesomeIcon icon={faArrowRight} />
                 </Link>
             </p>
         </div>
@@ -63,6 +55,7 @@ const SuggestionCard = ({ icon, title, description, link, action }: SuggestionPr
 };
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [loading, setLoading] = useState<boolean>(true);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
 
@@ -90,24 +83,24 @@ export default () => {
     }, []);
 
     return (
-        <AdminContentBlock title={'Overview'}>
+        <AdminContentBlock title={t('nav.overview') as string}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>Overview</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{t('nav.overview') as string}</h2>
                     <p
                         css={tw`hidden md:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        A quick glance at your system.
+                        {t('overview.quickGlance') as string}
                     </p>
                 </div>
             </div>
 
             <FlashMessageRender byKey={'overview'} css={tw`mb-4`} />
 
-            <AdminBox title={'Version Information'} icon={faDesktop}>
+            <AdminBox title={t('overview.versionInfo') as string} icon={faDesktop}>
                 {settings.debug && (
                     <Alert type={'warning'} className={'mb-3'}>
-                        Jexactyl is running in debug mode. Do not use in production.
+                        {t('overview.debugModeWarning') as string}
                     </Alert>
                 )}
                 {loading ? (
@@ -115,35 +108,28 @@ export default () => {
                 ) : (
                     <>
                         <div className={'text-gray-200 mb-2'}>
-                            You are currently running version&nbsp;
-                            <CopyOnClick text={versionData?.panel.current}>
-                                <Code>{versionData?.panel.current}</Code>
-                            </CopyOnClick>
-                            , with the latest release being &nbsp;
-                            <CopyOnClick text={versionData?.panel.latest}>
-                                <Code>{versionData?.panel.latest}</Code>
-                            </CopyOnClick>
-                            .
+                            {t('overview.currentVersion', {
+                                current: versionData?.panel.current,
+                                latest: versionData?.panel.latest,
+                            }) as string}
                         </div>
                         {versionData?.panel.current.startsWith('v4.0.0-') && (
                             <Alert type={'danger'} className={'mt-4'}>
-                                You are running a beta release of Jexactyl v4, which may include several bugs or weird
-                                glitches. Do NOT use this software in production unless you don&apos;t care about losing
-                                data.
+                                {t('overview.betaWarning') as string}
                             </Alert>
                         )}
                     </>
                 )}
             </AdminBox>
-            <AdminBox title={'Suggested Actions'} className={'mt-6'} icon={faQuestionCircle}>
+            <AdminBox title={t('overview.suggestedActions') as string} className={'mt-6'} icon={faQuestionCircle}>
                 <div className={'grid lg:grid-cols-3 gap-4'}>
                     {!settings.auto_update && (
                         <SuggestionCard
                             icon={faRecycle}
                             link={'/admin/settings'}
-                            title={'Enable automatic updates'}
+                            title={t('overview.enableAutoUpdates') as string}
                             description={
-                                'By setting up automatic updates, you can keep Jexactyl stable and secure in the background.'
+                                t('overview.enableAutoUpdatesDesc') as string
                             }
                         />
                     )}
@@ -151,9 +137,9 @@ export default () => {
                         <SuggestionCard
                             icon={faUserPlus}
                             link={'/admin/auth'}
-                            title={'Allow user registration'}
+                            title={t('overview.allowRegistration') as string}
                             description={
-                                'Enabling the Authentication module allows users to signup via the login page.'
+                                t('overview.allowRegistrationDesc') as string
                             }
                         />
                     )}
@@ -163,24 +149,24 @@ export default () => {
                                 <SuggestionCard
                                     icon={faLayerGroup}
                                     link={'/admin/nodes/new'}
-                                    title={'Add your first node'}
-                                    description={"Nodes are physical servers which Jexactyl's servers run on."}
+                                    title={t('overview.addFirstNode') as string}
+                                    description={t('overview.addFirstNodeDesc') as string}
                                 />
                             )}
                             {metricData.servers < 1 && (
                                 <SuggestionCard
                                     icon={faServer}
                                     link={'/admin/servers/new'}
-                                    title={'Create your first server'}
-                                    description={'Create a server to host your favourite game or program.'}
+                                    title={t('overview.createFirstServer') as string}
+                                    description={t('overview.createFirstServerDesc') as string}
                                 />
                             )}
                             {everest.tickets.enabled && metricData.tickets > 0 && (
                                 <SuggestionCard
                                     icon={faTicket}
                                     link={'/admin/tickets'}
-                                    title={'Answer customer tickets'}
-                                    description={`You currently have ${metricData.tickets} pending tickets.`}
+                                    title={t('overview.answerTickets') as string}
+                                    description={t('overview.answerTicketsDesc', { count: metricData.tickets }) as string}
                                 />
                             )}
                         </>
@@ -188,15 +174,15 @@ export default () => {
                     <SuggestionCard
                         icon={faHeart}
                         link={'https://donate.stripe.com/6oE02Zftd9cC34IbIS'}
-                        title={'Donate to Jexactyl'}
-                        action={'Donate'}
+                        title={t('overview.donateToJexactyl') as string}
+                        action={t('overview.donate') as string}
                         description={
-                            'Support the project by leaving a donation to help us pay for testing servers and domains.'
+                            t('overview.donateDesc') as string
                         }
                     />
                 </div>
             </AdminBox>
-            <AdminBox title={'Administrator Activity'} className={'mt-6'} icon={faEye}>
+            <AdminBox title={t('overview.adminActivity') as string} className={'mt-6'} icon={faEye}>
                 <ActivityContainer />
             </AdminBox>
         </AdminContentBlock>

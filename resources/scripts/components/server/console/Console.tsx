@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import { debounce } from 'debounce';
 import type { Dispatch, KeyboardEvent as ReactKeyboardEvent, SetStateAction } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ITerminalInitOnlyOptions, ITerminalOptions, ITheme } from 'xterm';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
@@ -63,6 +64,7 @@ interface Props {
 }
 
 export default ({ expand, setExpand }: Props) => {
+    const { t } = useTranslation('server');
     const terminalInitOnlyProps: ITerminalInitOnlyOptions = {
         rows: expand ? 45 : 30,
     };
@@ -243,8 +245,8 @@ export default ({ expand, setExpand }: Props) => {
                     <input
                         className={classNames('peer', styles.command_input)}
                         type={'text'}
-                        placeholder={'Type a command...'}
-                        aria-label={'Console command input.'}
+                        placeholder={t('consolePage.typeCommand') as string}
+                        aria-label={t('consolePage.consoleInput') as string}
                         disabled={!instance || !connected}
                         onKeyDown={handleCommandKeyDown}
                         autoCorrect={'off'}

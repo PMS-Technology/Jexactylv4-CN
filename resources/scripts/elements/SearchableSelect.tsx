@@ -1,5 +1,6 @@
 import { debounce } from 'debounce';
 import React, { createRef, ReactElement, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import tw, { styled } from 'twin.macro';
 import Input from '@/elements/Input';
 import InputSpinner from '@/elements/InputSpinner';
@@ -134,6 +135,7 @@ export const SearchableSelect = <T extends IdObj>({
     children,
     className,
 }: SearchableSelectProps<T>) => {
+    const { t } = useTranslation('common');
     const [loading, setLoading] = useState(false);
     const [expanded, setExpanded] = useState(false);
 
@@ -369,11 +371,11 @@ export const SearchableSelect = <T extends IdObj>({
                     {items === null || items.length < 1 ? (
                         items === null || inputText.length < 2 ? (
                             <div css={tw`flex flex-row items-center h-10 px-3`}>
-                                <p css={tw`text-sm`}>Please type 2 or more characters.</p>
+                                <p css={tw`text-sm`}>{t('select.typeMore')}</p>
                             </div>
                         ) : (
                             <div css={tw`flex flex-row items-center h-10 px-3`}>
-                                <p css={tw`text-sm`}>No results found.</p>
+                                <p css={tw`text-sm`}>{t('select.noResults')}</p>
                             </div>
                         )
                     ) : (

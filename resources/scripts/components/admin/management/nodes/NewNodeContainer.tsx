@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { Actions } from 'easy-peasy';
 import { useStoreActions } from 'easy-peasy';
 import type { FormikHelpers } from 'formik';
@@ -47,6 +48,7 @@ const initialValues: Values2 = {
 };
 
 export default () => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -120,7 +122,7 @@ export default () => {
                                         disabled={isSubmitting || !isValid}
                                         icon={PlusIcon}
                                     >
-                                        Create
+                                        {t('nodes.create') as string}
                                     </Button>
                                 </div>
                             </div>

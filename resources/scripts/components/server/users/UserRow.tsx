@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { type Subuser } from '@definitions/server';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, faUnlockAlt, faUserLock } from '@fortawesome/free-solid-svg-icons';
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export default ({ subuser }: Props) => {
+    const { t } = useTranslation('server');
     const uuid = useStoreState(state => state.user!.data!.uuid);
     const [visible, setVisible] = useState(false);
 
@@ -38,13 +40,13 @@ export default ({ subuser }: Props) => {
                     />
                     &nbsp;
                 </p>
-                <p css={tw`text-2xs text-neutral-300 uppercase hidden md:block`}>2FA Enabled</p>
+                <p css={tw`text-2xs text-neutral-300 uppercase hidden md:block`}>{t('usersPage.twoFaEnabled') as string}</p>
             </div>
             <div css={tw`ml-4 hidden md:block`}>
                 <p css={tw`font-medium text-center`}>
                     {subuser.permissions.filter(permission => permission !== 'websocket.connect').length}
                 </p>
-                <p css={tw`text-2xs text-neutral-300 uppercase`}>Permissions</p>
+                <p css={tw`text-2xs text-neutral-300 uppercase`}>{t('usersPage.permissions') as string}</p>
             </div>
             {subuser.uuid !== uuid && (
                 <>

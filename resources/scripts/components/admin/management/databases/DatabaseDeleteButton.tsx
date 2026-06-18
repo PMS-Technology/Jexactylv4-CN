@@ -5,6 +5,7 @@ import { Button } from '@/elements/button';
 import { Shape } from '@/elements/button/types';
 import ConfirmationModal from '@/elements/ConfirmationModal';
 import { TrashIcon } from '@heroicons/react/outline';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     databaseId: number;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default ({ databaseId, onDeleted }: Props) => {
+    const { t } = useTranslation('admin');
     const [visible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -39,14 +41,13 @@ export default ({ databaseId, onDeleted }: Props) => {
         <>
             <ConfirmationModal
                 visible={visible}
-                title={'Delete database host?'}
-                buttonText={'Yes, delete database host'}
+                title={t('databases.deleteDatabaseHost') as string}
+                buttonText={t('databases.yesDeleteDatabaseHost') as string}
                 onConfirmed={onDelete}
                 showSpinnerOverlay={loading}
                 onModalDismissed={() => setVisible(false)}
             >
-                Are you sure you want to delete this database host? This action will delete all knowledge of databases
-                created on this host but not the databases themselves.
+                {t('databases.deleteDatabaseHostConfirmation') as string}
             </ConfirmationModal>
 
             <Button.Danger type="button" shape={Shape.IconSquare} onClick={() => setVisible(true)}>

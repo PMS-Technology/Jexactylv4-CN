@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { Actions } from 'easy-peasy';
 import { useStoreActions } from 'easy-peasy';
 import { useState } from 'react';
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default ({ nodeId, onDeleted }: Props) => {
+    const { t } = useTranslation('admin');
     const [visible, setVisible] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -43,13 +45,13 @@ export default ({ nodeId, onDeleted }: Props) => {
         <>
             <ConfirmationModal
                 visible={visible}
-                title={'Delete node?'}
-                buttonText={'Yes, delete node'}
+                title={t('nodes.deleteNodeConfirm') as string}
+                buttonText={t('nodes.deleteNodeDesc') as string}
                 onConfirmed={onDelete}
                 showSpinnerOverlay={loading}
                 onModalDismissed={() => setVisible(false)}
             >
-                Are you sure you want to delete this node?
+                {t('nodes.deleteNodeWarning') as string}
             </ConfirmationModal>
 
             <Button.Danger type={'button'} onClick={() => setVisible(true)}>

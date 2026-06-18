@@ -4,9 +4,11 @@ import { Dialog } from '@/elements/dialog';
 import SpinnerOverlay from '@/elements/SpinnerOverlay';
 import { TrashIcon } from '@heroicons/react/outline';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 export default ({ id }: { id: number }) => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -25,15 +27,15 @@ export default ({ id }: { id: number }) => {
             <Dialog.Confirm
                 open={open}
                 onClose={() => setOpen(false)}
-                title={'Confirm server preset deletion'}
+                title={t('servers.confirmPresetDeletion') as string}
                 onConfirmed={submit}
                 buttonType={'danger'}
             >
                 <SpinnerOverlay visible={loading} />
-                Are you sure you wish to delete this server preset? This action cannot be undone.
+                {t('servers.areYouSureDeletePreset') as string}
             </Dialog.Confirm>
             <Button.Danger onClick={() => setOpen(true)}>
-                <TrashIcon className={'w-5 h-5 mr-1'} /> Delete
+                <TrashIcon className={'w-5 h-5 mr-1'} /> {t('servers.delete') as string}
             </Button.Danger>
         </>
     );

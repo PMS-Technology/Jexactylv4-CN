@@ -53,12 +53,12 @@ class StripeController extends ClientApiController
         $product = Product::findOrFail($request->input('product_id'));
 
         if (!$product->isPaid()) {
-            throw new DisplayException('You cannot create a checkout session for a free product.');
+            throw new DisplayException(trans('exceptions.billing.free_checkout_session'));
         }
 
         if ($node_id) {
             if (!Node::findOrFail($request->input('node_id'))->deployable) {
-                throw new DisplayException('Paid servers cannot be deployed to this node.');
+                throw new DisplayException(trans('exceptions.billing.paid_node_unavailable'));
             }
         } else {
             try {
@@ -66,7 +66,7 @@ class StripeController extends ClientApiController
                     ->where('id', $request->input('server_id'))
                     ->firstOrFail();
             } catch (ModelNotFoundException $exception) {
-                throw new DisplayException('This server ID does not exist on your account.');
+                throw new DisplayException(trans('exceptions.billing.server_not_on_account'));
             }
         }
 
@@ -113,11 +113,11 @@ class StripeController extends ClientApiController
         try {
             $transaction = $this->stripe->checkout->sessions->retrieve($request->input('session'));
         } catch (DisplayException $ex) {
-            throw new DisplayException('Failed to process order: unable to retrieve session');
+            throw new DisplayException(trans('exceptions.billing.session_retrieve_failed'));
         }
 
         if ($transaction->payment_status !== 'paid') {
-            throw new DisplayException('Payment not completed.');
+            throw new DisplayException(trans('exceptions.billing.payment_incomplete'));
         }
 
         $metadata = $transaction->metadata;
@@ -127,7 +127,7 @@ class StripeController extends ClientApiController
         $order = Order::where('transaction_id', $transaction->id)->firstOrFail();
 
         if ($order->isProcessed()) {
-            throw new DisplayException('This order has already been processed.');
+            throw new DisplayException(trans('exceptions.billing.order_already_processed'));
         }
 
         try {
@@ -175,7 +175,7 @@ class StripeController extends ClientApiController
         $discount_code = DiscountCode::where('code', $request->input('discount_code'))->first();
 
         if (!$discount_code || !$discount_code->isValid()) {
-            throw new DisplayException('The discount code provided is not valid.');
+            throw new DisplayException(trans('exceptions.billing.discount_provided_invalid'));
         }
 
         return $this->transform($discount_code, DiscountCodeTransformer::class);
