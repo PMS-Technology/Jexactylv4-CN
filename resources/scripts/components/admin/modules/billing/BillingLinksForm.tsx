@@ -46,7 +46,6 @@ const LinksForm = () => {
 };
 
 export default () => {
-    const { t } = useTranslation('admin');
     const { clearFlashes } = useFlash();
     const settings = useStoreState(s => s.everest.data!.billing);
     const updateEverest = useStoreActions(s => s.everest.updateEverest);

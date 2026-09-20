@@ -3,8 +3,8 @@ import { useFormikContext } from 'formik';
 import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
-import getAllocations from '@/api/routes/admin/nodes/getAllocations';
-import { useServerFromRoute } from '@/api/routes/admin/server';
+import { getNodeAllocationEntries as getAllocations } from '@/api/routes/admin/nodes';
+import { useServerFromRoute } from '@/api/routes/admin/servers';
 import AdminBox from '@/elements/AdminBox';
 import Label from '@/elements/Label';
 import Select from '@/elements/Select';

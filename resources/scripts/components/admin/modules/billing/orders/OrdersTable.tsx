@@ -1,5 +1,5 @@
 import Pill, { PillStatus } from '@/elements/Pill';
-import { useGetOrders, Context as OrderContext } from '@/api/routes/admin/billing/orders';
+import { useGetOrders, OrderContext } from '@/api/routes/admin/billing';
 import AdminTable, {
     ContentWrapper,
     Pagination,
@@ -18,31 +18,7 @@ import { useTranslation } from 'react-i18next';
 import useFlash from '@/plugins/useFlash';
 import { formatDistanceToNowStrict } from 'date-fns';
 import Spinner from '@/elements/Spinner';
-import { OrderFilters } from '@/api/routes/admin/billing/types';
-
-export function format(date: number): string {
-    let prefix = 'th';
-
-    switch (date) {
-        case 1:
-        case 21:
-        case 31:
-            prefix = 'st';
-            break;
-        case 2:
-        case 22:
-            prefix = 'nd';
-            break;
-        case 3:
-        case 23:
-            prefix = 'rd';
-            break;
-        default:
-            break;
-    }
-
-    return `${date}${prefix}`;
-}
+import { OrderFilters } from '@/api/routes/admin/billing';
 
 export function type(state: string): PillStatus {
     switch (state) {

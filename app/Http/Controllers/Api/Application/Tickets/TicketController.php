@@ -33,8 +33,8 @@ class TicketController extends ApplicationApiController
         }
 
         $tickets = QueryBuilder::for(Ticket::query())
-            ->allowedFilters(['id', 'title', 'status', 'created_at'])
-            ->allowedSorts(['id', 'title', 'status', 'created_at'])
+            ->allowedFilters(...['id', 'title', 'status', 'created_at'])
+            ->allowedSorts(...['id', 'title', 'status', 'created_at'])
             ->paginate($perPage);
 
         return $this->transform($tickets, TicketTransformer::class);
@@ -53,6 +53,7 @@ class TicketController extends ApplicationApiController
         ]);
 
         Activity::event('admin:tickets:create')
+            ->subject($ticket)
             ->property('ticket', $ticket)
             ->description('A ticket was created')
             ->log();
@@ -76,6 +77,7 @@ class TicketController extends ApplicationApiController
         $ticket->update($request->all());
 
         Activity::event('admin:tickets:update')
+            ->subject($ticket)
             ->property('ticket', $ticket)
             ->property('new_data', $request->all())
             ->description('A ticket was updated')
@@ -111,6 +113,7 @@ class TicketController extends ApplicationApiController
         $ticket->delete();
 
         Activity::event('admin:tickets:delete')
+            ->subject($ticket)
             ->property('ticket', $ticket)
             ->description('A ticket was deleted')
             ->log();

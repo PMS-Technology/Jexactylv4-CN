@@ -1,5 +1,5 @@
-import { getLinks, type Values, Context as LinksContext, CustomLink } from '@/api/routes/admin/links';
-import { useTranslation } from 'react-i18next';
+import { getLinks, type Values, Context as LinksContext } from '@/api/routes/admin/links';
+import { CustomLink } from '@definitions/admin';
 import { useStoreState } from '@/state/hooks';
 import AdminTable, {
     ContentWrapper,
@@ -26,7 +26,6 @@ interface Props {
 }
 
 const LinksTable = ({ setOpen, setLink }: Props) => {
-    const { t } = useTranslation('admin');
     const { data: links, error, isValidating } = getLinks();
     const { colors } = useStoreState(state => state.theme.data!);
     const { setPage, sort, sortDirection, setSort, setFilters } = useContext(LinksContext);
@@ -55,26 +54,26 @@ const LinksTable = ({ setOpen, setLink }: Props) => {
                         <table css={tw`w-full table-auto`}>
                             <TableHead>
                                 <TableHeader
-                                    name={t('linksModule.id') as string}
+                                    name={'ID'}
                                     direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('id')}
                                 />
                                 <TableHeader
-                                    name={t('linksModule.name') as string}
+                                    name={'Name'}
                                     direction={sort === 'name' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('name')}
                                 />
                                 <TableHeader
-                                    name={t('linksModule.url') as string}
+                                    name={'URL'}
                                     direction={sort === 'url' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('url')}
                                 />
                                 <TableHeader
-                                    name={t('linksModule.isVisible') as string}
+                                    name={'Is Visible'}
                                     direction={sort === 'visibe' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('visible')}
                                 />
-                                <TableHeader name={t('linksModule.actions') as string} />
+                                <TableHeader name={'Actions'} />
                             </TableHead>
 
                             <TableBody>
@@ -104,9 +103,9 @@ const LinksTable = ({ setOpen, setLink }: Props) => {
                                                 css={tw`px-6 text-sm text-neutral-200 text-left whitespace-nowrap font-bold hover:brightness-125`}
                                             >
                                                 {link.visible ? (
-                                                    <Pill type={'success'}>{t('linksModule.visible') as string}</Pill>
+                                                    <Pill type={'success'}>Visible</Pill>
                                                 ) : (
-                                                    <Pill type={'danger'}>{t('linksModule.hidden') as string}</Pill>
+                                                    <Pill type={'danger'}>Hidden</Pill>
                                                 )}
                                             </td>
                                             <td className={'px-6 py-4 space-x-3'}>

@@ -9,8 +9,10 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Everest\Models\Billing\Category;
 use Spatie\QueryBuilder\QueryBuilder;
+use Everest\Exceptions\DisplayException;
 use Everest\Transformers\Api\Application\CategoryTransformer;
 use Everest\Exceptions\Http\QueryValueOutOfRangeHttpException;
+use Everest\Http\Requests\Api\Application\ApplicationApiRequest;
 use Everest\Http\Controllers\Api\Application\ApplicationApiController;
 use Everest\Http\Requests\Api\Application\Billing\Categories\GetBillingCategoryRequest;
 use Everest\Http\Requests\Api\Application\Billing\Categories\GetBillingCategoriesRequest;
@@ -39,8 +41,8 @@ class CategoryController extends ApplicationApiController
         }
 
         $categories = QueryBuilder::for(Category::query())
-            ->allowedFilters(['id', 'name'])
-            ->allowedSorts(['id', 'name', 'created_at', 'visible'])
+            ->allowedFilters(...['id', 'name'])
+            ->allowedSorts(...['id', 'name', 'created_at', 'visible'])
             ->paginate($perPage);
 
         return $this->transform($categories, CategoryTransformer::class);
@@ -51,7 +53,7 @@ class CategoryController extends ApplicationApiController
      */
     public function store(StoreBillingCategoryRequest $request): array
     {
-        $egg = Egg::query()->findOrFail($request->input('eggId'));
+        ['nest_id' => $nestId, 'egg_id' => $eggId] = $this->resolveNestAndEgg($request);
 
         try {
             $category = Category::create([
@@ -60,14 +62,15 @@ class CategoryController extends ApplicationApiController
                 'icon' => $request->input('icon'),
                 'description' => $request->input('description'),
                 'visible' => $request->input('visible'),
-                'nest_id' => $egg->nest_id,
-                'egg_id' => $egg->id,
+                'nest_id' => $nestId,
+                'egg_id' => $eggId,
             ]);
         } catch (\Exception $ex) {
             throw new \Exception('Failed to create a new product category: ' . $ex->getMessage());
         }
 
         Activity::event('admin:billing:categories:create')
+            ->subject($category)
             ->property('category', $category)
             ->description('A billing category was created')
             ->log();
@@ -80,7 +83,7 @@ class CategoryController extends ApplicationApiController
      */
     public function update(UpdateBillingCategoryRequest $request, Category $category): Response
     {
-        $egg = Egg::query()->findOrFail($request->input('eggId'));
+        ['nest_id' => $nestId, 'egg_id' => $eggId] = $this->resolveNestAndEgg($request);
 
         try {
             $category->updateOrFail([
@@ -88,14 +91,15 @@ class CategoryController extends ApplicationApiController
                 'icon' => $request->input('icon'),
                 'description' => $request->input('description'),
                 'visible' => $request->input('visible'),
-                'nest_id' => $egg->nest_id,
-                'egg_id' => $egg->id,
+                'nest_id' => $nestId,
+                'egg_id' => $eggId,
             ]);
         } catch (\Exception $ex) {
             throw new \Exception('Failed to update a product category: ' . $ex->getMessage());
         }
 
         Activity::event('admin:billing:categories:update')
+            ->subject($category)
             ->property('category', $category)
             ->property('new_data', $request->all())
             ->description('A billing category was updated')
@@ -126,10 +130,37 @@ class CategoryController extends ApplicationApiController
         });
 
         Activity::event('admin:billing:categories:delete')
+            ->subject($category)
             ->property('category', $category)
             ->description('A billing category was deleted')
             ->log();
 
         return $this->returnNoContent();
+    }
+
+    /**
+     * Resolve the nest and egg a category should be scoped to. An egg is optional: when
+     * one isn't provided, customers pick an egg from the nest themselves at checkout, so
+     * only the nest is required.
+     *
+     * @return array{nest_id: int, egg_id: int|null}
+     */
+    private function resolveNestAndEgg(ApplicationApiRequest $request): array
+    {
+        $eggId = $request->input('eggId');
+
+        if ($eggId) {
+            $egg = Egg::query()->findOrFail($eggId);
+
+            return ['nest_id' => $egg->nest_id, 'egg_id' => $egg->id];
+        }
+
+        $nestId = $request->input('nestId');
+
+        if (!$nestId) {
+            throw new DisplayException('Either an egg or a nest must be selected for this category.');
+        }
+
+        return ['nest_id' => (int) $nestId, 'egg_id' => null];
     }
 }

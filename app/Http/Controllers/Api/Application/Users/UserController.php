@@ -6,6 +6,7 @@ use Everest\Models\User;
 use Illuminate\Support\Arr;
 use Everest\Facades\Activity;
 use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 use Spatie\QueryBuilder\QueryBuilder;
 use Spatie\QueryBuilder\AllowedFilter;
 use Everest\Exceptions\DisplayException;
@@ -20,6 +21,7 @@ use Everest\Http\Requests\Api\Application\Users\GetUsersRequest;
 use Everest\Http\Requests\Api\Application\Users\StoreUserRequest;
 use Everest\Http\Requests\Api\Application\Users\DeleteUserRequest;
 use Everest\Http\Requests\Api\Application\Users\UpdateUserRequest;
+use Everest\Http\Requests\Api\Application\Users\SuspendUserRequest;
 use Everest\Http\Controllers\Api\Application\ApplicationApiController;
 
 class UserController extends ApplicationApiController
@@ -48,7 +50,7 @@ class UserController extends ApplicationApiController
         }
 
         $users = QueryBuilder::for(User::query())
-            ->allowedFilters([
+            ->allowedFilters(...[
                 'username',
                 'email',
                 AllowedFilter::exact('id'),
@@ -67,7 +69,7 @@ class UserController extends ApplicationApiController
                 }),
             ])
             ->defaultSort('-root_admin')
-            ->allowedSorts(['id', 'uuid', 'username', 'email', 'admin_role_id', 'use_totp', 'root_admin', 'state', 'created_at'])
+            ->allowedSorts(...['id', 'uuid', 'username', 'email', 'admin_role_id', 'use_totp', 'root_admin', 'state', 'created_at'])
             ->paginate($perPage);
 
         return $this->transform($users, UserTransformer::class);
@@ -114,6 +116,7 @@ class UserController extends ApplicationApiController
         $user = $this->updateService->handle($user, $request->validated());
 
         Activity::event('admin:users:update')
+            ->subject($user)
             ->property('user', $user)
             ->property('new_data', $request->all())
             ->description('A user was updated')
@@ -129,16 +132,20 @@ class UserController extends ApplicationApiController
      * @throws \Exception
      * @throws \Everest\Exceptions\Model\DataValidationException
      */
-    public function store(StoreUserRequest $request): array
+    public function store(StoreUserRequest $request): JsonResponse
     {
         $user = $this->creationService->handle($request->validated());
 
         Activity::event('admin:users:create')
+            ->subject($user)
             ->property('user', $user)
             ->description('A user was created')
             ->log();
 
-        return $this->transform($user, UserTransformer::class);
+        return response()->json(
+            $this->transform($user, UserTransformer::class),
+            Response::HTTP_CREATED,
+        );
     }
 
     /**
@@ -146,7 +153,7 @@ class UserController extends ApplicationApiController
      *
      * @throws \Throwable
      */
-    public function suspend(User $user): Response
+    public function suspend(SuspendUserRequest $request, User $user): Response
     {
         if ($user->root_admin) {
             throw new \Exception('You cannot suspend an administrator.');
@@ -155,6 +162,7 @@ class UserController extends ApplicationApiController
         $user->update(['state' => $user->isSuspended() ? 'active' : 'suspended']);
 
         Activity::event('admin:users:suspend')
+            ->subject($user)
             ->property('user', $user)
             ->description('A user was suspended')
             ->log();
@@ -173,6 +181,7 @@ class UserController extends ApplicationApiController
         $this->deletionService->handle($user);
 
         Activity::event('admin:users:delete')
+            ->subject($user)
             ->property('user', $user)
             ->description('A user was deleted')
             ->log();

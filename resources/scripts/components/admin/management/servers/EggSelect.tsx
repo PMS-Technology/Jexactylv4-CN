@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { WithRelationships } from '@/api/routes/admin';
-import type { Egg } from '@/api/routes/admin/egg';
-import { searchEggs } from '@/api/routes/admin/egg';
+import type { Egg } from '@definitions/admin';
+import { searchEggs } from '@/api/routes/admin/eggs';
 import Label from '@/elements/Label';
 import Select from '@/elements/Select';
 

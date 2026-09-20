@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
-import { getServerPresets, Context as ServerPresetsContext } from '@/api/routes/admin/servers/presets';
+import { getServerPresets, ServerPresetsContext } from '@/api/routes/admin/servers';
 import AdminTable, {
     ContentWrapper,
     Loading,
@@ -16,7 +16,7 @@ import AdminTable, {
 import CopyOnClick from '@/elements/CopyOnClick';
 import useFlash from '@/plugins/useFlash';
 import { useStoreState } from '@/state/hooks';
-import { ServerPresetFilters } from '@/api/routes/admin/servers/types';
+import { ServerPresetFilters } from '@/api/routes/admin/servers';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/outline';
 
 interface Props {

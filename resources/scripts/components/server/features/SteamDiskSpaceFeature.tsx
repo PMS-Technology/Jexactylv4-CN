@@ -6,6 +6,7 @@ import tw from 'twin.macro';
 import { Button } from '@/elements/button';
 import FlashMessageRender from '@/elements/FlashMessageRender';
 import useFlash from '@/plugins/useFlash';
+import { useStoreState } from '@/state/hooks';
 import { SocketEvent } from '@server/events';
 
 const SteamDiskSpaceFeature = () => {

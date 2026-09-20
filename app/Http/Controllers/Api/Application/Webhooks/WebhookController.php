@@ -27,7 +27,7 @@ class WebhookController extends ApplicationApiController
     public function index(Webhooks\GetWebhookEventsRequest $request): array
     {
         $events = QueryBuilder::for(WebhookEvent::query())
-            ->allowedFilters(['key'])
+            ->allowedFilters(...['key'])
             ->get();
 
         return $this->transform($events, WebhookEventTransformer::class);
@@ -49,6 +49,12 @@ class WebhookController extends ApplicationApiController
                 $event->update(['enabled' => $request->input('enabled')]);
             }
         }
+
+        Activity::event('admin:webhooks:toggle')
+            ->property('id', $request->input('id'))
+            ->property('enabled', $request->input('enabled'))
+            ->description('Webhook event(s) were toggled')
+            ->log();
 
         return $this->returnNoContent();
     }
@@ -76,7 +82,7 @@ class WebhookController extends ApplicationApiController
 
         Activity::event('admin:webhooks:update')
             ->property('settings', $request->all())
-            ->description('Jexactyl webhook settings were updated')
+            ->description('Jexpanelwebhook settings were updated')
             ->log();
 
         return $this->returnNoContent();

@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
-import { useServerFromRoute } from '@/api/routes/admin/server';
+import { useServerFromRoute } from '@/api/routes/admin/servers';
 import AdminBox from '@/elements/AdminBox';
 import OwnerSelect from '@admin/management/servers/OwnerSelect';
 import Field from '@/elements/Field';

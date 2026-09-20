@@ -2,8 +2,8 @@ import { useFormikContext } from 'formik';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { Node } from '@/api/routes/admin/node';
-import { searchNodes } from '@/api/routes/admin/node';
+import type { Node } from '@definitions/admin';
+import { searchNodes } from '@/api/routes/admin/nodes';
 import SearchableSelect, { Option } from '@/elements/SearchableSelect';
 
 export default ({ node, setNode }: { node: Node | null; setNode: (_: Node | null) => void }) => {

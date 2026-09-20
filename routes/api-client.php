@@ -42,10 +42,21 @@ Route::prefix('/')->middleware([SuspendedAccount::class])->group(function () {
             Route::get('/two-factor', [Client\TwoFactorController::class, 'index']);
             Route::post('/two-factor', [Client\TwoFactorController::class, 'store']);
             Route::post('/two-factor/disable', [Client\TwoFactorController::class, 'delete']);
+
+            // A passkey satisfies the forced two-factor requirement, so these must stay
+            // reachable for an account that has not enrolled in TOTP.
+            Route::prefix('/passkeys')->group(function () {
+                Route::get('/', [Client\PasskeyController::class, 'index']);
+                Route::post('/options', [Client\PasskeyController::class, 'options']);
+                Route::post('/', [Client\PasskeyController::class, 'store']);
+                Route::post('/remove', [Client\PasskeyController::class, 'delete']);
+            });
         });
 
         Route::put('/email', [Client\AccountController::class, 'updateEmail'])->name('api:client.account.update-email');
         Route::put('/password', [Client\AccountController::class, 'updatePassword'])->name('api:client.account.update-password');
+        Route::post('/avatar', [Client\AccountController::class, 'updateAvatar'])->name('api:client.account.update-avatar');
+        Route::delete('/avatar', [Client\AccountController::class, 'removeAvatar'])->name('api:client.account.remove-avatar');
 
         Route::get('/activity', Client\ActivityLogController::class)->name('api:client.account.activity');
 
@@ -73,20 +84,22 @@ Route::prefix('/')->middleware([SuspendedAccount::class])->group(function () {
 
     Route::prefix('/billing')->middleware([BillingEnabled::class])->group(function () {
         // Data for storefront checkout
-        Route::post('/nodes/{product:id}', [Client\Billing\NodesController::class, 'index']);
-        Route::get('/categories', [Client\Billing\CategoryController::class, 'index']);
+        Route::post('/nodes/{product:id}', [Client\Billing\StoreController::class, 'nodes']);
+        Route::get('/categories', [Client\Billing\StoreController::class, 'categories']);
 
         // Discount code checking
         Route::post('/discount-codes', [Client\Billing\DiscountCodeController::class, 'index']);
 
         // Viewing of available categories/products
-        Route::get('/categories/{id}', [Client\Billing\ProductController::class, 'index']);
-        Route::get('/products/{id}', [Client\Billing\ProductController::class, 'view']);
-        Route::get('/products/{id}/variables', [Client\Billing\EggController::class, 'index']);
+        Route::get('/categories/{category:id}', [Client\Billing\StoreController::class, 'products']);
+        Route::get('/products/{product:id}', [Client\Billing\StoreController::class, 'product']);
+        Route::get('/products/{product:id}/eggs', [Client\Billing\StoreController::class, 'eggs']);
+        Route::get('/products/{egg:id}/variables', [Client\Billing\StoreController::class, 'variables']);
 
         // View existing billing orders that have already been created
         Route::get('/orders', [Client\Billing\OrderController::class, 'index']);
-        Route::get('/orders/{id}', [Client\Billing\OrderController::class, 'view']);
+        Route::get('/orders/{order:id}', [Client\Billing\OrderController::class, 'view']);
+        Route::get('/orders/{order:id}/invoice', [Client\Billing\OrderController::class, 'invoice']);
 
         // Billing controllers and services
         Route::post('/stripe/create', [Client\Billing\StripeController::class, 'create']);

@@ -12,6 +12,13 @@ export default class Transformers {
         };
     };
 
+    static toPasskey = ({ attributes }: FractalResponseData): Models.Passkey => ({
+        uuid: attributes.uuid,
+        name: attributes.name,
+        lastUsedAt: attributes.last_used_at ? new Date(attributes.last_used_at) : null,
+        createdAt: new Date(attributes.created_at),
+    });
+
     static toApiKey = ({ attributes }: FractalResponseData): Models.ApiKey => ({
         id: attributes.id,
         identifier: attributes.identifier,
@@ -46,6 +53,7 @@ export default class Transformers {
 
     static toUser = ({ attributes }: FractalResponseData): Models.User => {
         return {
+            id: attributes.id,
             uuid: attributes.uuid,
             username: attributes.username,
             email: attributes.email,
@@ -64,6 +72,7 @@ export default class Transformers {
 
         return {
             id: attributes.id,
+            logId: attributes.log_id ?? null,
             batch: attributes.batch,
             event: attributes.event,
             ip: attributes.ip,
@@ -71,6 +80,7 @@ export default class Transformers {
             description: attributes.description,
             properties: attributes.properties,
             hasAdditionalMetadata: attributes.has_additional_metadata ?? false,
+            subjects: attributes.subjects ?? [],
             timestamp: new Date(attributes.timestamp),
             relationships: {
                 actor: transform(actor as FractalResponseData, this.toUser, null),
@@ -78,5 +88,3 @@ export default class Transformers {
         };
     };
 }
-
-export class MetaTransformers {}

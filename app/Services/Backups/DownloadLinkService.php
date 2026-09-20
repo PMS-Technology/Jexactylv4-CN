@@ -3,6 +3,7 @@
 namespace Everest\Services\Backups;
 
 use Everest\Models\User;
+use Everest\Enum\JwtScope;
 use Everest\Models\Backup;
 use Carbon\CarbonImmutable;
 use Everest\Services\Nodes\NodeJWTService;
@@ -34,6 +35,7 @@ class DownloadLinkService
                 'backup_uuid' => $backup->uuid,
                 'server_uuid' => $backup->server->uuid,
             ])
+            ->setScopes(JwtScope::BackupDownload)
             ->handle($backup->server->node, $user->id . $backup->server->uuid);
 
         return sprintf('%s/download/backup?token=%s', $backup->server->node->getConnectionAddress(), $token->toString());

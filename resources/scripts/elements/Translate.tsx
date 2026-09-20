@@ -1,15 +1,22 @@
-import type { TransProps } from 'react-i18next';
+import type { ComponentType, ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-type Props = Omit<TransProps<string, string>, 't'>;
+interface Props {
+    children?: ReactNode;
+    defaults?: string;
+    i18nKey?: string | string[];
+    ns?: string | string[];
+    values?: Record<string, unknown>;
+}
 
 function Translate({ ns, children, ...props }: Props) {
-    const { t } = useTranslation(ns);
+    const { i18n } = useTranslation();
+    const DynamicTrans = Trans as ComponentType<any>;
 
     return (
-        <Trans t={t} {...props}>
+        <DynamicTrans i18n={i18n} ns={ns} {...props}>
             {children}
-        </Trans>
+        </DynamicTrans>
     );
 }
 

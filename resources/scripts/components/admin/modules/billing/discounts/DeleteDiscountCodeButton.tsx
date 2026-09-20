@@ -1,4 +1,4 @@
-import { deleteDiscountCode } from '@/api/routes/admin/billing/discount-codes';
+import { deleteDiscountCode } from '@/api/routes/admin/billing';
 import { Button } from '@/elements/button';
 import { Dialog } from '@/elements/dialog';
 import { useTranslation } from 'react-i18next';

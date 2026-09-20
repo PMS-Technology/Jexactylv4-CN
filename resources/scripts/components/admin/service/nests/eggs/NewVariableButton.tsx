@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
-import type { CreateEggVariable } from '@/api/routes/admin/eggs/createEggVariable';
-import createEggVariable from '@/api/routes/admin/eggs/createEggVariable';
-import { useEggFromRoute } from '@/api/routes/admin/egg';
+import type { CreateEggVariable } from '@/api/routes/admin/eggs';
+import { createEggVariable } from '@/api/routes/admin/eggs';
+import { useEggFromRoute } from '@/api/routes/admin/eggs';
 import { EggVariableForm, validationSchema } from '@admin/service/nests/eggs/EggVariablesContainer';
 import Modal from '@/elements/Modal';
 import FlashMessageRender from '@/elements/FlashMessageRender';

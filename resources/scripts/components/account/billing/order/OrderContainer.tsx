@@ -1,14 +1,15 @@
 import Spinner from '@/elements/Spinner';
-import { useEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStoreState } from '@/state/hooks';
 import NodeBox from '@account/billing/order/NodeBox';
+import EggBox from '@account/billing/order/EggBox';
 import PageContentBlock from '@/elements/PageContentBlock';
 import VariableBox from '@account/billing/order/VariableBox';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
     faArchive,
+    faCheck,
     faCreditCard,
     faDatabase,
     faEthernet,
@@ -24,25 +25,50 @@ import PaymentButton from './PaymentButton';
 import { EggVariable } from '@definitions/server';
 import { Button } from '@/elements/button';
 import FlashMessageRender from '@/elements/FlashMessageRender';
-import { DiscountCode, Product, type Node } from '@definitions/account/billing';
-import { getProduct, getProductVariables, getViableNodes } from '@/api/routes/account/billing/products';
+import { DiscountCode, Product, type Node, type Egg } from '@definitions/account/billing';
+import { getProduct, getProductEggs, getProductVariables, getViableNodes } from '@/api/routes/account/billing/products';
 import TitledGreyBox from '@/elements/TitledGreyBox';
 import AdminCheckbox from '@/elements/AdminCheckbox';
 import { processFreeCheckoutSession } from '@/api/routes/account/billing/orders/process';
 import DiscountCodeDialog from './DiscountCodeDialog';
-import { useTranslation } from 'react-i18next';
+import LimitBox from '@/elements/billing/LimitBox';
+import Money from '@/elements/billing/Money';
+import { hexToRgba } from '@/lib/helpers';
 
-const LimitBox = ({ icon, content }: { icon: IconDefinition; content: string }) => {
+const StepHeader = ({
+    step,
+    complete,
+    title,
+    description,
+}: {
+    step: number;
+    complete: boolean;
+    title: ReactNode;
+    description: ReactNode;
+}) => {
+    const { colors } = useStoreState(state => state.theme.data!);
+
     return (
-        <div className={'font-semibold text-gray-400 my-1'}>
-            <FontAwesomeIcon icon={icon} className={'w-4 h-4 inline-flex mr-2 '} />
-            {content}
+        <div className={'flex items-start gap-4 mb-4'}>
+            <div
+                className={'w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-1 font-bold text-sm'}
+                style={
+                    complete
+                        ? { backgroundColor: colors.primary, color: '#fff' }
+                        : { backgroundColor: hexToRgba(colors.primary, 0.12), color: colors.primary }
+                }
+            >
+                {complete ? <FontAwesomeIcon icon={faCheck} className={'w-3.5 h-3.5'} /> : step}
+            </div>
+            <div className={'text-xl lg:text-3xl font-semibold'}>
+                {title}
+                <p className={'text-gray-400 font-normal text-sm mt-1'}>{description}</p>
+            </div>
         </div>
     );
 };
 
 export default () => {
-    const { t } = useTranslation('dashboard');
     const params = useParams<'id'>();
 
     const vars = useRef(new Map<string, string>()).current;
@@ -54,18 +80,21 @@ export default () => {
     const [nodes, setNodes] = useState<Node[] | undefined>();
     const [selectedNode, setSelectedNode] = useState<number>(0);
     const [product, setProduct] = useState<Product | undefined>();
-    const [eggs, setEggs] = useState<EggVariable[] | undefined>();
+    const [availableEggs, setAvailableEggs] = useState<Egg[] | undefined>();
+    const [selectedEgg, setSelectedEgg] = useState<number | undefined>();
+    const [variables, setVariables] = useState<EggVariable[] | undefined>();
     const [discountCode, setDiscountCode] = useState<DiscountCode | undefined>();
 
     const [termsAgreed, setTermsAgreed] = useState<boolean>(false);
     const [privacyAgreed, setPrivacyAgreed] = useState<boolean>(false);
 
-    const { colors } = useStoreState(state => state.theme.data!);
+    const needsEggSelection = product?.eggId === null;
+    const resolvedEggId = product?.eggId ?? selectedEgg;
 
     const createFree = () => {
         if (product) {
-            const variables = Array.from(vars, ([key, value]) => ({ key, value }));
-            processFreeCheckoutSession(product.id, selectedNode, variables, undefined)
+            const orderVariables = Array.from(vars, ([key, value]) => ({ key, value }));
+            processFreeCheckoutSession(product.id, selectedNode, orderVariables, undefined, resolvedEggId)
                 .then(() => navigate('/'))
                 .catch(error => clearAndAddHttpError({ key: 'account:billing:order', error }));
         }
@@ -79,7 +108,13 @@ export default () => {
 
                 const nodesData = await getViableNodes(productData.id);
                 setNodes(nodesData);
-                setSelectedNode(Number(nodesData[0]?.id) ?? 0);
+                const firstEligible = nodesData.find(node => (productData.price === 0 ? node.deployableFree : true));
+                setSelectedNode(Number(firstEligible?.id) ?? 0);
+
+                if (productData.eggId === null) {
+                    const eggsData = await getProductEggs(productData.id);
+                    setAvailableEggs(eggsData);
+                }
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
@@ -91,13 +126,13 @@ export default () => {
     useEffect(() => {
         clearFlashes();
 
-        if (!product || eggs) return;
+        if (!resolvedEggId || variables) return;
 
         // Fetch product variables (egg data)
-        getProductVariables(Number(product.eggId))
-            .then(data => setEggs(data))
+        getProductVariables(resolvedEggId)
+            .then(data => setVariables(data))
             .catch(error => console.error(error));
-    }, [product]);
+    }, [resolvedEggId]);
 
     if (!product) return <Spinner centered />;
 
@@ -109,54 +144,62 @@ export default () => {
         return Math.max(0, product.price - discountCode.value).toFixed(2);
     })();
 
+    const selectedNodeData = nodes?.find(node => Number(node.id) === selectedNode);
+    const deploymentFee = selectedNodeData?.deploymentFee ?? 0;
+    const grandTotal = Number(finalPrice) + deploymentFee;
+
+    const showVariablesStep = !!variables && variables.length > 1;
+
+    let stepCounter = 1;
+    const locationStep = stepCounter++;
+    const eggStep = needsEggSelection ? stepCounter++ : undefined;
+    const variablesStep = showVariablesStep ? stepCounter++ : undefined;
+    const legalStep = stepCounter++;
+    const paymentStep = stepCounter++;
+
     return (
-        <PageContentBlock title={t('billing.yourOrder')}>
+        <PageContentBlock title={'Your Order'}>
             <FlashMessageRender byKey={'account:billing:order'} className={'mb-4'} />
             <div className={'text-3xl lg:text-5xl font-bold mt-8 mb-12'}>
-                {t('billing.yourOrder')}
-                <p className={'text-gray-400 font-normal text-sm mt-1'}>{t('billing.yourOrderDescription')}</p>
+                Your Order
+                <p className={'text-gray-400 font-normal text-sm mt-1'}>
+                    Customize your selected plan and submit a payment.
+                </p>
             </div>
             <div className={'grid lg:grid-cols-8 gap-4 lg:gap-12'}>
                 <div className={'lg:border-r-4 border-gray-500 lg:col-span-2'}>
                     <p className={'text-2xl text-gray-300 my-4 font-bold'}>
-                        {t('billing.selectedPlan')}
+                        Selected Plan
                         {product.icon && <img src={product.icon} className={'w-8 h-8 ml-2 inline-flex'} />}
                     </p>
-                    <LimitBox icon={faIdBadge} content={product.name} />
+                    <LimitBox icon={faIdBadge} limit={<>{product.name}</>} />
                     <div className={'font-semibold text-gray-400 text-lg my-1'}>
                         <FontAwesomeIcon icon={faCreditCard} className={'w-4 h-4 inline-flex mr-2 '} />
-                        <span style={{ color: colors.primary }} className={'mr-1'}>
-                            {billing.currency.symbol}
-                            {finalPrice} {billing.currency.code.toUpperCase()}
-                        </span>
-                        <span className={'text-sm'}>{t('billing.mo')}</span>
+                        <Money value={Number(finalPrice)} className={'mr-1'} accent />
+                        <span className={'text-sm'}>/ mo</span>
                     </div>
                     <div className={'h-0.5 my-4 bg-gray-600 mr-8 rounded-full'} />
-                    <LimitBox icon={faMicrochip} content={`${product.limits.cpu}% CPU`} />
-                    <LimitBox
-                        icon={faMemory}
-                        content={t('billing.memoryLimit', { amount: (product.limits.memory / 1024).toFixed(1) })}
-                    />
-                    <LimitBox
-                        icon={faHdd}
-                        content={t('billing.diskLimit', { amount: (product.limits.disk / 1024).toFixed(1) })}
-                    />
+                    <LimitBox icon={faMicrochip} limit={<>{product.limits.cpu}% CPU</>} />
+                    <LimitBox icon={faMemory} limit={<>{(product.limits.memory / 1024).toFixed(1)} GiB Memory</>} />
+                    <LimitBox icon={faHdd} limit={<>{(product.limits.disk / 1024).toFixed(1)} GiB Disk</>} />
                     <div className={'h-0.5 my-4 bg-gray-600 mr-8 rounded-full'} />
-                    <LimitBox icon={faArchive} content={t('billing.backupSlots', { count: product.limits.backup })} />
-                    <LimitBox icon={faDatabase} content={t('billing.databaseSlots', { count: product.limits.database })} />
-                    <LimitBox icon={faEthernet} content={t('billing.networkPorts', { count: product.limits.allocation })} />
+                    <LimitBox icon={faArchive} limit={<>{product.limits.backup} Backup Slots</>} />
+                    <LimitBox icon={faDatabase} limit={<>{product.limits.database} Database Slots</>} />
+                    <LimitBox icon={faEthernet} limit={<>{product.limits.allocation} Network Ports</>} />
                 </div>
                 <div className={'lg:col-span-6'}>
                     <div>
                         <div className={'my-10'}>
-                            <div className={'text-xl lg:text-3xl font-semibold mb-4'}>
-                                {t('billing.chooseLocation')}
-                                <p className={'text-gray-400 font-normal text-sm mt-1'}>{t('billing.chooseLocationDescription')}</p>
-                            </div>
+                            <StepHeader
+                                step={locationStep}
+                                complete={!!selectedNode && (nodes?.length ?? 0) > 0}
+                                title={'Choose a location'}
+                                description={'Select a location from our list to deploy your server to.'}
+                            />
                             <div className={'grid lg:grid-cols-2 gap-4'}>
                                 {(!nodes || nodes.length < 1) && (
                                     <Alert type={'danger'} className={'col-span-2'}>
-                                        {t('billing.noDeploymentNodes')}
+                                        There are no nodes available for deployment. Please contact an administrator.
                                     </Alert>
                                 )}
                                 {nodes?.map(node => (
@@ -165,20 +208,56 @@ export default () => {
                                         key={node.id}
                                         selected={selectedNode}
                                         setSelected={setSelectedNode}
+                                        disabled={product.price === 0 && !node.deployableFree}
                                     />
                                 ))}
                             </div>
                         </div>
                         <div className={'h-px bg-gray-700 rounded-full'} />
-                        {eggs && eggs.length > 1 && (
+                        {needsEggSelection && (
                             <>
                                 <div className={'my-10'}>
-                                    <div className={'text-xl lg:text-3xl font-semibold mb-4'}>
-                                        {t('billing.planVariables')}
-                                        <p className={'text-gray-400 font-normal text-sm mt-1'}>{t('billing.planVariablesDescription')}</p>
-                                    </div>
+                                    <StepHeader
+                                        step={eggStep!}
+                                        complete={!!selectedEgg}
+                                        title={'Choose your egg'}
+                                        description={
+                                            'Select which server type from this nest you would like to deploy.'
+                                        }
+                                    />
                                     <div className={'grid lg:grid-cols-2 gap-4'}>
-                                        {eggs?.map(variable => (
+                                        {(!availableEggs || availableEggs.length < 1) && (
+                                            <Alert type={'danger'} className={'col-span-2'}>
+                                                There are no eggs available for this product. Please contact an
+                                                administrator.
+                                            </Alert>
+                                        )}
+                                        {availableEggs?.map(egg => (
+                                            <EggBox
+                                                egg={egg}
+                                                key={egg.id}
+                                                selected={selectedEgg}
+                                                setSelected={setSelectedEgg}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className={'h-px bg-gray-700 rounded-full'} />
+                            </>
+                        )}
+                        {showVariablesStep && (
+                            <>
+                                <div className={'my-10'}>
+                                    <StepHeader
+                                        step={variablesStep!}
+                                        complete={!!selectedNode && (nodes?.length ?? 0) > 0}
+                                        title={'Plan Variables'}
+                                        description={
+                                            'Modify your server variables before your server is even created for ease of use.'
+                                        }
+                                    />
+                                    <div className={'grid lg:grid-cols-2 gap-4'}>
+                                        {variables?.map(variable => (
                                             <div key={variable.envVariable}>
                                                 {variable.isEditable && <VariableBox variable={variable} vars={vars} />}
                                             </div>
@@ -189,21 +268,23 @@ export default () => {
                             </>
                         )}
                         <div className={'my-10'}>
-                            <div className={'text-xl lg:text-3xl font-semibold mb-4'}>
-                                {t('billing.legalDocuments')}
-                                <p className={'text-gray-400 font-normal text-sm mt-1'}>{t('billing.legalDocumentsDescription')}</p>
-                            </div>
+                            <StepHeader
+                                step={legalStep}
+                                complete={termsAgreed && privacyAgreed}
+                                title={'Legal Documents'}
+                                description={'Agree and sign the relevant legal documents for your new server.'}
+                            />
                             <div className={'grid lg:grid-cols-2 gap-4'}>
-                                <TitledGreyBox title={t('billing.termsAgreement')} className={'relative'}>
+                                <TitledGreyBox title={'Terms of Service agreement'} className={'relative'}>
                                     {!termsAgreed ? (
                                         <>
-                                            {t('billing.clickToAgree')}{' '}
+                                            Click the checkbox to agree to our{' '}
                                             <a href={billing.links.terms} className={'text-blue-400 font-semibold'}>
-                                                {t('billing.termsOfService')} <FontAwesomeIcon icon={faExternalLinkAlt} />
+                                                Terms of Service <FontAwesomeIcon icon={faExternalLinkAlt} />
                                             </a>
                                         </>
                                     ) : (
-                                        <Alert type={'success'}>{t('billing.termsCompleted')}</Alert>
+                                        <Alert type={'success'}>Terms of Service completed</Alert>
                                     )}
                                     {!termsAgreed && (
                                         <div className={'absolute top-0 right-0 p-3'}>
@@ -215,16 +296,16 @@ export default () => {
                                         </div>
                                     )}
                                 </TitledGreyBox>
-                                <TitledGreyBox title={t('billing.privacyAgreement')} className={'relative'}>
+                                <TitledGreyBox title={'Privacy Policy agreement'} className={'relative'}>
                                     {!privacyAgreed ? (
                                         <>
-                                            {t('billing.clickToAgree')}{' '}
+                                            Click the checkbox to agree to our{' '}
                                             <a href={billing.links.privacy} className={'text-blue-400 font-semibold'}>
-                                                {t('billing.privacyPolicy')} <FontAwesomeIcon icon={faExternalLinkAlt} />
+                                                Privacy Policy <FontAwesomeIcon icon={faExternalLinkAlt} />
                                             </a>
                                         </>
                                     ) : (
-                                        <Alert type={'success'}>{t('billing.privacyCompleted')}</Alert>
+                                        <Alert type={'success'}>Privacy Policy completed</Alert>
                                     )}
                                     {!privacyAgreed && (
                                         <div className={'absolute top-0 right-0 p-3'}>
@@ -241,22 +322,42 @@ export default () => {
                         <div className={'h-px bg-gray-700 rounded-full'} />
                         {!termsAgreed || !privacyAgreed ? (
                             <Alert type={'warning'}>
-                                {t('billing.legalRequired')}
+                                Please agree to the above legal documents before proceeding with your order.
                             </Alert>
                         ) : (
                             <>
                                 {finalPrice !== 0 ? (
                                     <div className={'mt-10'}>
-                                        <div className={'text-xl lg:text-3xl font-semibold mb-4'}>
-                                            {t('billing.dueToday')}: {billing.currency.symbol}
-                                            {finalPrice} {billing.currency.code.toUpperCase()}
-                                            {discountCode && (
-                                                <span className={'text-green-400 text-base font-normal ml-3'}>
-                                                    {t('billing.discountApplied', { code: discountCode.code })}
-                                                </span>
-                                            )}
-                                            <p className={'text-gray-400 font-normal text-sm mt-1'}>{t('billing.payNowDescription')}</p>
-                                        </div>
+                                        <StepHeader
+                                            step={paymentStep}
+                                            complete={false}
+                                            title={
+                                                <>
+                                                    Due Today: <Money value={grandTotal} accent />
+                                                    {deploymentFee > 0 && (
+                                                        <span className={'text-sm text-gray-400 font-normal ml-2'}>
+                                                            (includes <Money value={deploymentFee} /> one-time
+                                                            deployment fee)
+                                                        </span>
+                                                    )}
+                                                    {discountCode && (
+                                                        <span className={'text-green-400 text-base font-normal ml-3'}>
+                                                            ({discountCode.code} discount applied)
+                                                        </span>
+                                                    )}
+                                                </>
+                                            }
+                                            description={
+                                                deploymentFee > 0 ? (
+                                                    <>
+                                                        Then <Money value={Number(finalPrice)} suffix={'/mo'} />{' '}
+                                                        starting next billing cycle.
+                                                    </>
+                                                ) : (
+                                                    'Press Pay Now to checkout via your preferred payment method.'
+                                                )
+                                            }
+                                        />
                                         <div className={'flex justify-between w-full mt-8'}>
                                             <DiscountCodeDialog
                                                 discountCode={discountCode}
@@ -268,18 +369,28 @@ export default () => {
                                                     product={product}
                                                     vars={vars}
                                                     discount_code={discountCode?.code}
+                                                    egg={resolvedEggId}
                                                 />
                                             </div>
                                         </div>
                                     </div>
                                 ) : (
                                     <div className={'flex w-full mt-8'}>
-                                        <p className={'font-semibold text-gray-400'}>
-                                            {t('billing.freeProductDescription')}
-                                        </p>
-                                        <Button className={'ml-auto'} onClick={createFree}>
-                                            {t('billing.createServer')}
-                                        </Button>
+                                        {needsEggSelection && !selectedEgg ? (
+                                            <Alert type={'warning'} className={'w-full'}>
+                                                Please select an egg above to continue.
+                                            </Alert>
+                                        ) : (
+                                            <>
+                                                <p className={'font-semibold text-gray-400'}>
+                                                    As this product is free, no purchase needs to be made via our
+                                                    payment gateways.
+                                                </p>
+                                                <Button className={'ml-auto'} onClick={createFree}>
+                                                    Create Server
+                                                </Button>
+                                            </>
+                                        )}
                                     </div>
                                 )}
                             </>

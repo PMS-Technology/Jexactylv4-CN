@@ -12,6 +12,7 @@ use Everest\Http\Middleware\VerifyReCaptcha;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Http\Middleware\TrustProxies;
 use Everest\Http\Middleware\LanguageMiddleware;
+use Everest\Http\Middleware\SetSecurityHeaders;
 use Illuminate\Session\Middleware\StartSession;
 use Everest\Http\Middleware\Activity\TrackAPIKey;
 use Everest\Http\Middleware\MaintenanceMiddleware;
@@ -46,6 +47,11 @@ class Kernel extends HttpKernel
         ValidatePostSize::class,
         TrimStrings::class,
         ConvertEmptyStringsToNull::class,
+        SetSecurityHeaders::class,
+    ];
+
+    protected $middlewarePriority = [
+        SubstituteClientBindings::class,
     ];
 
     /**

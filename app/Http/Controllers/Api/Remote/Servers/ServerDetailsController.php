@@ -13,6 +13,7 @@ use Everest\Services\Eggs\EggConfigurationService;
 use Everest\Repositories\Eloquent\ServerRepository;
 use Everest\Http\Resources\Wings\ServerConfigurationCollection;
 use Everest\Services\Servers\ServerConfigurationStructureService;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Everest\Http\Controllers\Api\Application\ApplicationApiController;
 
 class ServerDetailsController extends ApplicationApiController
@@ -36,7 +37,14 @@ class ServerDetailsController extends ApplicationApiController
      */
     public function __invoke(Request $request, string $uuid): JsonResponse
     {
+        /** @var \Everest\Models\Node $node */
+        $node = $request->attributes->get('node');
+
         $server = $this->repository->getByUuid($uuid);
+        if ($server->node_id !== $node->id) {
+            // Don't reveal that a server with this UUID exists on a different node.
+            throw new NotFoundHttpException();
+        }
 
         return new JsonResponse([
             'settings' => $this->configurationStructureService->handle($server),

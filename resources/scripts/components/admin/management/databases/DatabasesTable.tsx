@@ -1,4 +1,4 @@
-import getDatabases from '@/api/routes/admin/databases/getDatabases';
+import { useDatabaseEntries as getDatabases } from '@/api/routes/admin/databases';
 import AdminTable, {
     ContentWrapper,
     Pagination,
@@ -16,7 +16,7 @@ import { useContext, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
-import { Context as DatabasesContext } from '@/api/routes/admin/databases/getDatabases';
+import { DatabaseEntriesContext as DatabasesContext } from '@/api/routes/admin/databases';
 import DatabaseStatus from './DatabaseStatus';
 
 export default () => {

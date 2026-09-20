@@ -5,7 +5,6 @@ import { faExclamationTriangle, faCheckCircle, faInfoCircle } from '@fortawesome
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Tooltip from '@/elements/tooltip/Tooltip';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Button } from '@/elements/button';
 import { updateSettings } from '@/api/routes/admin/billing';
 
@@ -14,7 +13,6 @@ interface StripeKeys {
 }
 
 export default ({ extOpen }: { extOpen?: boolean }) => {
-    const { t } = useTranslation('admin');
     const [data, setData] = useState<StripeKeys>();
     const [open, setOpen] = useState<boolean>(extOpen ?? false);
     const existingKeys = useStoreState(s => s.everest.data!.billing.keys);
@@ -34,18 +32,19 @@ export default ({ extOpen }: { extOpen?: boolean }) => {
     }, [existingKeys]);
 
     return (
-        <Dialog open={open} onClose={() => setOpen(false)} title={t('billingModule.configureStripeApi')}>
+        <Dialog open={open} onClose={() => setOpen(false)} title={'Configure Stripe API'}>
             <div className={'p-3 bg-black/50 rounded-lg mb-4'}>
                 <p className={'text-gray-200 font-semibold'}>
                     <FontAwesomeIcon icon={faInfoCircle} className={'text-blue-400 mr-2'} />
-                    {t('billingModule.stillSettingUp')}
+                    Still setting up?
                 </p>
                 <p className={'text-gray-400 text-sm'}>
-                    {t('billingModule.feelFreeToSkipThisMessage')}
+                    Feel free to skip this message by closing the dialog and proceed to set up your products and
+                    categories. Once you&apos;re ready, head to the Settings tab to input your API key and secret.
                 </p>
             </div>
-            {t('billingModule.beforeYouCanUseStripeApi')}
-            {t('billingModule.visitTheStripeDashboard')}
+            Before you can use the Stripe API, you must provide Jexpanelwith API keys to authenticate with Stripe. Visit
+            the Stripe dashboard
             <a
                 target={'_blank'}
                 rel={'noreferrer'}
@@ -54,14 +53,14 @@ export default ({ extOpen }: { extOpen?: boolean }) => {
             >
                 here
             </a>
-            {t('billingModule.toObtainApiKeyAndSecretThenPaste')}
+            to obtain your API key and secret key, then paste them here.
             <div className={'relative mt-4'}>
                 <Input
                     placeholder={'Enter "secret" key here...'}
                     onChange={e => setData({ ...data, secret: e.currentTarget.value })}
                 />
                 {!data?.secret || data.secret.length < 100 || data.secret.length > 120 ? (
-                    <Tooltip placement={'right'} content={t('billingModule.youMustEnterValidStripeSecretKey')}>
+                    <Tooltip placement={'right'} content={'You must enter a valid Stripe secret key to continue.'}>
                         <FontAwesomeIcon
                             icon={faExclamationTriangle}
                             className={'absolute top-1/3 right-4 text-yellow-500'}
@@ -73,7 +72,7 @@ export default ({ extOpen }: { extOpen?: boolean }) => {
             </div>
             <div className={'w-full text-right mt-4'}>
                 <Button onClick={submit} disabled={!data?.secret}>
-                    {t('billingModule.submit')}
+                    Submit
                 </Button>
             </div>
         </Dialog>

@@ -6,12 +6,12 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { object } from 'yup';
 
-import type { Egg, EggVariable, LoadedEgg } from '@/api/routes/admin/egg';
-import { getEgg } from '@/api/routes/admin/egg';
-import type { Server } from '@/api/routes/admin/server';
-import { useServerFromRoute } from '@/api/routes/admin/server';
-import type { Values } from '@/api/routes/admin/servers/updateServerStartup';
-import updateServerStartup from '@/api/routes/admin/servers/updateServerStartup';
+import type { Egg, EggVariable } from '@definitions/admin';
+import { getEgg } from '@/api/routes/admin/eggs';
+import type { Server } from '@definitions/admin';
+import { useServerFromRoute } from '@/api/routes/admin/servers';
+import type { UpdateServerStartupValues as Values } from '@/api/routes/admin/servers';
+import { updateServerStartupEntry as updateServerStartup } from '@/api/routes/admin/servers';
 import EggSelect from '@admin/management/servers/EggSelect';
 import NestSelector from '@admin/management/servers/NestSelector';
 import FormikSwitch from '@/elements/FormikSwitch';
@@ -164,8 +164,8 @@ function ServerStartupForm({
     server,
 }: {
     selectedEggId?: number;
-    egg?: LoadedEgg;
-    setEgg: (value: LoadedEgg | undefined) => void;
+    egg?: WithRelationships<Egg, 'variables'>;
+    setEgg: (value: WithRelationships<Egg, 'variables'> | undefined) => void;
     server: Server;
 }) {
     const { t } = useTranslation('admin');
@@ -228,7 +228,7 @@ export default () => {
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
         (actions: Actions<ApplicationStore>) => actions.flashes,
     );
-    const [egg, setEgg] = useState<LoadedEgg | undefined>(undefined);
+    const [egg, setEgg] = useState<WithRelationships<Egg, 'variables'> | undefined>(undefined);
 
     useEffect(() => {
         if (!server) {

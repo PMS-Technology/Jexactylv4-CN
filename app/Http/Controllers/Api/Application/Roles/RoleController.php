@@ -3,6 +3,7 @@
 namespace Everest\Http\Controllers\Api\Application\Roles;
 
 use Everest\Models\User;
+use Everest\Facades\Activity;
 use Everest\Models\AdminRole;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -37,8 +38,8 @@ class RoleController extends ApplicationApiController
         }
 
         $roles = QueryBuilder::for(AdminRole::query())
-            ->allowedFilters(['id', 'name'])
-            ->allowedSorts(['id', 'name'])
+            ->allowedFilters(...['id', 'name'])
+            ->allowedSorts(...['id', 'name'])
             ->paginate($perPage);
 
         return $this->transform($roles, AdminRoleTransformer::class);
@@ -75,6 +76,12 @@ class RoleController extends ApplicationApiController
         ]);
         $role = AdminRole::query()->create($data);
 
+        Activity::event('admin:roles:create')
+            ->subject($role)
+            ->property('role', $role)
+            ->description('An administrator role was created')
+            ->log();
+
         return $this->transform($role, AdminRoleTransformer::class);
     }
 
@@ -85,6 +92,13 @@ class RoleController extends ApplicationApiController
     {
         $role->update($request->validated());
 
+        Activity::event('admin:roles:update')
+            ->subject($role)
+            ->property('role', $role)
+            ->property('new_data', $request->all())
+            ->description('An administrator role was updated')
+            ->log();
+
         return $this->transform($role, AdminRoleTransformer::class);
     }
 
@@ -93,6 +107,21 @@ class RoleController extends ApplicationApiController
      */
     public function updatePermissions(UpdateRoleRequest $request, AdminRole $role): array
     {
+        $allowed = collect(AdminRole::permissions())
+            ->map(fn ($value, $prefix) => array_map(fn ($key) => "$prefix.$key", array_keys($value['keys'])))
+            ->flatten()
+            ->all();
+
+        $role->update([
+            'permissions' => array_values(array_intersect($request->input('permissions', []), $allowed)),
+        ]);
+
+        Activity::event('admin:roles:update-permissions')
+            ->subject($role)
+            ->property('role', $role)
+            ->description('Permissions were updated for an administrator role')
+            ->log();
+
         return $this->transform($role, AdminRoleTransformer::class);
     }
 
@@ -108,6 +137,12 @@ class RoleController extends ApplicationApiController
 
             $role->delete();
         });
+
+        Activity::event('admin:roles:delete')
+            ->subject($role)
+            ->property('role', $role)
+            ->description('An administrator role was deleted')
+            ->log();
 
         return $this->returnNoContent();
     }

@@ -3,7 +3,7 @@ import { faDatabase } from '@fortawesome/free-solid-svg-icons';
 import { Field as FormikField, useFormikContext } from 'formik';
 import tw from 'twin.macro';
 
-import type { Node } from '@/api/routes/admin/nodes/getNodes';
+import type { NodeEntry as Node } from '@definitions/admin';
 import AdminBox from '@/elements/AdminBox';
 import DatabaseSelect from '@admin/management/nodes/DatabaseSelect';
 import Label from '@/elements/Label';
@@ -28,6 +28,18 @@ export default function NodeSettingsContainer({ node }: { node?: Node }) {
 
             <div css={tw`mb-6`}>
                 <Field id={'fqdn'} name={'fqdn'} label={t('nodes.fqdn') as string} type={'text'} />
+            </div>
+
+            <div css={tw`mb-6`}>
+                <Field
+                    id={'sftpAlias'}
+                    name={'sftpAlias'}
+                    label={'SFTP Alias'}
+                    type={'text'}
+                    description={
+                        'Optional hostname shown to server owners in the File Manager SFTP details instead of the FQDN.'
+                    }
+                />
             </div>
 
             <div css={tw`mb-6`}>

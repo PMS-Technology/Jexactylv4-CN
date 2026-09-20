@@ -1,4 +1,4 @@
-import { ServerPresetValues } from '@/api/routes/admin/servers/types';
+import { ServerPresetValues } from '@/api/routes/admin/servers';
 import { Button } from '@/elements/button';
 import { Dialog } from '@/elements/dialog';
 import Input from '@/elements/Input';
@@ -8,7 +8,7 @@ import { CheckCircleIcon, ChevronLeftIcon, ChevronRightIcon, PencilAltIcon, Plus
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import NestEggSelect from '@admin/management/servers/presets/NestEggSelect';
-import { createServerPreset, updateServerPreset } from '@/api/routes/admin/servers/presets';
+import { createServerPreset, updateServerPreset } from '@/api/routes/admin/servers';
 import SpinnerOverlay from '@/elements/SpinnerOverlay';
 import { ServerPreset } from '@/api/definitions/admin';
 import { useNavigate } from 'react-router-dom';

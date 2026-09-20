@@ -7,10 +7,10 @@ import { useNavigate } from 'react-router-dom';
 import tw from 'twin.macro';
 import { object } from 'yup';
 
-import type { Egg } from '@/api/routes/admin/egg';
-import type { CreateServerRequest } from '@/api/routes/admin/servers/createServer';
-import createServer from '@/api/routes/admin/servers/createServer';
-import type { Node } from '@/api/routes/admin/node';
+import type { Egg } from '@definitions/admin';
+import type { CreateServerRequest } from '@/api/routes/admin/servers';
+import { createServerEntry as createServer } from '@/api/routes/admin/servers';
+import type { Node } from '@definitions/admin';
 import AdminBox from '@/elements/AdminBox';
 import NodeSelect from '@admin/management/servers/NodeSelect';
 import {
@@ -32,7 +32,7 @@ import AdminContentBlock from '@/elements/AdminContentBlock';
 import { WithRelationships } from '@/api/routes/admin';
 import { AsyncSelectField } from '@/elements/SelectField';
 import type { Option } from '@/elements/SelectField';
-import getAllocations from '@/api/routes/admin/nodes/getAllocations';
+import { getNodeAllocationEntries as getAllocations } from '@/api/routes/admin/nodes';
 import { Alert } from '@/elements/alert';
 
 function InternalForm() {
@@ -45,7 +45,7 @@ function InternalForm() {
     } = useFormikContext<CreateServerRequest>();
 
     const [egg, setEgg] = useState<WithRelationships<Egg, 'variables'> | undefined>(undefined);
-    const [node, setNode] = useState<Node | undefined>(undefined);
+    const [node, setNode] = useState<Node | null>(null);
 
     useEffect(() => {
         if (egg === undefined) {
@@ -77,7 +77,7 @@ function InternalForm() {
             <div className="grid grid-cols-2 gap-y-6 gap-x-8 mb-16">
                 <div className="grid grid-cols-1 gap-y-6 col-span-2 md:col-span-1">
                     <BaseSettingsBox>
-                        <NodeSelect node={node!} setNode={setNode} />
+                        <NodeSelect node={node} setNode={setNode} />
                         <div className="xl:col-span-2 bg-neutral-800 border border-neutral-900 shadow-inner p-4 rounded">
                             <FormikSwitch
                                 name={'startOnCompletion'}

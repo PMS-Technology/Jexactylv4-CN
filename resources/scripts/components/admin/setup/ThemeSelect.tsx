@@ -1,5 +1,4 @@
-import updateColors from '@/api/routes/admin/theme/updateColors';
-import { useTranslation } from 'react-i18next';
+import { updateColors } from '@/api/routes/admin/theme';
 import useStatus from '@/plugins/useStatus';
 import { useStoreActions, useStoreState } from '@/state/hooks';
 import AdminBox from '@/elements/AdminBox';
@@ -8,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { CheckCircleIcon } from '@heroicons/react/outline';
 
 const colorOptions = [
-    { hex: '#16a34a', name: 'Jexactyl Green' },
+    { hex: '#16a34a', name: 'JexpanelGreen' },
     { hex: '#12aaaa', name: 'Microsoft Teal' },
     { hex: '#ff0000', name: 'Brick Red' },
     { hex: '#9D00FF', name: 'Iris Purple' },
@@ -19,7 +18,6 @@ const colorOptions = [
 ];
 
 export default ({ defaultColor }: { defaultColor: string }) => {
-    const { t } = useTranslation('admin');
     const { status, setStatus } = useStatus();
     const theme = useStoreState(state => state.theme.data!);
     const setTheme = useStoreActions(actions => actions.theme.setTheme);
@@ -43,17 +41,17 @@ export default ({ defaultColor }: { defaultColor: string }) => {
         <div>
             <div className={'w-full flex flex-row items-center mb-8'}>
                 <div className={'flex flex-col flex-shrink'} style={{ minWidth: '0' }}>
-                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>{t('setup.themePreferences') as string}</h2>
+                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>Theme Preferences</h2>
                     <p
                         className={
                             'hidden lg:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden'
                         }
                     >
-                        {t('setup.themePreferencesDescription') as string}
+                        Select a preferred primary color for your Panel UI.
                     </p>
                 </div>
             </div>
-            <AdminBox status={status} title={t('setup.setPrimaryColor') as string}>
+            <AdminBox status={status} title={'Set Primary Color'}>
                 <div className={'grid grid-cols-4 lg:grid-cols-8 gap-4 lg:gap-8'}>
                     {colorOptions.map(option => (
                         <div
@@ -77,7 +75,7 @@ export default ({ defaultColor }: { defaultColor: string }) => {
                     ))}
                 </div>
             </AdminBox>
-            <p className={'text-gray-400 mt-2 text-right'}>{t('setup.selectColorDescription') as string}</p>
+            <p className={'text-gray-400 mt-2 text-right'}>Select a color from the options to apply it.</p>
         </div>
     );
 };

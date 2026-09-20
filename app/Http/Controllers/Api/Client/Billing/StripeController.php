@@ -2,11 +2,13 @@
 
 namespace Everest\Http\Controllers\Api\Client\Billing;
 
+use Everest\Models\Egg;
 use Everest\Models\Node;
 use Everest\Models\User;
 use Stripe\StripeClient;
 use Everest\Models\Server;
 use Everest\Models\Billing\Order;
+use Illuminate\Support\Facades\DB;
 use Everest\Models\Billing\Product;
 use Everest\Exceptions\DisplayException;
 use Everest\Models\Billing\DiscountCode;
@@ -39,7 +41,9 @@ class StripeController extends ClientApiController
     ) {
         parent::__construct();
 
-        $this->stripe = new StripeClient(config('modules.billing.keys.secret'));
+        $this->stripe = app()->bound(StripeClient::class)
+            ? app(StripeClient::class)
+            : new StripeClient(config('modules.billing.keys.secret'));
     }
 
     /**
@@ -49,31 +53,39 @@ class StripeController extends ClientApiController
     {
         $price = null;
         $server = null;
+        $deploymentFee = 0.0;
         $node_id = $request->input('node_id') ?? null;
         $product = Product::findOrFail($request->input('product_id'));
 
         if (!$product->isPaid()) {
-            throw new DisplayException(trans('exceptions.billing.free_checkout_session'));
+            throw new DisplayException('You cannot create a checkout session for a free product.');
         }
 
         if ($node_id) {
-            if (!Node::findOrFail($request->input('node_id'))->deployable) {
-                throw new DisplayException(trans('exceptions.billing.paid_node_unavailable'));
+            $node = Node::findOrFail($node_id);
+
+            if (!$node->deployable) {
+                throw new DisplayException('Paid servers cannot be deployed to this node.');
             }
+
+            $deploymentFee = (float) ($node->deployment_fee ?? 0);
         } else {
             try {
                 $server = $request->user()->servers()
                     ->where('id', $request->input('server_id'))
                     ->firstOrFail();
             } catch (ModelNotFoundException $exception) {
-                throw new DisplayException(trans('exceptions.billing.server_not_on_account'));
+                throw new DisplayException('This server ID does not exist on your account.');
             }
         }
 
         $order_type = $server ? Order::TYPE_RENEWAL : Order::TYPE_NEW;
+        $egg_id = $this->resolveEggSelection($product, $request->input('egg_id'));
+
+        $discountCode = $request->input('discount_code');
 
         if ($request->exists('discount_code')) {
-            $price = $this->discountService->handle($product, $request->input('discount_code'));
+            $price = $this->discountService->handle($product, $discountCode);
         }
 
         $metadata = [
@@ -82,12 +94,19 @@ class StripeController extends ClientApiController
             'product_id' => (string) $product->id,
             'node_id' => (string) ($node_id ?? ''),
             'server_id' => (string) ($server?->id ?? 0),
+            'egg_id' => (string) ($egg_id ?? ''),
             'variables' => json_encode($request->input('variables') ?? []),
             'order_type' => $order_type,
-            'discount_code', $request->input('discount_code') ?? null,
+            'discount_code' => $request->input('discount_code') ?? null,
         ];
 
-        $transaction = $this->paymentService->create($this->stripe, $request->user(), $product, $metadata, $price);
+        $orderMetadata = array_filter([
+            'deployment_fee' => $deploymentFee > 0 ? $deploymentFee : null,
+            'discount_code' => $price !== null ? $discountCode : null,
+            'subtotal' => $price !== null ? $product->price : null,
+        ], fn ($value) => $value !== null) ?: null;
+
+        $transaction = $this->paymentService->create($this->stripe, $request->user(), $product, $metadata, $price, $deploymentFee);
 
         $order = $this->orderService->create(
             $transaction->id,
@@ -95,7 +114,8 @@ class StripeController extends ClientApiController
             $product,
             Order::STATUS_PENDING,
             $order_type,
-            $price
+            $price,
+            $orderMetadata
         );
 
         if ($server) {
@@ -113,21 +133,49 @@ class StripeController extends ClientApiController
         try {
             $transaction = $this->stripe->checkout->sessions->retrieve($request->input('session'));
         } catch (DisplayException $ex) {
-            throw new DisplayException(trans('exceptions.billing.session_retrieve_failed'));
+            throw new DisplayException('Failed to process order: unable to retrieve session');
         }
 
         if ($transaction->payment_status !== 'paid') {
-            throw new DisplayException(trans('exceptions.billing.payment_incomplete'));
+            throw new DisplayException('Payment not completed.');
         }
 
-        $metadata = $transaction->metadata;
-        $server = Server::find($metadata->server_id);
-        $user = User::findOrFail($metadata->user_id);
-        $product = Product::findOrFail($metadata->product_id);
-        $order = Order::where('transaction_id', $transaction->id)->firstOrFail();
+        $metadata = (array) $transaction->metadata;
+        $server = Server::find($metadata['server_id']);
+        $user = User::findOrFail($metadata['user_id']);
+        $product = Product::findOrFail($metadata['product_id']);
 
-        if ($order->isProcessed()) {
-            throw new DisplayException(trans('exceptions.billing.order_already_processed'));
+        // Atomically claim the order before doing any deployment work.
+        $order = DB::transaction(function () use ($transaction, $metadata) {
+            $order = Order::where('transaction_id', $transaction->id)->lockForUpdate()->firstOrFail();
+
+            if ($order->status !== Order::STATUS_PENDING) {
+                throw new DisplayException('This order has already been processed.');
+            }
+
+            $order->setStatus(Order::STATUS_PROCESSING);
+
+            if (!empty($metadata['discount_code'])) {
+                $discount_code = DiscountCode::where('code', $metadata['discount_code'])->lockForUpdate()->first();
+
+                if ($discount_code && $discount_code->isValid()) {
+                    $discount_code->use();
+                }
+            }
+
+            return $order;
+        });
+
+        // Bind the completed payment to the order.
+        $expected = (int) round($order->total * 100);
+        $currency = strtolower((string) config('modules.billing.currency.code'));
+
+        if (strtolower((string) ($transaction->currency ?? '')) !== $currency
+            || (int) ($transaction->amount_total ?? 0) < $expected) {
+            // Release the claim rather than failing the order outright.
+            $order->setStatus(Order::STATUS_PENDING);
+
+            throw new DisplayException('Payment amount or currency does not match the order.');
         }
 
         try {
@@ -158,12 +206,6 @@ class StripeController extends ClientApiController
             ]);
         }
 
-        $discount_code = DiscountCode::where('code', $metadata->discount_code)->first();
-
-        if ($discount_code) {
-            $discount_code->use();
-        }
-
         return $this->transform($server, ServerTransformer::class);
     }
 
@@ -175,9 +217,33 @@ class StripeController extends ClientApiController
         $discount_code = DiscountCode::where('code', $request->input('discount_code'))->first();
 
         if (!$discount_code || !$discount_code->isValid()) {
-            throw new DisplayException(trans('exceptions.billing.discount_provided_invalid'));
+            throw new DisplayException('The discount code provided is not valid.');
         }
 
         return $this->transform($discount_code, DiscountCodeTransformer::class);
+    }
+
+    /**
+     * Validate the egg a customer selected for a product whose category doesn't pin one.
+     * Categories with a fixed egg ignore any submitted selection. Returns the egg id to
+     * carry through the checkout, or null when the category already has a fixed egg.
+     */
+    private function resolveEggSelection(Product $product, mixed $submittedEggId): ?int
+    {
+        if ($product->category->egg_id) {
+            return null;
+        }
+
+        if (!$submittedEggId) {
+            throw new DisplayException('An egg must be selected to deploy this product.');
+        }
+
+        $egg = Egg::findOrFail($submittedEggId);
+
+        if ((int) $egg->nest_id !== (int) $product->category->nest_id) {
+            throw new DisplayException('The selected egg does not belong to this product\'s nest.');
+        }
+
+        return $egg->id;
     }
 }

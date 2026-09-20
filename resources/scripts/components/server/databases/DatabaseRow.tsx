@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDatabase, faEye, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import Modal from '@/elements/Modal';
@@ -27,7 +26,6 @@ interface Props {
 }
 
 export default ({ database, className }: Props) => {
-    const { t } = useTranslation('server');
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
     const { addError, clearFlashes } = useFlash();
     const [visible, setVisible] = useState(false);
@@ -36,15 +34,14 @@ export default ({ database, className }: Props) => {
     const appendDatabase = ServerContext.useStoreActions(actions => actions.databases.appendDatabase);
     const removeDatabase = ServerContext.useStoreActions(actions => actions.databases.removeDatabase);
 
-    const databaseNameRequired = t('databasesPage.databaseNameRequired') as string;
     const jdbcConnectionString = `jdbc:mysql://${database.username}${
         database.password ? `:${encodeURIComponent(database.password)}` : ''
     }@${database.connectionString}/${database.name}`;
 
     const schema = object().shape({
         confirm: string()
-            .required(databaseNameRequired)
-            .oneOf([database.name!.split('_', 2)[1], database.name], databaseNameRequired),
+            .required('The database name must be provided.')
+            .oneOf([database.name!.split('_', 2)[1] ?? '', database.name], 'The database name must be provided.'),
     });
 
     const submit = (_: { confirm: string }, { setSubmitting }: FormikHelpers<{ confirm: string }>) => {
@@ -75,22 +72,25 @@ export default ({ database, className }: Props) => {
                         }}
                     >
                         <FlashMessageRender byKey={'database:delete'} css={tw`mb-6`} />
-                        <h2 css={tw`text-2xl mb-6`}>{t('databasesPage.confirmDeletion') as string}</h2>
-                        <p css={tw`text-sm`} dangerouslySetInnerHTML={{ __html: t('databasesPage.deleteWarning', { name: database.name }) as string }} />
+                        <h2 css={tw`text-2xl mb-6`}>Confirm database deletion</h2>
+                        <p css={tw`text-sm`}>
+                            Deleting a database is a permanent action, it cannot be undone. This will permanently delete
+                            the <strong>{database.name}</strong> database and remove all associated data.
+                        </p>
                         <Form css={tw`m-0 mt-6`}>
                             <Field
                                 type={'text'}
                                 id={'confirm_name'}
                                 name={'confirm'}
-                                label={t('databasesPage.confirmDatabaseName') as string}
-                                description={t('databasesPage.confirmDatabaseDesc') as string}
+                                label={'Confirm Database Name'}
+                                description={'Enter the database name to confirm deletion.'}
                             />
                             <div css={tw`mt-6 text-right`}>
                                 <Button type={'button'} css={tw`mr-2`} onClick={() => setVisible(false)}>
-                                    {t('databasesPage.cancel') as string}
+                                    Cancel
                                 </Button>
                                 <Button type={'submit'} color={'red'} disabled={!isValid}>
-                                    {t('databasesPage.deleteDatabase') as string}
+                                    Delete Database
                                 </Button>
                             </div>
                         </Form>
@@ -99,33 +99,33 @@ export default ({ database, className }: Props) => {
             </Formik>
             <Modal visible={connectionVisible} onDismissed={() => setConnectionVisible(false)}>
                 <FlashMessageRender byKey={'database-connection-modal'} css={tw`mb-6`} />
-                <h3 css={tw`mb-6 text-2xl`}>{t('databasesPage.connectionDetails') as string}</h3>
+                <h3 css={tw`mb-6 text-2xl`}>Database connection details</h3>
                 <div>
-                    <Label>{t('databasesPage.endpoint') as string}</Label>
+                    <Label>Endpoint</Label>
                     <CopyOnClick text={database.connectionString}>
                         <Input type={'text'} readOnly value={database.connectionString} />
                     </CopyOnClick>
                 </div>
                 <div css={tw`mt-6`}>
-                    <Label>{t('databasesPage.connectionsFromLabel') as string}</Label>
+                    <Label>Connections from</Label>
                     <Input type={'text'} readOnly value={database.allowConnectionsFrom} />
                 </div>
                 <div css={tw`mt-6`}>
-                    <Label>{t('databasesPage.username') as string}</Label>
+                    <Label>Username</Label>
                     <CopyOnClick text={database.username}>
                         <Input type={'text'} readOnly value={database.username} />
                     </CopyOnClick>
                 </div>
                 <Can action={'database.view_password'}>
                     <div css={tw`mt-6`}>
-                        <Label>{t('databasesPage.password') as string}</Label>
+                        <Label>Password</Label>
                         <CopyOnClick text={database.password} showInNotification={false}>
                             <Input type={'text'} readOnly value={database.password} />
                         </CopyOnClick>
                     </div>
                 </Can>
                 <div css={tw`mt-6`}>
-                    <Label>{t('databasesPage.jdbcString') as string}</Label>
+                    <Label>JDBC Connection String</Label>
                     <CopyOnClick text={jdbcConnectionString} showInNotification={false}>
                         <Input type={'text'} readOnly value={jdbcConnectionString} />
                     </CopyOnClick>
@@ -134,7 +134,7 @@ export default ({ database, className }: Props) => {
                     <Can action={'database.update'}>
                         <RotatePasswordButton databaseId={database.id} onUpdate={appendDatabase} />
                     </Can>
-                    <Button onClick={() => setConnectionVisible(false)}>{t('databasesPage.close') as string}</Button>
+                    <Button onClick={() => setConnectionVisible(false)}>Close</Button>
                 </div>
             </Modal>
             <GreyRowBox $hoverable={false} className={className} css={tw`mb-2`}>
@@ -150,17 +150,17 @@ export default ({ database, className }: Props) => {
                     <CopyOnClick text={database.connectionString}>
                         <p css={tw`text-sm`}>{database.connectionString}</p>
                     </CopyOnClick>
-                    <p css={tw`mt-1 text-2xs text-neutral-500 uppercase select-none`}>{t('databasesPage.endpoint') as string}</p>
+                    <p css={tw`mt-1 text-2xs text-neutral-500 uppercase select-none`}>Endpoint</p>
                 </div>
                 <div css={tw`ml-8 text-center hidden md:block`}>
                     <p css={tw`text-sm`}>{database.allowConnectionsFrom}</p>
-                    <p css={tw`mt-1 text-2xs text-neutral-500 uppercase select-none`}>{t('databasesPage.connectionsFromLabel') as string}</p>
+                    <p css={tw`mt-1 text-2xs text-neutral-500 uppercase select-none`}>Connections from</p>
                 </div>
                 <div css={tw`ml-8 text-center hidden md:block`}>
                     <CopyOnClick text={database.username}>
                         <p css={tw`text-sm`}>{database.username}</p>
                     </CopyOnClick>
-                    <p css={tw`mt-1 text-2xs text-neutral-500 uppercase select-none`}>{t('databasesPage.username') as string}</p>
+                    <p css={tw`mt-1 text-2xs text-neutral-500 uppercase select-none`}>Username</p>
                 </div>
                 <div css={tw`ml-8`}>
                     <Button css={tw`mr-2`} onClick={() => setConnectionVisible(true)}>

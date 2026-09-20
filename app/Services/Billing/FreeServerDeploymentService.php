@@ -3,7 +3,6 @@
 namespace Everest\Services\Billing;
 
 use Carbon\Carbon;
-use Everest\Models\Egg;
 use Everest\Models\Node;
 use Everest\Models\User;
 use Everest\Models\Server;
@@ -24,10 +23,10 @@ class FreeServerDeploymentService extends ServerDeploymentService
     /**
      * Process the creation of a free server.
      */
-    public function handleFree(User $user, Product $product, Node $node, Order $order, array $variables): Server
+    public function handleFree(User $user, Product $product, Node $node, Order $order, array $variables, ?int $eggId = null): Server
     {
         $renewalDays = config('modules.billing.renewal.free_renewal_days', 30);
-        $egg = Egg::findOrFail($product->category->egg_id);
+        $egg = $this->resolveEgg($product, $eggId);
         $allocation = $this->getAllocation($node->id, $order->id);
         $environment = $this->getEnvironment($egg->id, $variables);
 
@@ -62,7 +61,7 @@ class FreeServerDeploymentService extends ServerDeploymentService
                 'description' => $ex->getMessage(),
             ]);
 
-            throw new DisplayException(trans('exceptions.billing.unable_to_create_server', ['message' => $ex->getMessage()]));
+            throw new DisplayException('Unable to create server: ' . $ex->getMessage());
         }
 
         return $server;
@@ -75,20 +74,31 @@ class FreeServerDeploymentService extends ServerDeploymentService
     {
         if ($is_new_order) {
             if (!$node->exists()) {
-                throw new DisplayException(trans('exceptions.billing.valid_node_required'));
+                throw new DisplayException('A valid node must be assigned for deployment.');
             }
 
             if (!$node->deployable_free) {
-                throw new DisplayException(trans('exceptions.billing.free_node_unavailable'));
+                throw new DisplayException('Free servers cannot be deployed to this node.');
             }
 
-            if ($user->servers()->where('billing_product_id', $product->id)->count() > 0) {
-                throw new DisplayException(trans('exceptions.billing.free_product_owned'));
+            if ($node->deployment_fee > 0) {
+                throw new DisplayException('This node has a deployment fee and cannot be used for free servers.');
+            }
+
+            $alreadyOwnsProduct = $user->servers()->where('billing_product_id', $product->id)->exists()
+                || Order::where('user_id', $user->id)
+                    ->where('product_id', $product->id)
+                    ->where('type', Order::TYPE_NEW)
+                    ->where('status', Order::STATUS_PENDING)
+                    ->exists();
+
+            if ($alreadyOwnsProduct) {
+                throw new DisplayException('You already own one of this free product and cannot have multiple.');
             }
         }
 
         if ($product->isPaid()) {
-            throw new DisplayException(trans('exceptions.billing.paid_package_free_deploy'));
+            throw new DisplayException('This package is paid and cannot be deployed for no cost.');
         }
     }
 }

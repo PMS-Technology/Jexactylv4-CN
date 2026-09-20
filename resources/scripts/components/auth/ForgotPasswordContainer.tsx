@@ -3,7 +3,6 @@ import type { FormikHelpers } from 'formik';
 import { Formik } from 'formik';
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import Reaptcha from 'reaptcha';
 import tw from 'twin.macro';
 import { object, string } from 'yup';
@@ -22,7 +21,6 @@ interface Values {
 }
 
 function ForgotPasswordContainer() {
-    const { t } = useTranslation('auth');
     const ref = useRef<Reaptcha>(null);
     const token = useRef('');
 
@@ -39,12 +37,14 @@ function ForgotPasswordContainer() {
     ) => {
         clearFlashes();
 
-        if (recaptchaEnabled && !token) {
+        // If there is no token in the state yet, request the token and then abort this submit request
+        // since it will be re-submitted when the recaptcha data is returned by the component.
+        if (recaptchaEnabled && !token.current) {
             ref.current!.execute().catch(error => {
                 console.error(error);
 
                 setSubmitting(false);
-                addFlash({ type: 'error', title: t('error.title', { ns: 'common' }) as string, message: httpErrorToHuman(error) });
+                addFlash({ type: 'error', title: 'Error', message: httpErrorToHuman(error) });
             });
 
             return;
@@ -57,7 +57,7 @@ function ForgotPasswordContainer() {
             })
             .catch(error => {
                 console.error(error);
-                addFlash({ type: 'error', title: t('error.title', { ns: 'common' }) as string, message: httpErrorToHuman(error) });
+                addFlash({ type: 'error', title: 'Error', message: httpErrorToHuman(error) });
             })
             .then(() => {
                 token.current = '';
@@ -75,46 +75,48 @@ function ForgotPasswordContainer() {
             initialValues={{ email: '', code: '', password: '', password_confirm: '' }}
             validationSchema={object().shape({
                 email: string()
-                    .email(t('forgotPassword.emailRequired') as string)
-                    .required(t('forgotPassword.emailRequired') as string),
-                code: string().required(t('forgotPassword.codeRequired') as string),
+                    .email('A valid email address must be provided to continue.')
+                    .required('A valid email address must be provided to continue.'),
+                code: string().required('You must enter your account recovery code to continue.'),
                 password: string().min(8).required(),
                 password_confirm: string().min(8).required(),
             })}
         >
             {({ isSubmitting, setSubmitting, submitForm }) => (
-                <LoginFormContainer title={t('forgotPassword.title') as string} css={tw`w-full flex`}>
+                <LoginFormContainer title={'Reset your Password'} css={tw`w-full flex`}>
                     <Field
-                        label={t('forgotPassword.emailAddress') as string}
-                        description={t('forgotPassword.emailDesc') as string}
+                        label={'Email Address'}
+                        description={'Enter your account email address that you use to access the Panel.'}
                         name={'email'}
                         type={'email'}
                     />
                     <div className={'mt-6'}>
                         <Field
-                            label={t('forgotPassword.recoveryCode') as string}
-                            description={t('forgotPassword.recoveryCodeDesc') as string}
+                            label={'Account Recovery Code'}
+                            description={
+                                "Enter the account recovery code you were given when your account was created. Don't have this code? Contact our support for assistance."
+                            }
                             name={'code'}
                             type={'text'}
                         />
                     </div>
                     <div className={'my-6'}>
                         <Field
-                            label={t('forgotPassword.newPassword') as string}
-                            description={t('forgotPassword.newPasswordDesc') as string}
+                            label={'New Password'}
+                            description={"Enter the new password you'd like to use for this user account."}
                             name={'password'}
                             type={'password'}
                         />
                     </div>
                     <Field
-                        label={t('forgotPassword.confirmNewPassword') as string}
-                        description={t('forgotPassword.confirmNewPasswordDesc') as string}
+                        label={'Confirm New Password'}
+                        description={'For extra security, re-enter the above password.'}
                         name={'password_confirm'}
                         type={'password'}
                     />
                     <div css={tw`mt-6`}>
                         <Button type={'submit'} className={'w-full'} size={Button.Sizes.Large} disabled={isSubmitting}>
-                            {t('forgotPassword.attemptLogin') as string}
+                            Attempt Login
                         </Button>
                     </div>
                     {recaptchaEnabled && (
@@ -137,7 +139,7 @@ function ForgotPasswordContainer() {
                             to={'/auth/login'}
                             css={tw`text-xs text-neutral-300 tracking-wide no-underline uppercase font-medium hover:text-neutral-600`}
                         >
-                            {t('forgotPassword.returnToLogin') as string}
+                            Return to Login
                         </Link>
                     </div>
                 </LoginFormContainer>

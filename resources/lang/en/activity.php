@@ -15,12 +15,16 @@ return [
         'checkpoint' => 'Two-factor authentication requested',
         'recovery-token' => 'Used two-factor recovery token',
         'token' => 'Solved two-factor challenge',
+        'passkey' => 'Logged in with a passkey',
         'ip-blocked' => 'Blocked request from unlisted IP address for :identifier',
         'sftp' => [
             'fail' => 'Failed SFTP log in',
         ],
     ],
     'user' => [
+        'user' => [
+            'create' => 'Created a new user :email',
+        ],
         'account' => [
             'email-changed' => 'Changed email from :old to :new',
             'password-changed' => 'Changed password',
@@ -36,6 +40,10 @@ return [
         'two-factor' => [
             'create' => 'Enabled two-factor auth',
             'delete' => 'Disabled two-factor auth',
+        ],
+        'passkey' => [
+            'create' => 'Added passkey :name to account',
+            'delete' => 'Removed passkey :name from account',
         ],
     ],
     'server' => [
@@ -67,7 +75,7 @@ return [
             'delete' => 'Deleted database :name',
         ],
         'file' => [
-            'compress_one' => 'Compressed :directory:file',
+            'compress_one' => 'Compressed :directory:files.0',
             'compress_other' => 'Compressed :count files in :directory',
             'read' => 'Viewed the contents of :file',
             'copy' => 'Created a copy of :file',

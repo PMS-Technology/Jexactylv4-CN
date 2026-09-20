@@ -1,5 +1,4 @@
 import { Form, Formik } from 'formik';
-import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
 import AdminBox from '@/elements/AdminBox';
@@ -14,7 +13,6 @@ import FlashMessageRender from '@/elements/FlashMessageRender';
 import Label from '@/elements/Label';
 
 export default () => {
-    const { t } = useTranslation('admin');
     const { addFlash, clearFlashes, clearAndAddHttpError } = useFlash();
 
     const settings = useStoreState(state => state.settings.data!);
@@ -30,7 +28,7 @@ export default () => {
                 addFlash({
                     type: 'success',
                     key: 'settings:general',
-                    message: t('settings.savedSuccessfully') as string,
+                    message: 'Settings have been updated successfully.',
                 });
             })
             .catch(error => {
@@ -66,22 +64,22 @@ export default () => {
             <Form>
                 <FlashMessageRender byKey={'settings:general'} className={'mb-2'} />
                 <div css={tw`grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6`}>
-                    <AdminBox title={t('settings.companyName') as string} icon={faPaintBrush}>
+                    <AdminBox title={'Application Name'} icon={faPaintBrush}>
                         <Field id={'name'} name={'name'} type={'text'} description={''} />
                         <p className={'text-gray-400 text-xs mt-1.5'}>
-                            {t('settings.companyNameDesc') as string}
+                            Configure the name of this Panel to suit your needs.
                         </p>
                     </AdminBox>
-                    <AdminBox title={t('settings.logo') as string} icon={faImage}>
+                    <AdminBox title={'Application Logo'} icon={faImage}>
                         <Field id={'logo'} name={'logo'} type={'url'} description={''} />
                         <p className={'text-gray-400 text-xs mt-1.5'}>
-                            {t('settings.logoDesc') as string}
+                            Configure the logo of this Panel to suit your needs.
                         </p>
                     </AdminBox>
-                    <AdminBox title={t('settings.autoUpdate') as string} icon={faRecycle}>
+                    <AdminBox title={'Automatic Updates'} icon={faRecycle}>
                         <div>
                             <div className={'inline-flex'}>
-                                <Label className={'mt-1 mr-2'}>{t('settings.allowAutoUpdate') as string}</Label>
+                                <Label className={'mt-1 mr-2'}>Allow Automatic Updates?</Label>
                                 <Field
                                     id={'auto_update'}
                                     name={'auto_update'}
@@ -90,14 +88,15 @@ export default () => {
                                 />
                             </div>
                             <p className={'text-gray-400 text-xs mt-1.5'}>
-                                {t('settings.autoUpdateDesc') as string}
+                                If enabled, Jexpanelwill automatically update in order to keep your system secure and
+                                introduce new features.
                             </p>
                         </div>
                     </AdminBox>
-                    <AdminBox title={t('settings.adminIndicators') as string} icon={faShapes}>
+                    <AdminBox title={'Admin Indicators'} icon={faShapes}>
                         <div>
                             <div className={'inline-flex'}>
-                                <Label className={'mt-1 mr-2'}>{t('settings.showIndicators') as string}</Label>
+                                <Label className={'mt-1 mr-2'}>Show admin indicators?</Label>
                                 <Field
                                     id={'indicators'}
                                     name={'indicators'}
@@ -106,14 +105,15 @@ export default () => {
                                 />
                             </div>
                             <p className={'text-gray-400 text-xs mt-1.5'}>
-                                {t('settings.indicatorsDesc') as string}
+                                If enabled, small boxes will appear in the top-right of the UI indicating whether
+                                Jexpanelmodules are enabled/disabled. Only on large screens.
                             </p>
                         </div>
                     </AdminBox>
-                    <AdminBox title={t('settings.speedDial') as string} icon={faPlusCircle}>
+                    <AdminBox title={'Speed Dial'} icon={faPlusCircle}>
                         <div>
                             <div className={'inline-flex'}>
-                                <Label className={'mt-1 mr-2'}>{t('settings.showSpeedDial') as string}</Label>
+                                <Label className={'mt-1 mr-2'}>Show speed dial component?</Label>
                                 <Field
                                     id={'speed_dial'}
                                     name={'speed_dial'}
@@ -122,15 +122,16 @@ export default () => {
                                 />
                             </div>
                             <p className={'text-gray-400 text-xs mt-1.5'}>
-                                {t('settings.speedDialDesc') as string}
+                                If enabled, a component will show to admins in the client-side UI for quick actions -
+                                such as creating a server or user.
                             </p>
                         </div>
                     </AdminBox>
-                    <AdminBox title={t('settings.activityLogging') as string} icon={faEye}>
+                    <AdminBox title={'Activity Logging'} icon={faEye}>
                         <div>
                             <div className={'bg-black/50 rounded-lg p-2 grid lg:grid-cols-3 gap-4 place-items-center'}>
                                 <div className={'inline-flex'}>
-                                    <Label className={'mt-1 mr-2'}>{t('settings.account') as string}</Label>
+                                    <Label className={'mt-1 mr-2'}>Account</Label>
                                     <Field
                                         id={'activity.enabled.account'}
                                         name={'activity.enabled.account'}
@@ -139,7 +140,7 @@ export default () => {
                                     />
                                 </div>
                                 <div className={'inline-flex'}>
-                                    <Label className={'mt-1 mr-2'}>{t('settings.server') as string}</Label>
+                                    <Label className={'mt-1 mr-2'}>Server</Label>
                                     <Field
                                         id={'activity.enabled.server'}
                                         name={'activity.enabled.server'}
@@ -148,7 +149,7 @@ export default () => {
                                     />
                                 </div>
                                 <div className={'inline-flex'}>
-                                    <Label className={'mt-1 mr-2'}>{t('settings.admin') as string}</Label>
+                                    <Label className={'mt-1 mr-2'}>Admin</Label>
                                     <Field
                                         id={'activity.enabled.admin'}
                                         name={'activity.enabled.admin'}
@@ -158,18 +159,18 @@ export default () => {
                                 </div>
                             </div>
                             <p className={'text-gray-400 text-xs mt-1.5'}>
-                                {t('settings.activityLoggingDesc') as string}
+                                Check the boxes you wish to log activity for. By default, all of these are enabled.
                             </p>
                         </div>
                     </AdminBox>
                 </div>
                 <div css={tw`w-full flex flex-row items-center mt-6`}>
                     <div css={tw`flex text-xs text-gray-500`}>
-                        {t('settings.changesNote') as string}
+                        These changes may not apply until users refresh the page.
                     </div>
 
                     <div css={tw`flex ml-auto`}>
-                        <Button type="submit">{t('settings.saveChanges') as string}</Button>
+                        <Button type="submit">Save Changes</Button>
                     </div>
                 </div>
             </Form>

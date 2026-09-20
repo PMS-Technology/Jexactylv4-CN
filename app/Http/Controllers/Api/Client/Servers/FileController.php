@@ -2,6 +2,7 @@
 
 namespace Everest\Http\Controllers\Api\Client\Servers;
 
+use Everest\Enum\JwtScope;
 use Everest\Models\Server;
 use Carbon\CarbonImmutable;
 use Everest\Facades\Activity;
@@ -80,6 +81,7 @@ class FileController extends ClientApiController
                 'file_path' => rawurldecode($request->get('file')),
                 'server_uuid' => $server->uuid,
             ])
+            ->setScopes(JwtScope::FileDownload)
             ->handle($server->node, $request->user()->id . $server->uuid);
 
         Activity::event('server:file.download')->property('file', $request->get('file'))->log();
@@ -179,7 +181,7 @@ class FileController extends ClientApiController
             ->property('files', $request->input('files'))
             ->log();
 
-        return $this->transform($file, FileObjectTransformer::class);
+        return $this->transform($file, FileObjectTransformer::class, false);
     }
 
     /**

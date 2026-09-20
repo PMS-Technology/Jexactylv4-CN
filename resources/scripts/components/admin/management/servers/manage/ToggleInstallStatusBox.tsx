@@ -4,13 +4,11 @@ import { Button } from '@/elements/button';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { Dialog } from '@/elements/dialog';
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useServerFromRoute } from '@/api/routes/admin/server';
+import { useServerFromRoute } from '@/api/routes/admin/servers';
 import useFlash from '@/plugins/useFlash';
-import toggleInstallStatus from '@/api/routes/admin/servers/manage/toggleInstallStatus';
+import { toggleServerInstallStatus as toggleInstallStatus } from '@/api/routes/admin/servers';
 
 export default () => {
-    const { t } = useTranslation('admin');
     const { data: server } = useServerFromRoute();
     const [visible, setVisible] = useState<boolean>(false);
     const { addFlash, clearAndAddHttpError } = useFlash();
@@ -39,23 +37,24 @@ export default () => {
     return (
         <>
             <Dialog.Confirm
-                title={t('servers.confirmInstallStatusChange') as string}
+                title={'Confirm install status change'}
                 onConfirmed={submit}
                 open={visible}
                 onClose={() => setVisible(false)}
-                confirm={t('servers.iUnderstandProceed') as string}
+                confirm={'I understand, proceed'}
             >
-                {t('servers.areYouSureChangeInstallStatus') as string}
+                Are you sure you wish to change the install status of this server?
             </Dialog.Confirm>
             <div css={tw`h-auto flex flex-col`}>
-                <AdminBox icon={faDownload} title={t('servers.installStatus') as string} css={tw`relative w-full`}>
+                <AdminBox icon={faDownload} title={'Install Status'} css={tw`relative w-full`}>
                     <Button.Info size={Button.Sizes.Large} css={tw`w-full`} onClick={() => setVisible(true)}>
-                        {t('servers.setServerAs') as string} {server.status === 'installing' ? (t('servers.active') as string) : (t('servers.installing') as string)}
+                        Set Server as {server.status === 'installing' ? 'Active' : 'Installing'}
                     </Button.Info>
                     <p css={tw`text-xs text-neutral-400 mt-2`}>
-                        {t('servers.changeInstallStateDescription') as string}&nbsp;
+                        Change the server from being in an installed state to uninstalled, or vice versa. Your server is
+                        currently marked as&nbsp;
                         <span className={'text-blue-400'}>
-                            {server.status === 'installing' ? (t('servers.installing') as string) : (t('servers.active') as string)}
+                            {server.status === 'installing' ? 'installing' : 'active'}
                         </span>
                         .
                     </p>

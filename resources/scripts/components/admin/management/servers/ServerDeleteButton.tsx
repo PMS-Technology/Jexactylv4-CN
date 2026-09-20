@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { Button } from '@/elements/button';
-import deleteServer from '@/api/routes/admin/servers/deleteServer';
-import { useServerFromRoute } from '@/api/routes/admin/server';
+import { deleteServerEntry as deleteServer } from '@/api/routes/admin/servers';
+import { useServerFromRoute } from '@/api/routes/admin/servers';
 import type { ApplicationStore } from '@/state';
 import { Dialog } from '@/elements/dialog';
 import SpinnerOverlay from '@/elements/SpinnerOverlay';

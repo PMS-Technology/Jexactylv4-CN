@@ -5,8 +5,7 @@ import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import { object, string } from 'yup';
 
-import createNest from '@/api/routes/admin/nests/createNest';
-import getNests from '@/api/routes/admin/nests/getNests';
+import { createNestEntry as createNest, useNestEntries as getNests } from '@/api/routes/admin/nests';
 import { Button } from '@/elements/button';
 import { Size, Variant } from '@/elements/button/types';
 import Field from '@/elements/Field';

@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import tw from 'twin.macro';
 import { number, object, string } from 'yup';
 
-import updateNode from '@/api/routes/admin/nodes/updateNode';
+import { updateNodeEntry as updateNode } from '@/api/routes/admin/nodes';
 import NodeDeleteButton from '@admin/management/nodes/NodeDeleteButton';
 import NodeLimitContainer from '@admin/management/nodes/NodeLimitContainer';
 import NodeListenContainer from '@admin/management/nodes/NodeListenContainer';
@@ -23,11 +23,13 @@ interface Values {
     name: string;
     databaseHostId: number | null;
     fqdn: string;
+    sftpAlias: string | null;
     scheme: string;
     behindProxy: string; // Yes, this is technically a boolean.
     public: string; // Yes, this is technically a boolean.
     deployable: string; // Yes, this is technically a boolean.
     deployableFree: string;
+    deploymentFee: number;
     daemonBase: string; // This value cannot be updated once a node has been created.
 
     memory: number;
@@ -89,11 +91,13 @@ export default () => {
                 name: node.name,
                 databaseHostId: node.databaseHostId,
                 fqdn: node.fqdn,
+                sftpAlias: node.sftpAlias,
                 scheme: node.scheme,
                 behindProxy: node.behindProxy ? 'true' : 'false',
                 public: node.public ? 'true' : 'false',
                 deployable: node.deployable ? 'true' : 'false',
                 deployableFree: node.deployableFree ? 'true' : 'false',
+                deploymentFee: node.deploymentFee ?? 0,
                 daemonBase: node.daemonBase,
 
                 listenPortHTTP: node.listenPortHTTP,
@@ -117,6 +121,9 @@ export default () => {
                 memoryOverallocate: number().required(),
                 disk: number().required(),
                 diskOverallocate: number().required(),
+                deploymentFee: number()
+                    .typeError('Deployment fee must be a number')
+                    .min(0, 'Deployment fee cannot be negative'),
             })}
         >
             {({ isSubmitting, isValid }) => (

@@ -1,10 +1,9 @@
-import { useContext, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import type { Filters } from '@/api/routes/admin/servers/getServers';
-import getNodes, { Context as NodesContext } from '@/api/routes/admin/nodes/getNodes';
+import { useContext, useEffect } from 'react';
+import type { ServerEntryFilters as Filters } from '@/api/routes/admin/servers';
+import { useNodeEntries as getNodes, NodeEntriesContext as NodesContext } from '@/api/routes/admin/nodes';
 import FlashMessageRender from '@/elements/FlashMessageRender';
 import useFlash from '@/plugins/useFlash';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import tw from 'twin.macro';
 import AdminContentBlock from '@/elements/AdminContentBlock';
 import AdminTable, {
@@ -22,16 +21,11 @@ import { Button } from '@/elements/button';
 import CopyOnClick from '@/elements/CopyOnClick';
 import { bytesToString, mbToBytes } from '@/lib/formatters';
 import { useStoreState } from '@/state/hooks';
-import { Dialog } from '@/elements/dialog';
-import NewNodeContainer from './NewNodeContainer';
-
 const NodesContainer = () => {
-    const { t } = useTranslation('admin');
     const { colors } = useStoreState(state => state.theme.data!);
     const { setPage, setFilters, sort, setSort, sortDirection } = useContext(NodesContext);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { data: nodes, error, isValidating } = getNodes();
-    const [open, setOpen] = useState<boolean>(false);
 
     useEffect(() => {
         if (!error) {
@@ -56,25 +50,22 @@ const NodesContainer = () => {
     };
 
     return (
-        <AdminContentBlock title={t('nodes.nodes') as string}>
-            <Dialog title={t('nodes.createNewNode') as string} open={open} onClose={() => setOpen(false)} size={'xl'}>
-                <NewNodeContainer />
-            </Dialog>
+        <AdminContentBlock title={'Nodes'}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{t('nodes.nodes') as string}</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>Nodes</h2>
                     <p
                         css={tw`hidden md:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        {t('nodes.allNodes') as string}
+                        All nodes available on the system.
                     </p>
                 </div>
 
-                <div css={tw`flex ml-auto pl-4`}>
-                    <Button type={'button'} css={tw`h-10 px-4 py-0 whitespace-nowrap`} onClick={() => setOpen(true)}>
-                        {t('nodes.createNewNode') as string}
+                <Link to={'/admin/nodes/new'} css={tw`flex ml-auto pl-4`}>
+                    <Button type={'button'} css={tw`h-10 px-4 py-0 whitespace-nowrap`}>
+                        New Node
                     </Button>
-                </div>
+                </Link>
             </div>
 
             <FlashMessageRender byKey={'nodes'} css={tw`mb-4`} />
@@ -86,27 +77,27 @@ const NodesContainer = () => {
                             <table css={tw`w-full table-auto`}>
                                 <TableHead>
                                     <TableHeader
-                                        name={t('nodes.id') as string}
+                                        name={'ID'}
                                         direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('id')}
                                     />
                                     <TableHeader
-                                        name={t('nodes.name') as string}
+                                        name={'Name'}
                                         direction={sort === 'name' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('name')}
                                     />
                                     <TableHeader
-                                        name={t('nodes.fqdn') as string}
+                                        name={'FQDN'}
                                         direction={sort === 'fqdn' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('fqdn')}
                                     />
                                     <TableHeader
-                                        name={t('nodes.totalMemory') as string}
+                                        name={'Total Memory'}
                                         direction={sort === 'memory' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('memory')}
                                     />
                                     <TableHeader
-                                        name={t('nodes.totalDisk') as string}
+                                        name={'Total Disk'}
                                         direction={sort === 'disk' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('disk')}
                                     />
@@ -157,13 +148,13 @@ const NodesContainer = () => {
                                                         <span
                                                             css={tw`px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-green-100 text-green-800`}
                                                         >
-                                                            {t('nodes.secure') as string}
+                                                            Secure
                                                         </span>
                                                     ) : (
                                                         <span
                                                             css={tw`px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-red-200 text-red-800`}
                                                         >
-                                                            {t('nodes.nonSecure') as string}
+                                                            Non-Secure
                                                         </span>
                                                     )}
                                                 </td>

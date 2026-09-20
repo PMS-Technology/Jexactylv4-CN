@@ -6,13 +6,13 @@ import SpinnerOverlay from '@/elements/SpinnerOverlay';
 import { Product } from '@definitions/account/billing';
 import { createCheckoutSession } from '@/api/routes/account/billing/orders/process';
 import { Alert } from '@/elements/alert';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
     node: number;
     product: Product;
     vars: Map<string, string>;
     discount_code?: string | undefined;
+    egg?: number;
 }
 
 export interface BillingServerVariables {
@@ -21,9 +21,9 @@ export interface BillingServerVariables {
 }
 
 export default (data: Props) => {
-    const { t } = useTranslation('dashboard');
     const [loading, setLoading] = useState(false);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
+    const eggMissing = data.product.eggId === null && !data.egg;
 
     const handleSubmit = async (event: FormEvent) => {
         clearFlashes();
@@ -32,7 +32,7 @@ export default (data: Props) => {
 
         const variables: BillingServerVariables[] = Array.from(data.vars, ([key, value]) => ({ key, value }));
 
-        createCheckoutSession(data.product.id, data.node, undefined, variables, data.discount_code)
+        createCheckoutSession(data.product.id, data.node, undefined, variables, data.discount_code, data.egg)
             .then(url => {
                 window.location.assign(url);
             })
@@ -45,11 +45,13 @@ export default (data: Props) => {
             <SpinnerOverlay visible={loading} />
             <FlashMessageRender byKey={'account:billing:order'} className={'mb-4'} />
             {isNaN(data.node) ? (
-                <Alert type={'warning'}>{t('billing.validNodeRequired')}</Alert>
+                <Alert type={'warning'}>A valid node must be selected to continue with your order.</Alert>
+            ) : eggMissing ? (
+                <Alert type={'warning'}>An egg must be selected to continue with your order.</Alert>
             ) : (
                 <div className={'text-right'}>
-                    <Button disabled={isNaN(data.node)} size={Button.Sizes.Large}>
-                        {t('billing.payNow')}
+                    <Button disabled={isNaN(data.node) || eggMissing} size={Button.Sizes.Large}>
+                        Pay Now
                     </Button>
                 </div>
             )}

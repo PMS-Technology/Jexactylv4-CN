@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import useFlash from '@/plugins/useFlash';
 import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { exportBillingConfiguration } from '@/api/routes/admin/billing/config';
+import { exportBillingConfiguration } from '@/api/routes/admin/billing';
 
 export default () => {
     const { t } = useTranslation('admin');

@@ -6,6 +6,7 @@ use Everest\Models\Server;
 use Everest\Models\Database;
 use Everest\Facades\Activity;
 use Illuminate\Http\Response;
+use Everest\Exceptions\DisplayException;
 use Everest\Services\Databases\DatabasePasswordService;
 use Everest\Transformers\Api\Client\DatabaseTransformer;
 use Everest\Services\Databases\DatabaseManagementService;
@@ -46,12 +47,17 @@ class DatabaseController extends ClientApiController
      */
     public function store(StoreDatabaseRequest $request, Server $server): array
     {
-        $database = $this->deployDatabaseService->handle($server, $request->validated());
+        $database = Activity::event('server:database.create')->transaction(function ($log) use ($request, $server) {
+            if ($server->databases()->lockForUpdate()->count() >= $server->database_limit) {
+                throw new DisplayException('Cannot create additional databases on this server: limit has been reached.');
+            }
 
-        Activity::event('server:database.create')
-            ->subject($database)
-            ->property('name', $database->database)
-            ->log();
+            $database = $this->deployDatabaseService->handle($server, $request->validated());
+
+            $log->subject($database)->property('name', $database->database);
+
+            return $database;
+        });
 
         return $this->fractal->item($database)
             ->parseIncludes(['password'])
@@ -67,15 +73,12 @@ class DatabaseController extends ClientApiController
      */
     public function rotatePassword(RotatePasswordRequest $request, Server $server, Database $database): array
     {
-        $this->passwordService->handle($database);
-        $database->refresh();
-
         Activity::event('server:database.rotate-password')
             ->subject($database)
             ->property('name', $database->database)
-            ->log();
+            ->transaction(fn () => $this->passwordService->handle($database));
 
-        return $this->fractal->item($database)
+        return $this->fractal->item($database->refresh())
             ->parseIncludes(['password'])
             ->transformWith(DatabaseTransformer::class)
             ->toArray();

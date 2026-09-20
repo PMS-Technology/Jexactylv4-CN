@@ -87,16 +87,17 @@ class NetworkAllocationController extends ClientApiController
      */
     public function store(NewAllocationRequest $request, Server $server): array
     {
-        if ($server->allocations()->count() >= $server->allocation_limit) {
-            throw new DisplayException(trans('exceptions.network.allocation_limit_reached'));
-        }
+        $allocation = Activity::event('server:allocation.create')->transaction(function ($log) use ($server) {
+            if ($server->allocations()->lockForUpdate()->count() >= $server->allocation_limit) {
+                throw new DisplayException('Cannot assign additional allocations to this server: limit has been reached.');
+            }
 
-        $allocation = $this->assignableAllocationService->handle($server);
+            $allocation = $this->assignableAllocationService->handle($server);
 
-        Activity::event('server:allocation.create')
-            ->subject($allocation)
-            ->property('allocation', $allocation->toString())
-            ->log();
+            $log->subject($allocation)->property('allocation', $allocation->toString());
+
+            return $allocation;
+        });
 
         return $this->transform($allocation, AllocationTransformer::class);
     }
@@ -111,11 +112,11 @@ class NetworkAllocationController extends ClientApiController
         // Don't allow the deletion of allocations if the server does not have an
         // allocation limit set.
         if (empty($server->allocation_limit)) {
-            throw new DisplayException(trans('exceptions.network.allocation_limit_missing'));
+            throw new DisplayException('You cannot delete allocations for this server: no allocation limit is set.');
         }
 
         if ($allocation->id === $server->allocation_id) {
-            throw new DisplayException(trans('exceptions.network.cannot_delete_primary'));
+            throw new DisplayException('You cannot delete the primary allocation for this server.');
         }
 
         Allocation::query()->where('id', $allocation->id)->update([

@@ -6,7 +6,7 @@ import { Dialog } from '@/elements/dialog';
 import Preview from '@admin/modules/theme/Preview';
 import AdminContentBlock from '@/elements/AdminContentBlock';
 import ColorSelect from '@admin/modules/theme/ColorSelect';
-import resetTheme from '@/api/routes/admin/theme/resetTheme';
+import { resetTheme } from '@/api/routes/admin/theme';
 
 export default () => {
     const { t } = useTranslation('admin');

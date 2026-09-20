@@ -1,7 +1,6 @@
 import Pill, { PillStatus } from '@/elements/Pill';
 import PageContentBlock from '@/elements/PageContentBlock';
-import FlashMessageRender from '@/elements/FlashMessageRender';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import useFlash from '@/plugins/useFlash';
 import AdminTable, {
     ContentWrapper,
@@ -16,36 +15,22 @@ import AdminTable, {
 } from '@/elements/AdminTable';
 import CopyOnClick from '@/elements/CopyOnClick';
 import { formatDistanceToNowStrict } from 'date-fns';
-import { useGetOrders } from '@/api/routes/account/billing/orders';
+import { getAllOrders, useGetOrders } from '@/api/routes/account/billing/orders';
 import { Context as OrderContext } from '@/api/routes/account/billing/orders/index';
 import { OrderFilters } from '@/api/routes/account/billing/orders/types';
+import { Order } from '@definitions/account/billing';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckCircle, faXmarkCircle } from '@fortawesome/free-solid-svg-icons';
-import { useTranslation } from 'react-i18next';
-
-export function format(date: number): string {
-    let prefix = 'th';
-
-    switch (date) {
-        case 1:
-        case 21:
-        case 31:
-            prefix = 'st';
-            break;
-        case 2:
-        case 22:
-            prefix = 'nd';
-            break;
-        case 3:
-        case 23:
-            prefix = 'rd';
-            break;
-        default:
-            break;
-    }
-
-    return `${date}${prefix}`;
-}
+import {
+    faCheckCircle,
+    faClockRotateLeft,
+    faReceipt,
+    faServer,
+    faWallet,
+    faXmarkCircle,
+} from '@fortawesome/free-solid-svg-icons';
+import StatTile from '@/elements/billing/StatTile';
+import Money from '@/elements/billing/Money';
+import InvoiceIcon from './InvoiceIcon';
 
 export function type(state: string): PillStatus {
     switch (state) {
@@ -61,7 +46,6 @@ export function type(state: string): PillStatus {
 }
 
 function OrderTable({ server_id }: { server_id?: number }) {
-    const { t } = useTranslation('dashboard');
     const { data: orders, error } = useGetOrders();
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { setPage, setFilters, sort, setSort, sortDirection } = useContext(OrderContext);
@@ -99,28 +83,29 @@ function OrderTable({ server_id }: { server_id?: number }) {
                         <table className={`w-full table-auto`}>
                             <TableHead>
                                 <TableHeader
-                                    name={t('billing.orderId')}
+                                    name={'ID'}
                                     direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('id')}
                                 />
                                 <TableHeader
-                                    name={t('billing.totalPrice')}
+                                    name={'Total Price'}
                                     direction={sort === 'total' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('total')}
                                 />
-                                <TableHeader name={t('billing.description')} />
+                                <TableHeader name={'Description'} />
                                 <TableHeader
-                                    name={t('billing.createdAt')}
+                                    name={'Created At'}
                                     direction={sort === 'created_at' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('created_at')}
                                 />
-                                <TableHeader name={t('billing.paymentState')} />
+                                <TableHeader name={'Payment State'} />
                                 <TableHeader
-                                    name={t('billing.orderType')}
+                                    name={'Order Type'}
                                     direction={sort === 'type' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('type')}
                                 />
-                                {!server_id && <TableHeader name={t('billing.activeService')} />}
+                                {!server_id && <TableHeader name={'Active Service'} />}
+                                <TableHeader name={'Invoice'} />
                             </TableHead>
                             <TableBody>
                                 {orders !== undefined &&
@@ -134,7 +119,9 @@ function OrderTable({ server_id }: { server_id?: number }) {
                                                     </code>
                                                 </CopyOnClick>
                                             </td>
-                                            <td className={'px-6 py-4 text-white font-bold'}>${order.total}/mo</td>
+                                            <td className={'px-6 py-4 text-white font-bold'}>
+                                                <Money value={order.total} suffix={'/mo'} />
+                                            </td>
                                             <td className={'px-6 py-4'}>{order.description}</td>
                                             <td className={'px-6 py-4'}>
                                                 {formatDistanceToNowStrict(order.created_at, { addSuffix: true })}
@@ -164,6 +151,9 @@ function OrderTable({ server_id }: { server_id?: number }) {
                                                     )}
                                                 </td>
                                             )}
+                                            <td className={'px-6 py-4 text-center'}>
+                                                <InvoiceIcon order={order} />
+                                            </td>
                                         </TableRow>
                                     ))}
                             </TableBody>
@@ -176,17 +166,67 @@ function OrderTable({ server_id }: { server_id?: number }) {
     );
 }
 
+function BillingStats() {
+    const [orders, setOrders] = useState<Order[] | undefined>();
+
+    useEffect(() => {
+        getAllOrders()
+            .then(setOrders)
+            .catch(error => console.error(error));
+    }, []);
+
+    const activeServerIds = new Set<number>();
+    let monthlyRecurring = 0;
+    let lifetimeSpend = 0;
+    let pending = 0;
+
+    (orders || []).forEach(order => {
+        if (order.status === 'pending') pending++;
+        if (order.status === 'processed') lifetimeSpend += order.total;
+
+        if (order.server_id && order.relationships.server && !activeServerIds.has(order.server_id)) {
+            activeServerIds.add(order.server_id);
+            monthlyRecurring += order.total;
+        }
+    });
+
+    return (
+        <div className={'grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8'}>
+            <StatTile
+                icon={faServer}
+                label={'Active Services'}
+                value={orders === undefined ? '...' : activeServerIds.size}
+            />
+            <StatTile
+                icon={faWallet}
+                label={'Monthly Recurring'}
+                value={orders === undefined ? '...' : <Money value={monthlyRecurring} />}
+            />
+            <StatTile
+                icon={faReceipt}
+                label={'Lifetime Spend'}
+                value={orders === undefined ? '...' : <Money value={lifetimeSpend} />}
+            />
+            <StatTile
+                icon={faClockRotateLeft}
+                label={'Pending Orders'}
+                value={orders === undefined ? '...' : pending}
+            />
+        </div>
+    );
+}
+
 export default ({ server_id }: { server_id?: number }) => {
-    const { t } = useTranslation('dashboard');
     const hooks = useTableHooks<OrderFilters>();
 
     return !server_id ? (
-        <PageContentBlock>
-            <div className={'text-3xl lg:text-5xl font-bold mt-8 mb-12'}>
-                {t('billing.billingActivity')}
-                <p className={'text-gray-400 font-normal text-sm mt-1'}>{t('billing.billingActivityDescription')}</p>
-                <FlashMessageRender byKey={'billing:orders'} className={'mt-4'} />
-            </div>
+        <PageContentBlock
+            title={'Billing Activity'}
+            header
+            description={"View and manage the active and previous subscriptions you've created."}
+            showFlashKey={'billing:orders'}
+        >
+            <BillingStats />
             <OrderContext.Provider value={hooks}>
                 <OrderTable />
             </OrderContext.Provider>

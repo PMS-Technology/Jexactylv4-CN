@@ -14,14 +14,14 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AuthenticatedRoute from '@/elements/AuthenticatedRoute';
 import { NotFound } from '@/elements/ScreenBlock';
 import { EverestSettings } from '@/state/everest';
-import Onboarding from '@account/Onboarding';
-import SpeedDial from '@/elements/SpeedDial';
-import SetupContainer from './admin/setup/SetupContainer';
 
 const AdminRouter = lazy(() => import('@/routers/AdminRouter'));
 const AuthenticationRouter = lazy(() => import('@/routers/AuthenticationRouter'));
 const DashboardRouter = lazy(() => import('@/routers/DashboardRouter'));
 const ServerRouter = lazy(() => import('@/routers/ServerRouter'));
+const Onboarding = lazy(() => import('@account/Onboarding'));
+const SpeedDial = lazy(() => import('@/elements/SpeedDial'));
+const SetupContainer = lazy(() => import('./admin/setup/SetupContainer'));
 
 interface ExtendedWindow extends Window {
     SiteConfiguration?: SiteSettings;
@@ -34,9 +34,11 @@ interface ExtendedWindow extends Window {
         root_admin: boolean;
         use_totp: boolean;
         language: string;
-        avatar_url: string;
+        avatar_url: string | null;
         admin_role_name: string;
         admin_role_id?: number;
+        admin_permissions: string[];
+        has_password: boolean;
         state: string;
         updated_at: string;
         created_at: string;
@@ -56,8 +58,10 @@ function App() {
             avatarURL: PterodactylUser.avatar_url,
             roleName: PterodactylUser.admin_role_name,
             admin_role_id: PterodactylUser.admin_role_id,
+            adminPermissions: PterodactylUser.admin_permissions ?? [],
             state: PterodactylUser.state,
             useTotp: PterodactylUser.use_totp,
+            hasPassword: PterodactylUser.has_password ?? true,
             createdAt: new Date(PterodactylUser.created_at),
             updatedAt: new Date(PterodactylUser.updated_at),
         });
@@ -91,13 +95,17 @@ function App() {
             <StoreProvider store={store}>
                 <ProgressBar />
                 {PterodactylUser?.root_admin && !SiteConfiguration?.setup ? (
-                    <SetupContainer />
+                    <Spinner.Suspense>
+                        <SetupContainer />
+                    </Spinner.Suspense>
                 ) : (
                     <>
                         {' '}
                         {PterodactylUser?.username.startsWith('null_user_') &&
                         EverestConfiguration?.auth.modules.onboarding.enabled ? (
-                            <Onboarding />
+                            <Spinner.Suspense>
+                                <Onboarding />
+                            </Spinner.Suspense>
                         ) : (
                             <div className="mx-auto w-auto">
                                 <BrowserRouter>

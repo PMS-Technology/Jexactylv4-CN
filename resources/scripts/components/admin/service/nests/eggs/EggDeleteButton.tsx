@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
-import deleteEgg from '@/api/routes/admin/eggs/deleteEgg';
+import { deleteEggEntry as deleteEgg } from '@/api/routes/admin/eggs';
 import { Button } from '@/elements/button';
 import { Shape } from '@/elements/button/types';
 import ConfirmationModal from '@/elements/ConfirmationModal';

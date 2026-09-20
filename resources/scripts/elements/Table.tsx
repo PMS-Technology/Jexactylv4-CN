@@ -1,40 +1,7 @@
-import { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
 import { useStoreState } from '@/state/hooks';
 import { UsePaginationResult } from '@/plugins/usePagination';
 import { Button } from './button';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
-const Header = ({ children }: { children: ReactNode }) => {
-    const { colors } = useStoreState(s => s.theme.data!);
-
-    return (
-        <thead className={'text-xs uppercase text-gray-400'} style={{ backgroundColor: colors.headers }}>
-            <tr>{children}</tr>
-        </thead>
-    );
-};
-
-const HeaderItem = ({ children }: { children: ReactNode }) => <th className={'px-6 py-3'}>{children}</th>;
-
-const Body = ({ children }: { children: ReactNode }) => <tbody>{children}</tbody>;
-
-const BodyItem = ({ item, to, children }: { item: string; to?: string; children: ReactNode }) => {
-    const { colors } = useStoreState(s => s.theme.data!);
-
-    return (
-        <tr className={'border-b-2 border-gray-700'} style={{ backgroundColor: colors.secondary }}>
-            <th
-                style={{ color: colors.primary }}
-                className={'px-6 py-4 font-bold whitespace-nowrap hover:brightness-150 duration-300'}
-            >
-                {to ? <Link to={to}>{item}</Link> : item}
-            </th>
-            {children}
-        </tr>
-    );
-};
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/outline';
 
 const PaginatedFooter = ({
     pagination,
@@ -48,7 +15,7 @@ const PaginatedFooter = ({
     return (
         <div
             style={{ backgroundColor: !noBackground ? colors.secondary : 'transparent' }}
-            className={'rounded-b-lg py-2 px-4'}
+            className={'rounded-b-xl py-2 px-4'}
         >
             <div className={'flex justify-between space-x-2'}>
                 <p className={'text-xs font-bold text-gray-400 my-auto'}>
@@ -66,14 +33,14 @@ const PaginatedFooter = ({
                         size={Button.Sizes.Small}
                         onClick={pagination.goToPreviousPage}
                     >
-                        <FontAwesomeIcon icon={faChevronLeft} />
+                        <ChevronLeftIcon className={'w-4 h-4'} />
                     </Button.Text>
                     <Button.Text
                         disabled={pagination.currentPage === pagination.totalPages}
                         size={Button.Sizes.Small}
                         onClick={pagination.goToNextPage}
                     >
-                        <FontAwesomeIcon icon={faChevronRight} />
+                        <ChevronRightIcon className={'w-4 h-4'} />
                     </Button.Text>
                 </div>
             </div>
@@ -81,15 +48,4 @@ const PaginatedFooter = ({
     );
 };
 
-const Table = ({ children }: { children: ReactNode[] }) => {
-    const { colors } = useStoreState(s => s.theme.data!);
-
-    return (
-        <div className={'relative overflow-x-auto'}>
-            <div className={'py-5 rounded-t-lg'} style={{ backgroundColor: colors.secondary }}></div>
-            <table className={'w-full text-sm text-left text-gray-400'}>{children}</table>
-        </div>
-    );
-};
-
-export { Table, Header, HeaderItem, Body, BodyItem, PaginatedFooter };
+export { PaginatedFooter };

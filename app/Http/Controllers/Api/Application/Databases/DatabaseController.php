@@ -38,8 +38,8 @@ class DatabaseController extends ApplicationApiController
         }
 
         $databases = QueryBuilder::for(DatabaseHost::query())
-            ->allowedFilters(['name', 'host'])
-            ->allowedSorts(['id', 'name', 'host'])
+            ->allowedFilters(...['name', 'host'])
+            ->allowedSorts(...['id', 'name', 'host'])
             ->paginate($perPage);
 
         return $this->transform($databases, DatabaseHostTransformer::class);
@@ -63,6 +63,7 @@ class DatabaseController extends ApplicationApiController
         $database = $this->creationService->handle($request->validated());
 
         Activity::event('admin:database-hosts:create')
+            ->subject($database)
             ->property('database-host', $database)
             ->description('A new database host was created')
             ->log();
@@ -80,6 +81,7 @@ class DatabaseController extends ApplicationApiController
         $database = $this->updateService->handle($database->id, $request->validated());
 
         Activity::event('admin:database-hosts:update')
+            ->subject($database)
             ->property('database-host', $database)
             ->property('new_data', $request->all())
             ->description('A database host was updated')
@@ -98,6 +100,7 @@ class DatabaseController extends ApplicationApiController
         $database->delete();
 
         Activity::event('admin:database-hosts:delete')
+            ->subject($database)
             ->property('database-host', $database)
             ->description('A database host was deleted')
             ->log();

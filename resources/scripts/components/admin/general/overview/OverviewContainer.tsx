@@ -1,31 +1,35 @@
+import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import AdminContentBlock from '@/elements/AdminContentBlock';
 import FlashMessageRender from '@/elements/FlashMessageRender';
 import useFlash from '@/plugins/useFlash';
 import {
     faArrowRight,
+    faChartLine,
+    faCoins,
+    faDatabase,
     faDesktop,
-    faEye,
     faHeart,
     faLayerGroup,
     faQuestionCircle,
     faRecycle,
+    faSave,
     faServer,
     faTicket,
     faUserPlus,
+    faUsers,
     IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import AdminBox from '@/elements/AdminBox';
 import Spinner from '@/elements/Spinner';
+import CopyOnClick from '@/elements/CopyOnClick';
 import { useStoreState } from '@/state/hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link } from 'react-router-dom';
 import { Alert } from '@/elements/alert';
 import getMetrics, { MetricData } from '@/api/routes/admin/getMetrics';
 import getVersion, { VersionData } from '@/api/routes/admin/getVersion';
-import ActivityContainer from './ActivityContainer';
 
 interface SuggestionProps {
     icon: IconDefinition;
@@ -35,8 +39,15 @@ interface SuggestionProps {
     action?: string;
 }
 
+const Code = ({ children }: { children: ReactNode }) => {
+    return (
+        <code css={tw`text-sm font-mono bg-neutral-900 rounded`} style={{ padding: '2px 6px' }}>
+            {children}
+        </code>
+    );
+};
+
 const SuggestionCard = ({ icon, title, description, link, action }: SuggestionProps) => {
-    const { t } = useTranslation('admin');
     const { colors } = useStoreState(state => state.theme.data!);
 
     return (
@@ -47,15 +58,35 @@ const SuggestionCard = ({ icon, title, description, link, action }: SuggestionPr
             <p className={'text-gray-300'}>{description}</p>
             <p className={'mt-2 text-right text-sm'} style={{ color: colors.primary }}>
                 <Link to={link}>
-                    {action ?? (t('overview.manage') as string)} <FontAwesomeIcon icon={faArrowRight} />
+                    {action ?? 'Manage'} <FontAwesomeIcon icon={faArrowRight} />
                 </Link>
             </p>
         </div>
     );
 };
 
+interface StatProps {
+    icon: IconDefinition;
+    title: string;
+    value: ReactNode;
+    subtext?: string;
+}
+
+const StatCard = ({ icon, title, value, subtext }: StatProps) => {
+    const { colors } = useStoreState(state => state.theme.data!);
+
+    return (
+        <div className={'bg-black/25 p-3 lg:p-4 rounded-lg'}>
+            <p className={'text-sm text-gray-400'}>
+                <FontAwesomeIcon icon={icon} style={{ color: colors.primary }} /> {title}
+            </p>
+            <p className={'text-2xl font-semibold mt-1'}>{value}</p>
+            {subtext && <p className={'text-xs text-gray-400 mt-1'}>{subtext}</p>}
+        </div>
+    );
+};
+
 export default () => {
-    const { t } = useTranslation('admin');
     const [loading, setLoading] = useState<boolean>(true);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
 
@@ -83,24 +114,24 @@ export default () => {
     }, []);
 
     return (
-        <AdminContentBlock title={t('nav.overview') as string}>
+        <AdminContentBlock title={'Overview'}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{t('nav.overview') as string}</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>Overview</h2>
                     <p
                         css={tw`hidden md:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        {t('overview.quickGlance') as string}
+                        A quick glance at your system.
                     </p>
                 </div>
             </div>
 
             <FlashMessageRender byKey={'overview'} css={tw`mb-4`} />
 
-            <AdminBox title={t('overview.versionInfo') as string} icon={faDesktop}>
+            <AdminBox title={'Version Information'} icon={faDesktop}>
                 {settings.debug && (
                     <Alert type={'warning'} className={'mb-3'}>
-                        {t('overview.debugModeWarning') as string}
+                        Jexpanelis running in debug mode. Do not use in production.
                     </Alert>
                 )}
                 {loading ? (
@@ -108,28 +139,88 @@ export default () => {
                 ) : (
                     <>
                         <div className={'text-gray-200 mb-2'}>
-                            {t('overview.currentVersion', {
-                                current: versionData?.panel.current,
-                                latest: versionData?.panel.latest,
-                            }) as string}
+                            You are currently running version&nbsp;
+                            <CopyOnClick text={versionData?.panel.current}>
+                                <Code>{versionData?.panel.current}</Code>
+                            </CopyOnClick>
+                            , with the latest release being &nbsp;
+                            <CopyOnClick text={versionData?.panel.latest}>
+                                <Code>{versionData?.panel.latest}</Code>
+                            </CopyOnClick>
+                            .
                         </div>
                         {versionData?.panel.current.startsWith('v4.0.0-') && (
                             <Alert type={'danger'} className={'mt-4'}>
-                                {t('overview.betaWarning') as string}
+                                You are running a beta release of Jexpanelv4, which may include several bugs or weird
+                                glitches. Do NOT use this software in production unless you don&apos;t care about losing
+                                data.
                             </Alert>
                         )}
                     </>
                 )}
             </AdminBox>
-            <AdminBox title={t('overview.suggestedActions') as string} className={'mt-6'} icon={faQuestionCircle}>
+            <AdminBox title={'Statistics'} className={'mt-6'} icon={faChartLine}>
+                {loading || !metricData ? (
+                    <Spinner size={'large'} centered />
+                ) : (
+                    <div className={'grid grid-cols-2 lg:grid-cols-4 gap-4'}>
+                        <StatCard icon={faLayerGroup} title={'Nodes'} value={metricData.nodes} />
+                        <StatCard
+                            icon={faServer}
+                            title={'Servers'}
+                            value={metricData.servers.total}
+                            subtext={
+                                metricData.servers.suspended > 0 || metricData.servers.installing > 0
+                                    ? [
+                                          metricData.servers.suspended > 0
+                                              ? `${metricData.servers.suspended} suspended`
+                                              : null,
+                                          metricData.servers.installing > 0
+                                              ? `${metricData.servers.installing} installing`
+                                              : null,
+                                      ]
+                                          .filter(Boolean)
+                                          .join(', ')
+                                    : undefined
+                            }
+                        />
+                        <StatCard
+                            icon={faUsers}
+                            title={'Users'}
+                            value={metricData.users.total}
+                            subtext={`${metricData.users.admins} administrators`}
+                        />
+                        <StatCard icon={faTicket} title={'Pending Tickets'} value={metricData.tickets} />
+                        <StatCard icon={faDatabase} title={'Databases'} value={metricData.databases} />
+                        <StatCard icon={faSave} title={'Backups'} value={metricData.backups} />
+                        {metricData.billing && (
+                            <>
+                                <StatCard
+                                    icon={faCoins}
+                                    title={'Revenue'}
+                                    value={`${everest.billing.currency.symbol}${metricData.billing.revenue.toFixed(2)}`}
+                                    subtext={`${metricData.billing.orders_this_month} orders this month`}
+                                />
+                                <StatCard
+                                    icon={faQuestionCircle}
+                                    title={'Pending Orders'}
+                                    value={metricData.billing.orders_pending}
+                                    subtext={`${metricData.billing.products} products available`}
+                                />
+                            </>
+                        )}
+                    </div>
+                )}
+            </AdminBox>
+            <AdminBox title={'Suggested Actions'} className={'mt-6'} icon={faQuestionCircle}>
                 <div className={'grid lg:grid-cols-3 gap-4'}>
                     {!settings.auto_update && (
                         <SuggestionCard
                             icon={faRecycle}
                             link={'/admin/settings'}
-                            title={t('overview.enableAutoUpdates') as string}
+                            title={'Enable automatic updates'}
                             description={
-                                t('overview.enableAutoUpdatesDesc') as string
+                                'By setting up automatic updates, you can keep Jexpanelstable and secure in the background.'
                             }
                         />
                     )}
@@ -137,9 +228,9 @@ export default () => {
                         <SuggestionCard
                             icon={faUserPlus}
                             link={'/admin/auth'}
-                            title={t('overview.allowRegistration') as string}
+                            title={'Allow user registration'}
                             description={
-                                t('overview.allowRegistrationDesc') as string
+                                'Enabling the Authentication module allows users to signup via the login page.'
                             }
                         />
                     )}
@@ -149,24 +240,32 @@ export default () => {
                                 <SuggestionCard
                                     icon={faLayerGroup}
                                     link={'/admin/nodes/new'}
-                                    title={t('overview.addFirstNode') as string}
-                                    description={t('overview.addFirstNodeDesc') as string}
+                                    title={'Add your first node'}
+                                    description={"Nodes are physical servers which Jexactyl's servers run on."}
                                 />
                             )}
-                            {metricData.servers < 1 && (
+                            {metricData.servers.total < 1 && (
                                 <SuggestionCard
                                     icon={faServer}
                                     link={'/admin/servers/new'}
-                                    title={t('overview.createFirstServer') as string}
-                                    description={t('overview.createFirstServerDesc') as string}
+                                    title={'Create your first server'}
+                                    description={'Create a server to host your favourite game or program.'}
                                 />
                             )}
                             {everest.tickets.enabled && metricData.tickets > 0 && (
                                 <SuggestionCard
                                     icon={faTicket}
                                     link={'/admin/tickets'}
-                                    title={t('overview.answerTickets') as string}
-                                    description={t('overview.answerTicketsDesc', { count: metricData.tickets }) as string}
+                                    title={'Answer customer tickets'}
+                                    description={`You currently have ${metricData.tickets} pending tickets.`}
+                                />
+                            )}
+                            {metricData.billing && metricData.billing.orders_pending > 0 && (
+                                <SuggestionCard
+                                    icon={faCoins}
+                                    link={'/admin/billing/orders'}
+                                    title={'Review pending orders'}
+                                    description={`You currently have ${metricData.billing.orders_pending} pending billing orders.`}
                                 />
                             )}
                         </>
@@ -174,16 +273,13 @@ export default () => {
                     <SuggestionCard
                         icon={faHeart}
                         link={'https://donate.stripe.com/6oE02Zftd9cC34IbIS'}
-                        title={t('overview.donateToJexactyl') as string}
-                        action={t('overview.donate') as string}
+                        title={'Donate to Jexactyl'}
+                        action={'Donate'}
                         description={
-                            t('overview.donateDesc') as string
+                            'Support the project by leaving a donation to help us pay for testing servers and domains.'
                         }
                     />
                 </div>
-            </AdminBox>
-            <AdminBox title={t('overview.adminActivity') as string} className={'mt-6'} icon={faEye}>
-                <ActivityContainer />
             </AdminBox>
         </AdminContentBlock>
     );

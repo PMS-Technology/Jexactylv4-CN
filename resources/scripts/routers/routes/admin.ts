@@ -7,6 +7,7 @@ import ServerPresetViewContainer from '@/components/admin/management/servers/pre
 // todo(jex): lazy load these
 
 const OverviewContainer = lazy(() => import('@/components/admin/general/overview/OverviewContainer'));
+const ActivityLogsContainer = lazy(() => import('@/components/admin/general/activity/ActivityLogsContainer'));
 const SettingsRouter = lazy(() => import('@/components/admin/general/settings/SettingsRouter'));
 const ApplicationApiRouter = lazy(() => import('@/components/admin/general/api/ApplicationApiRouter'));
 
@@ -48,24 +49,31 @@ const admin: AdminRouteDefinition[] = [
      */
     route('', OverviewContainer, {
         name: 'Overview',
-        nameKey: 'nav.overview',
         end: true,
         icon: Icon.OfficeBuildingIcon,
         category: 'general',
+        permission: 'overview.read',
+    }),
+    route('activity', ActivityLogsContainer, {
+        name: 'Activity',
+        icon: Icon.ClipboardListIcon,
+        category: 'general',
+        permission: 'activity.read',
+        condition: ({ activityEnabled }: { activityEnabled: boolean }) => activityEnabled,
     }),
     route('settings/*', SettingsRouter, {
         name: 'Settings',
-        nameKey: 'nav.settings',
         icon: Icon.CogIcon,
         category: 'general',
+        permission: 'settings.read',
     }),
-    route('settings/webhooks/*', WebhookRouter),
+    route('settings/webhooks/*', WebhookRouter, { permission: 'webhooks.read' }),
     route('api/*', ApplicationApiRouter, {
         name: 'API',
-        nameKey: 'nav.api',
         icon: Icon.CodeIcon,
         category: 'general',
         advanced: true,
+        permission: 'api.read',
     }),
 
     /**
@@ -73,42 +81,53 @@ const admin: AdminRouteDefinition[] = [
      */
     route('auth', AuthContainer, {
         name: 'Auth',
-        nameKey: 'nav.auth',
         icon: Icon.KeyIcon,
         category: 'modules',
         advanced: true,
+        permission: 'auth.read',
     }),
     route('billing/*', BillingRouter, {
         name: 'Billing',
-        nameKey: 'nav.billing',
         icon: Icon.CashIcon,
         category: 'modules',
         advanced: true,
+        permission: 'billing.read',
     }),
     route('tickets/*', TicketRouter, {
         name: 'Tickets',
-        nameKey: 'nav.tickets',
         icon: Icon.TicketIcon,
         category: 'modules',
         advanced: true,
+        permission: 'tickets.read',
     }),
-    route('ai/*', AIRouter, { name: 'AI', nameKey: 'nav.ai', icon: Icon.SparklesIcon, category: 'modules', advanced: true }),
+    route('ai/*', AIRouter, {
+        name: 'AI',
+        icon: Icon.SparklesIcon,
+        category: 'modules',
+        advanced: true,
+        permission: 'ai.read',
+    }),
 
     /**
      * Admin - Appearance Routes
      */
     route('theme', ThemeContainer, {
         name: 'Theme',
-        nameKey: 'nav.theme',
         icon: Icon.PencilAltIcon,
         category: 'appearance',
+        permission: 'theme.read',
     }),
-    route('links/*', LinksContainer, { name: 'Links', nameKey: 'nav.links', icon: Icon.LinkIcon, category: 'appearance' }),
+    route('links/*', LinksContainer, {
+        name: 'Links',
+        icon: Icon.LinkIcon,
+        category: 'appearance',
+        permission: 'links.read',
+    }),
     route('alerts/*', AlertRouter, {
         name: 'Alerts',
-        nameKey: 'nav.alerts',
         icon: Icon.ShieldExclamationIcon,
         category: 'appearance',
+        permission: 'alerts.read',
     }),
 
     /**
@@ -116,40 +135,50 @@ const admin: AdminRouteDefinition[] = [
      */
     route('databases', DatabasesContainer, {
         name: 'Databases',
-        nameKey: 'nav.databases',
         icon: Icon.DatabaseIcon,
         category: 'management',
         advanced: true,
+        permission: 'databases.read',
     }),
-    route('databases/:id', DatabaseEditContainer),
-    route('nodes/*', NodesContainer, { name: 'Nodes', nameKey: 'nav.nodes', icon: Icon.ServerIcon, category: 'management' }),
-    route('nodes/new', NewNodeContainer),
-    route('nodes/:id/*', NodeRouter),
+    route('databases/:id', DatabaseEditContainer, { permission: 'databases.read' }),
+    route('nodes/*', NodesContainer, {
+        name: 'Nodes',
+        icon: Icon.ServerIcon,
+        category: 'management',
+        permission: 'nodes.read',
+    }),
+    route('nodes/new', NewNodeContainer, { permission: 'nodes.create' }),
+    route('nodes/:id/*', NodeRouter, { permission: 'nodes.read' }),
 
     route('servers', ServersContainer, {
         name: 'Servers',
-        nameKey: 'nav.servers',
         icon: Icon.TerminalIcon,
         category: 'management',
+        permission: 'servers.read',
     }),
-    route('servers/new', NewServerContainer),
-    route('servers/presets', ServerPresetContainer),
-    route('servers/presets/:id/*', ServerPresetViewContainer),
-    route('servers/:id/*', ServerRouter),
+    route('servers/new', NewServerContainer, { permission: 'servers.create' }),
+    route('servers/presets', ServerPresetContainer, { permission: 'server-presets.read' }),
+    route('servers/presets/:id/*', ServerPresetViewContainer, { permission: 'server-presets.read' }),
+    route('servers/:id/*', ServerRouter, { permission: 'servers.read' }),
 
-    route('users', AdminUsersContainer, { name: 'Users', nameKey: 'nav.users', icon: Icon.UserIcon, category: 'management' }),
-    route('users/new', NewUserContainer),
-    route('users/:id/*', UserRouter),
-    route('users/roles', RolesContainer),
-    route('users/roles/:id', RoleEditContainer),
+    route('users', AdminUsersContainer, {
+        name: 'Users',
+        icon: Icon.UserIcon,
+        category: 'management',
+        permission: 'users.read',
+    }),
+    route('users/new', NewUserContainer, { permission: 'users.create' }),
+    route('users/:id/*', UserRouter, { permission: 'users.read' }),
+    route('users/roles', RolesContainer, { permission: 'roles.read' }),
+    route('users/roles/:id', RoleEditContainer, { permission: 'roles.read' }),
 
     /**
      * Admin - Service Routes
      */
-    route('nests', NestsContainer),
-    route('nests/:nestId', NestEditContainer),
-    route('nests/:nestId/new', NewEggContainer),
-    route('nests/:nestId/eggs/:id/*', EggRouter),
+    route('nests', NestsContainer, { permission: 'nests.read' }),
+    route('nests/:nestId', NestEditContainer, { permission: 'nests.read' }),
+    route('nests/:nestId/new', NewEggContainer, { permission: 'eggs.create' }),
+    route('nests/:nestId/eggs/:id/*', EggRouter, { permission: 'eggs.read' }),
 ];
 
 export default admin;

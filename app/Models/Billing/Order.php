@@ -5,6 +5,7 @@ namespace Everest\Models\Billing;
 use Everest\Models\User;
 use Everest\Models\Model;
 use Everest\Models\Server;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -19,14 +20,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $type
  * @property int $threat_index
  * @property string|null $transaction_id
+ * @property array|null $metadata
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
+ * @property User $user
+ * @property Server|null $server
+ * @property Product $product
+ * @property Invoice|null $invoice
  */
 class Order extends Model
 {
     public const STATUS_FAILED = 'failed';
     public const STATUS_EXPIRED = 'expired';
     public const STATUS_PENDING = 'pending';
+    public const STATUS_PROCESSING = 'processing';
     public const STATUS_PROCESSED = 'processed';
 
     public const TYPE_NEW = 'new';
@@ -49,7 +56,7 @@ class Order extends Model
      */
     protected $fillable = [
         'name', 'user_id', 'description', 'transaction_id',
-        'total', 'status', 'product_id', 'type', 'threat_index',
+        'total', 'status', 'product_id', 'type', 'threat_index', 'metadata',
     ];
 
     /**
@@ -60,6 +67,7 @@ class Order extends Model
         'total' => 'float',
         'product_id' => 'int',
         'threat_index' => 'int',
+        'metadata' => 'array',
     ];
 
     public static array $validationRules = [
@@ -67,11 +75,12 @@ class Order extends Model
         'user_id' => 'required|exists:users,id',
         'description' => 'required|string|min:3',
         'total' => 'required|min:0',
-        'status' => 'required|in:expired,pending,failed,processed',
+        'status' => 'required|in:expired,pending,processing,failed,processed',
         'product_id' => 'exists:products,id',
         'type' => 'required|in:new,upgrade,renewal',
         'threat_index' => 'nullable|int|min:-1|max:100',
         'transaction_id' => 'nullable|string',
+        'metadata' => 'nullable|array',
     ];
 
     /**
@@ -96,6 +105,14 @@ class Order extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    /**
+     * Gets the invoice generated for this order, if any.
+     */
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class, 'order_id');
     }
 
     /**

@@ -18,8 +18,8 @@ import { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import useFlash from '@/plugins/useFlash';
 import { ShoppingBagIcon } from '@heroicons/react/outline';
-import { Context as ProductContext, useGetProducts } from '@/api/routes/admin/billing/products';
-import { ProductFilters } from '@/api/routes/admin/billing/types';
+import { ProductContext, useGetProducts } from '@/api/routes/admin/billing';
+import { ProductFilters } from '@/api/routes/admin/billing';
 
 function ProductTable() {
     const { t } = useTranslation('admin');

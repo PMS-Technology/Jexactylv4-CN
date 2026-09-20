@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property int|null $database_host_id
  * @property string $scheme
  * @property string $fqdn
+ * @property string|null $sftp_alias
  * @property int $listen_port_http
  * @property int $listen_port_sftp
  * @property int $public_port_http
@@ -39,6 +40,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  * @property string $daemon_base
  * @property bool|null $deployable
  * @property bool|null $deployable_free
+ * @property float|null $deployment_fee
  * @property int $servers_count
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
@@ -94,6 +96,7 @@ class Node extends Model
         'maintenance_mode' => 'boolean',
         'deployable' => 'boolean',
         'deployable_free' => 'boolean',
+        'deployment_fee' => 'float',
     ];
 
     /**
@@ -102,10 +105,10 @@ class Node extends Model
     protected $fillable = [
         'public', 'name', 'database_host_id',
         'listen_port_http', 'listen_port_sftp', 'public_port_http', 'public_port_sftp',
-        'fqdn', 'scheme', 'behind_proxy',
+        'fqdn', 'sftp_alias', 'scheme', 'behind_proxy',
         'memory', 'memory_overallocate', 'disk',
         'disk_overallocate', 'upload_size', 'daemon_base',
-        'description', 'maintenance_mode', 'deployable', 'deployable_free',
+        'description', 'maintenance_mode', 'deployable', 'deployable_free', 'deployment_fee',
     ];
 
     public static array $validationRules = [
@@ -114,6 +117,7 @@ class Node extends Model
         'database_host_id' => 'sometimes|nullable|exists:database_hosts,id',
         'public' => 'boolean',
         'fqdn' => 'required|string',
+        'sftp_alias' => 'sometimes|nullable|string|max:255',
         'listen_port_http' => 'required|numeric|between:1,65535',
         'listen_port_sftp' => 'required|numeric|between:1,65535',
         'public_port_http' => 'required|numeric|between:1,65535',
@@ -129,6 +133,7 @@ class Node extends Model
         'upload_size' => 'int|between:1,1024',
         'deployable' => 'nullable|boolean',
         'deployable_free' => 'nullable|boolean',
+        'deployment_fee' => 'nullable|numeric|min:0',
     ];
 
     /**

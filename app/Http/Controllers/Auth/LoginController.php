@@ -106,7 +106,7 @@ class LoginController extends AbstractLoginController
             throw new DisplayException(trans('exceptions.auth.passwords_mismatch'));
         }
 
-        $this->createAccount(['email' => $email, 'username' => $username, 'password' => $password]);
+        $this->createAccount(['email' => $email, 'username' => $username, 'password' => $password], $request);
 
         return $this->returnNoContent();
     }

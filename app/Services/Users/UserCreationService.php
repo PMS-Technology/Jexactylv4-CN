@@ -4,7 +4,7 @@ namespace Everest\Services\Users;
 
 use Ramsey\Uuid\Uuid;
 use Everest\Models\User;
-use Illuminate\Support\Facades\Crypt;
+use Everest\Facades\Activity;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Contracts\Auth\PasswordBroker;
@@ -41,7 +41,9 @@ class UserCreationService
             $data['password'] = $this->hasher->make(str_random(30));
         }
 
-        $data['recovery_code'] = Crypt::encryptString(str_random(32));
+        // Stored hashed (not merely encrypted) since it is verified with password_verify()
+        // in ForgotPasswordController — an encrypted value can never match a bcrypt check.
+        $data['recovery_code'] = $this->hasher->make(str_random(32));
 
         /** @var User $user */
         $user = $this->repository->create(array_merge($data, [
@@ -53,6 +55,15 @@ class UserCreationService
         }
 
         $this->connection->commit();
+
+        Activity::event('user:user.create')
+            ->subject($user)
+            ->property([
+                'email' => $user->email,
+                'username' => $user->username,
+                'admin' => $user->root_admin,
+            ])
+            ->log();
 
         return $user;
     }

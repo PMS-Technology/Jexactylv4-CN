@@ -2,6 +2,7 @@ import { Model, UUID } from '@definitions';
 import { SubuserPermission } from '@/state/server/subusers';
 
 interface User extends Model {
+    id?: number;
     uuid: string;
     username: string;
     email: string;
@@ -17,6 +18,13 @@ interface SSHKey extends Model {
     public_key: string;
     fingerprint: string;
     created_at: Date;
+}
+
+interface Passkey extends Model {
+    uuid: string;
+    name: string;
+    lastUsedAt: Date | null;
+    createdAt: Date;
 }
 
 interface ApiKey extends Model {
@@ -47,8 +55,15 @@ interface TicketMessage extends Model {
     updatedAt?: Date | null;
 }
 
+interface ActivityLogSubject {
+    type: string;
+    id: number;
+    identifier: string | null;
+}
+
 interface ActivityLog extends Model<'actor'> {
     id: string;
+    logId: number | null;
     batch: UUID | null;
     event: string;
     ip: string | null;
@@ -56,6 +71,7 @@ interface ActivityLog extends Model<'actor'> {
     description: string | null;
     properties: Record<string, string | unknown>;
     hasAdditionalMetadata: boolean;
+    subjects: ActivityLogSubject[];
     timestamp: Date;
     relationships: {
         actor: User | null;

@@ -5,8 +5,7 @@ import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 
-import getEggs from '@/api/routes/admin/nests/getEggs';
-import importEgg from '@/api/routes/admin/nests/importEgg';
+import { useNestEggEntries as getEggs, importEggEntry as importEgg } from '@/api/routes/admin/nests';
 import useFlash from '@/plugins/useFlash';
 import { Button } from '@/elements/button';
 import { Size, Variant } from '@/elements/button/types';

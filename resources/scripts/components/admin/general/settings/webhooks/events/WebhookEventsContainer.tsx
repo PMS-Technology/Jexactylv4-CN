@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Spinner from '@/elements/Spinner';
-import { getEvents, sendTestEvent, toggleEventStatus, WebhookEvent } from '@/api/routes/admin/webhooks';
+import { getEvents, sendTestEvent, toggleEventStatus } from '@/api/routes/admin/webhooks';
+import { WebhookEvent } from '@definitions/admin';
 import EventsTable from './EventsTable';
 import { Button } from '@/elements/button';
 import { useStoreState } from '@/state/hooks';

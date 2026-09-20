@@ -3,7 +3,6 @@ import type { FormikHelpers } from 'formik';
 import { Formik } from 'formik';
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import Reaptcha from 'reaptcha';
 import tw from 'twin.macro';
 import { object, string } from 'yup';
@@ -24,7 +23,6 @@ interface Values {
 }
 
 function RegisterContainer() {
-    const { t } = useTranslation('auth');
     const ref = useRef<Reaptcha>(null);
     const token = useRef('');
 
@@ -38,7 +36,9 @@ function RegisterContainer() {
     const onSubmit = (values: Values, { setSubmitting }: FormikHelpers<Values>) => {
         clearFlashes();
 
-        if (recaptchaEnabled && !token) {
+        // If there is no token in the state yet, request the token and then abort this submit request
+        // since it will be re-submitted when the recaptcha data is returned by the component.
+        if (recaptchaEnabled && !token.current) {
             ref.current!.execute().catch(error => {
                 console.error(error);
 
@@ -72,17 +72,17 @@ function RegisterContainer() {
             onSubmit={onSubmit}
             initialValues={{ username: '', email: '', password: '', confirm_password: '' }}
             validationSchema={object().shape({
-                username: string().required(t('register.usernameRequired') as string),
-                email: string().email().required(t('register.emailRequired') as string),
-                password: string().required(t('register.passwordRequired') as string),
-                confirm_password: string().required(t('register.confirmRequired') as string),
+                username: string().required('A username must be provided.'),
+                email: string().email().required('You must provide a valid email.'),
+                password: string().required('Please enter your account password.'),
+                confirm_password: string().required('Please enter the password confirmation.'),
             })}
         >
             {({ isSubmitting, setSubmitting, submitForm }) => (
-                <LoginFormContainer title={t('register.title') as string}>
+                <LoginFormContainer title={`Create an Account`}>
                     <Field
                         type={'text'}
-                        label={t('register.username') as string}
+                        label={'Username'}
                         icon={faIdBadge}
                         name={'username'}
                         placeholder={'user_account'}
@@ -91,7 +91,7 @@ function RegisterContainer() {
                     <div css={tw`mt-6`}>
                         <Field
                             type={'text'}
-                            label={t('register.emailAddress') as string}
+                            label={'Email Address'}
                             icon={faAt}
                             name={'email'}
                             placeholder={'user@jexpanel.com'}
@@ -101,7 +101,7 @@ function RegisterContainer() {
                     <div css={tw`mt-6`}>
                         <Field
                             type={'password'}
-                            label={t('register.password') as string}
+                            label={'Password'}
                             icon={faKey}
                             name={'password'}
                             placeholder={'••••••••••••'}
@@ -111,7 +111,7 @@ function RegisterContainer() {
                     <div css={tw`mt-6`}>
                         <Field
                             type={'password'}
-                            label={t('register.confirmPassword') as string}
+                            label={'Confirm Password'}
                             icon={faUnlockKeyhole}
                             name={'confirm_password'}
                             placeholder={'••••••••••••'}
@@ -126,7 +126,7 @@ function RegisterContainer() {
                             size={Button.Sizes.Large}
                             disabled={isSubmitting}
                         >
-                            {t('register.registerButton') as string}
+                            Register
                         </Button>
                     </div>
                     {recaptchaEnabled && (
@@ -149,7 +149,7 @@ function RegisterContainer() {
                             to={'/auth/login'}
                             css={tw`text-xs text-neutral-300 tracking-wide no-underline uppercase font-medium hover:text-neutral-600`}
                         >
-                            {t('register.returnToLogin') as string}
+                            Return to Login
                         </Link>
                     </div>
                 </LoginFormContainer>

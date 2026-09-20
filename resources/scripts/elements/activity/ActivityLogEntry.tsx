@@ -18,7 +18,7 @@ interface Props {
     children?: React.ReactNode;
 }
 
-function wrapProperties(value: unknown): any {
+export function wrapProperties(value: unknown): any {
     if (value === null || typeof value === 'string' || typeof value === 'number') {
         return `<strong>${String(value)}</strong>`;
     }
@@ -47,7 +47,9 @@ export default ({ activity, children }: Props) => {
 
     return (
         <div
-            className={'group grid grid-cols-10 py-4 last:rounded-b last:border-0 border-b-2 border-black/50'}
+            className={
+                'group grid grid-cols-10 py-4 last:rounded-b-xl last:border-0 border-b border-black/40 transition-colors duration-200 hover:bg-white/[0.02]'
+            }
             style={{ backgroundColor: colors.secondary }}
         >
             <div className={'hidden select-none items-center justify-center 2xl:col-span-1 2xl:flex'}>
@@ -90,7 +92,12 @@ export default ({ activity, children }: Props) => {
                     <div className={'mt-1 flex items-center text-sm'}>
                         {activity.ip && (
                             <span>
-                                {activity.ip}
+                                <Link
+                                    to={`#${pathTo({ ip: activity.ip })}`}
+                                    className={'transition-colors duration-75 hover:text-cyan-400'}
+                                >
+                                    {activity.ip}
+                                </Link>
                                 <span className={'text-slate-400'}>&nbsp;|&nbsp;</span>
                             </span>
                         )}

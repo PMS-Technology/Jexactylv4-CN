@@ -1,5 +1,4 @@
-import { updateSettings } from '@/api/routes/admin/ai/settings';
-import { useTranslation } from 'react-i18next';
+import { updateSettings } from '@/api/routes/admin/ai';
 import Input from '@/elements/Input';
 import SpinnerOverlay from '@/elements/SpinnerOverlay';
 import Tooltip from '@/elements/tooltip/Tooltip';
@@ -11,7 +10,6 @@ import { useStoreState } from 'easy-peasy';
 import { useEffect, useState } from 'react';
 
 export default () => {
-    const { t } = useTranslation('admin');
     const [key, setKey] = useState<string>();
     const settings = useStoreState(s => s.everest.data!.ai);
     const [loading, setLoading] = useState<boolean>(false);
@@ -37,28 +35,29 @@ export default () => {
     }, [key]);
 
     return (
-        <Dialog open onClose={() => undefined} preventExternalClose hideCloseIcon title={t('aiModule.configureJexactylAI') as string}>
+        <Dialog open onClose={() => undefined} preventExternalClose hideCloseIcon title={'Configure JexpanelAI'}>
             <SpinnerOverlay visible={loading} />
             <p className={'text-gray-400'}>
-                {t('aiModule.configureDescription') as string}
+                In order to use <span style={{ color: theme.primary }}>JexpanelAI</span>, you must get a Gemini API key
+                from Google.
             </p>
             <p className={'text-gray-400 my-2'}>
-                {t('aiModule.configureVisitLink') as string}{' '}
+                You can visit the{' '}
                 <a
                     href={'https://aistudio.google.com/'}
                     rel={'noreferrer'}
                     target={'_blank'}
                     className={'text-blue-400'}
                 >
-                    {t('aiModule.aiStudio') as string}
+                    AI Studio
                     <FontAwesomeIcon icon={faExternalLink} className={'mb-1.5 ml-0.5 h-2 w-2'} />
                 </a>
-                &nbsp;{t('aiModule.configureObtainKey') as string}
+                &nbsp;and obtain an API key to use.
             </p>
             <div className={'relative'}>
-                <Input placeholder={t('aiModule.enterApiKey') as string} onChange={e => setKey(e.currentTarget.value)} />
+                <Input placeholder={'Enter API key here...'} onChange={e => setKey(e.currentTarget.value)} />
                 {!key || key.length < 30 || key.length > 60 ? (
-                    <Tooltip placement={'right'} content={t('aiModule.invalidApiKey') as string}>
+                    <Tooltip placement={'right'} content={'You must enter a valid Google AI key to continue.'}>
                         <FontAwesomeIcon
                             icon={faExclamationTriangle}
                             className={'absolute top-1/3 right-4 text-yellow-500'}

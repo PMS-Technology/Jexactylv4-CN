@@ -9,22 +9,18 @@ import AdminContentBlock from '@/elements/AdminContentBlock';
 import { Button } from '@/elements/button';
 import type { ApplicationStore } from '@/state';
 import AdminBox from '@/elements/AdminBox';
-import { createCategory, updateCategory } from '@/api/routes/admin/billing/categories';
+import { createCategory, updateCategory } from '@/api/routes/admin/billing';
 import { object, string, boolean, number } from 'yup';
-import { faShoppingBasket } from '@fortawesome/free-solid-svg-icons';
+import { faLayerGroup, faShoppingBasket } from '@fortawesome/free-solid-svg-icons';
 import { useStoreState } from '@/state/hooks';
 import Label from '@/elements/Label';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { ServerServiceContainer } from '@admin/management/servers/ServerStartupContainer';
-import { WithRelationships } from '@/api/routes/admin';
-import type { Egg } from '@/api/routes/admin/egg';
+import { Dispatch, SetStateAction, useState } from 'react';
+import CategoryNestEggSelect from './CategoryNestEggSelect';
 import { ShoppingCartIcon } from '@heroicons/react/outline';
 import CategoryDeleteButton from './CategoryDeleteButton';
-import { getEgg } from '@/api/routes/admin/egg';
 import { Category } from '@definitions/admin';
-import { CategoryValues } from '@/api/routes/admin/billing/types';
+import { CategoryValues } from '@/api/routes/admin/billing';
 import { useSWRConfig } from 'swr';
-import { useTranslation } from 'react-i18next';
 
 interface Props {
     visible: boolean;
@@ -33,52 +29,40 @@ interface Props {
 }
 
 function InternalForm({ category, visible, setVisible }: Props) {
-    const { t } = useTranslation('admin');
-    const [_egg, setEgg] = useState<WithRelationships<Egg, 'variables'> | undefined>();
-    const { values, isSubmitting } = useFormikContext<CategoryValues>();
+    const { isSubmitting } = useFormikContext<CategoryValues>();
     const { secondary } = useStoreState(state => state.theme.data!.colors);
-
-    // Load egg object when category.eggId changes (after save/SWR revalidation)
-    // Note: No need for guard - useEffect only runs when category?.eggId changes
-    useEffect(() => {
-        if (category?.eggId) {
-            getEgg(category.eggId)
-                .then(egg => setEgg(egg))
-                .catch(error => console.error(error));
-        }
-    }, [category?.eggId]);
 
     return (
         <Form>
             <div css={tw`grid grid-cols-1 lg:grid-cols-2 gap-4`}>
                 <div css={tw`w-full flex flex-col mr-0 lg:mr-2`}>
-                    <AdminBox title={t('billingModule.categoryDetails')} icon={faShoppingBasket} isLoading={isSubmitting}>
+                    <AdminBox title={'Category Details'} icon={faShoppingBasket} isLoading={isSubmitting}>
                         <FieldRow>
                             <Field
                                 id={'name'}
                                 name={'name'}
                                 type={'text'}
                                 placeholder={'Minecraft Java'}
-                                label={t('billingModule.categoryName')}
-                                description={t('billingModule.simpleTitleForCategory')}
+                                label={'Category Name'}
+                                description={'A simple title for this category.'}
                             />
                             <Field
                                 id={'description'}
                                 name={'description'}
                                 type={'text'}
                                 placeholder={'With support for 1.21'}
-                                label={t('billingModule.description')}
-                                description={t('billingModule.taglineOrDescriptionForCategory')}
+                                label={'Description'}
+                                description={'A tagline or description for this product category.'}
                             />
                             <Field
                                 id={'icon'}
                                 name={'icon'}
                                 type={'text'}
-                                label={t('billingModule.icon')}
-                                description={t('billingModule.iconDisplayedWithCategory')}
+                                label={'Icon'}
+                                description={'An icon to be displayed with this category.'}
                             />
                             <div className={'mt-1'}>
-                                <Label htmlFor={'visible'}>{t('billingModule.visibleOnCreation')}</Label>
+                                <Label htmlFor={'visible'}>Visible on creation</Label>
                                 <div className={'mt-1'}>
                                     <label css={tw`inline-flex items-center mr-2`}>
                                         <Field
@@ -88,7 +72,7 @@ function InternalForm({ category, visible, setVisible }: Props) {
                                             checked={!visible}
                                             onClick={() => setVisible(false)}
                                         />
-                                        <span css={tw`text-neutral-300 ml-2`}>{t('billingModule.no')}</span>
+                                        <span css={tw`text-neutral-300 ml-2`}>No</span>
                                     </label>
 
                                     <label css={tw`inline-flex items-center ml-2`}>
@@ -99,26 +83,23 @@ function InternalForm({ category, visible, setVisible }: Props) {
                                             checked={visible}
                                             onClick={() => setVisible(true)}
                                         />
-                                        <span css={tw`text-neutral-300 ml-2`}>{t('billingModule.yes')}</span>
+                                        <span css={tw`text-neutral-300 ml-2`}>Yes</span>
                                     </label>
                                 </div>
-                                <p className={'mt-3 text-xs'}>{t('billingModule.shouldCategoryBeVisibleInstantly')}</p>
+                                <p className={'mt-3 text-xs'}>Should this category be visible instantly?</p>
                             </div>
                         </FieldRow>
                     </AdminBox>
                 </div>
                 <div css={tw`w-full flex flex-col mr-0 lg:mr-2`}>
-                    <ServerServiceContainer
-                        selectedEggId={values.eggId}
-                        setEgg={setEgg}
-                        nestId={category?.nestId ?? 0}
-                        noToggle
-                    />
+                    <AdminBox title={'Service Configuration'} icon={faLayerGroup} isLoading={isSubmitting}>
+                        <CategoryNestEggSelect />
+                    </AdminBox>
                     <div css={tw`rounded shadow-md mt-4 py-2 pr-6`} style={{ backgroundColor: secondary }}>
                         <div css={tw`text-right`}>
                             {category && <CategoryDeleteButton category={category} />}
                             <Button type={'submit'} css={tw`ml-4`}>
-                                {category ? t('billingModule.update') : t('billingModule.create')}
+                                {category ? 'Update' : 'Create'}
                             </Button>
                         </div>
                     </div>
@@ -129,7 +110,6 @@ function InternalForm({ category, visible, setVisible }: Props) {
 }
 
 export default ({ category }: { category?: Category }) => {
-    const { t } = useTranslation('admin');
     const navigate = useNavigate();
     const params = useParams<'id'>();
     const { mutate } = useSWRConfig();
@@ -170,7 +150,7 @@ export default ({ category }: { category?: Category }) => {
     };
 
     return (
-        <AdminContentBlock title={t('billingModule.newCategory')}>
+        <AdminContentBlock title={'New Category'}>
             <div css={tw`w-full flex flex-row items-center m-8`}>
                 {category?.icon ? (
                     <img src={category.icon} className={'ww-8 h-8 mr-4'} />
@@ -179,16 +159,16 @@ export default ({ category }: { category?: Category }) => {
                 )}
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
                     <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>
-                        {category?.name ?? t('billingModule.newProductCategory')}
+                        {category?.name ?? 'New Product Category'}
                     </h2>
                     <p
                         css={tw`hidden lg:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        {category?.uuid ?? t('billingModule.addNewCategoryToBilling')}
+                        {category?.uuid ?? 'Add a new category to the billing interface.'}
                     </p>
                 </div>
             </div>
-            <Formik
+            <Formik<CategoryValues>
                 onSubmit={category ? update : submit}
                 enableReinitialize={true}
                 initialValues={{
@@ -196,17 +176,16 @@ export default ({ category }: { category?: Category }) => {
                     icon: category?.icon ?? '',
                     description: category?.description ?? '',
                     visible: category?.visible ?? false,
-                    eggId: category?.eggId ?? 0,
-                    // Required by EggSelect component but not submitted to backend (not in CategoryValues type)
-                    environment: {} as Record<string, unknown>,
+                    nestId: category?.nestId ?? null,
+                    eggId: category?.eggId ?? null,
                 }}
                 validationSchema={object().shape({
                     name: string().required().max(191).min(3),
                     icon: string().nullable().max(191).min(3),
                     description: string().nullable().max(191).min(3),
                     visible: boolean().required(),
-                    nestId: number(),
-                    eggId: number(),
+                    nestId: number().nullable().required('A nest must be selected for this category.'),
+                    eggId: number().nullable(),
                 })}
             >
                 <InternalForm category={category} visible={visible} setVisible={setVisible} />
