@@ -3,6 +3,7 @@ import { useStoreState } from 'easy-peasy';
 
 import { ServerError } from '@/elements/ScreenBlock';
 import { hasAdminPermission } from '@/plugins/adminPermissions';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     children?: ReactNode;
@@ -11,13 +12,14 @@ interface Props {
 }
 
 function AdminPermissionRoute({ children, permission }: Props): JSX.Element {
+    const { t } = useTranslation('common');
     const adminPermissions = useStoreState(state => state.user.data!.adminPermissions);
 
     if (hasAdminPermission(adminPermissions, permission)) {
         return <>{children}</>;
     }
 
-    return <ServerError title="Access Denied" message="You do not have permission to access this page." />;
+    return <ServerError title={t('error.accessDenied')} message={t('error.noPermission')} />;
 }
 
 export default AdminPermissionRoute;

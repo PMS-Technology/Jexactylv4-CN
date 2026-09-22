@@ -5,8 +5,10 @@ import Tooltip from '@/elements/tooltip/Tooltip';
 import useFlash from '@/plugins/useFlash';
 import { downloadInvoice } from '@/api/routes/account/billing/orders';
 import { Order } from '@definitions/account/billing';
+import { useTranslation } from 'react-i18next';
 
 export default ({ order }: { order: Order }) => {
+    const { t } = useTranslation('dashboard');
     const [downloading, setDownloading] = useState(false);
     const { clearAndAddHttpError } = useFlash();
 
@@ -14,7 +16,7 @@ export default ({ order }: { order: Order }) => {
 
     if (!invoice) {
         return (
-            <Tooltip content={'Your invoice is still being generated — check back shortly.'}>
+            <Tooltip content={t('billing.invoiceGenerating')}>
                 <FontAwesomeIcon icon={faReceipt} className={'text-gray-500 cursor-default'} />
             </Tooltip>
         );
@@ -29,10 +31,10 @@ export default ({ order }: { order: Order }) => {
     };
 
     return (
-        <Tooltip content={'Download invoice'}>
+        <Tooltip content={t('billing.downloadInvoice')}>
             <button
                 type={'button'}
-                aria-label={'Download invoice'}
+                aria-label={t('billing.downloadInvoice')}
                 onClick={download}
                 disabled={downloading}
                 className={'text-gray-400 hover:text-neutral-100 transition-colors duration-150 disabled:opacity-50'}

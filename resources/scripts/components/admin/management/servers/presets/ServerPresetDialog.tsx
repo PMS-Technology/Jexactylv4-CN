@@ -13,12 +13,6 @@ import SpinnerOverlay from '@/elements/SpinnerOverlay';
 import { ServerPreset } from '@/api/definitions/admin';
 import { useNavigate } from 'react-router-dom';
 
-const pages = [
-    { title: '(1/3) Create a description', description: 'Add a title and description to identify this preset.' },
-    { title: '(2/3) Assign resource limits', description: 'Add a resource cap on specific hardware usage.' },
-    { title: '(3/3) Choose a nest and egg (optional)', description: 'Assign a default nest/egg to this preset.' },
-];
-
 export interface NameSelectProps {
     form: ServerPresetValues;
     update: <K extends keyof ServerPresetValues>(key: K, value: ServerPresetValues[K]) => void;
@@ -90,6 +84,20 @@ export default function ServerPresetDialog({ preset }: { preset?: ServerPreset }
     const [loading, setLoading] = useState<boolean>(false);
 
     const navigate = useNavigate();
+    const pages = [
+        {
+            title: t('servers.presetStepDescriptionTitle') as string,
+            description: t('servers.presetStepDescription') as string,
+        },
+        {
+            title: t('servers.presetStepResourcesTitle') as string,
+            description: t('servers.presetStepResourcesDescription') as string,
+        },
+        {
+            title: t('servers.presetStepEggTitle') as string,
+            description: t('servers.presetStepEggDescription') as string,
+        },
+    ];
 
     const { form, update } = useTypedForm<ServerPresetValues>({
         name: preset?.name ?? '',

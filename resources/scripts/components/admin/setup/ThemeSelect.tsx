@@ -5,19 +5,21 @@ import AdminBox from '@/elements/AdminBox';
 import { faCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { CheckCircleIcon } from '@heroicons/react/outline';
+import { useTranslation } from 'react-i18next';
 
 const colorOptions = [
-    { hex: '#16a34a', name: 'JexpanelGreen' },
-    { hex: '#12aaaa', name: 'Microsoft Teal' },
-    { hex: '#ff0000', name: 'Brick Red' },
-    { hex: '#9D00FF', name: 'Iris Purple' },
-    { hex: '#FFA500', name: 'Orange Orange' },
-    { hex: '#32559f', name: 'Ptero Blue' },
-    { hex: '#ff99c8', name: 'Pretty Pink' },
-    { hex: '#5e6472', name: 'Plain Grey' },
-];
+    { hex: '#16a34a', name: 'jexpanelGreen' },
+    { hex: '#12aaaa', name: 'microsoftTeal' },
+    { hex: '#ff0000', name: 'brickRed' },
+    { hex: '#9D00FF', name: 'irisPurple' },
+    { hex: '#FFA500', name: 'orangeOrange' },
+    { hex: '#32559f', name: 'pteroBlue' },
+    { hex: '#ff99c8', name: 'prettyPink' },
+    { hex: '#5e6472', name: 'plainGrey' },
+] as const;
 
 export default ({ defaultColor }: { defaultColor: string }) => {
+    const { t } = useTranslation('admin');
     const { status, setStatus } = useStatus();
     const theme = useStoreState(state => state.theme.data!);
     const setTheme = useStoreActions(actions => actions.theme.setTheme);
@@ -41,17 +43,19 @@ export default ({ defaultColor }: { defaultColor: string }) => {
         <div>
             <div className={'w-full flex flex-row items-center mb-8'}>
                 <div className={'flex flex-col flex-shrink'} style={{ minWidth: '0' }}>
-                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>Theme Preferences</h2>
+                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>
+                        {t('setup.themePreferences')}
+                    </h2>
                     <p
                         className={
                             'hidden lg:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden'
                         }
                     >
-                        Select a preferred primary color for your Panel UI.
+                        {t('setup.themePreferencesDescription')}
                     </p>
                 </div>
             </div>
-            <AdminBox status={status} title={'Set Primary Color'}>
+            <AdminBox status={status} title={t('setup.setPrimaryColor') as string}>
                 <div className={'grid grid-cols-4 lg:grid-cols-8 gap-4 lg:gap-8'}>
                     {colorOptions.map(option => (
                         <div
@@ -70,12 +74,12 @@ export default ({ defaultColor }: { defaultColor: string }) => {
                                     <CheckCircleIcon className={'w-7'} />
                                 </div>
                             )}
-                            <p className={'italic text-xs mt-1 text-gray-400'}>{option.name}</p>
+                            <p className={'italic text-xs mt-1 text-gray-400'}>{t(`setup.colors.${option.name}`)}</p>
                         </div>
                     ))}
                 </div>
             </AdminBox>
-            <p className={'text-gray-400 mt-2 text-right'}>Select a color from the options to apply it.</p>
+            <p className={'text-gray-400 mt-2 text-right'}>{t('setup.selectColorDescription')}</p>
         </div>
     );
 };

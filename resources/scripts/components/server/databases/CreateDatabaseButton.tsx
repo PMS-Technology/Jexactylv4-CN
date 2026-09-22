@@ -17,23 +17,20 @@ interface Values {
     connectionsFrom: string;
 }
 
-const schema = object().shape({
-    databaseName: string()
-        .required('A database name must be provided.')
-        .min(3, 'Database name must be at least 3 characters.')
-        .max(48, 'Database name must not exceed 48 characters.')
-        .matches(
-            /^[\w\-.]{3,48}$/,
-            'Database name should only contain alphanumeric characters, underscores, dashes, and/or periods.',
-        ),
-    connectionsFrom: string().matches(/^[\w\-/.%:]+$/, 'A valid host address must be provided.'),
-});
-
 export default () => {
     const { t } = useTranslation('server');
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
     const { addError, clearFlashes } = useFlash();
     const [visible, setVisible] = useState(false);
+
+    const schema = object().shape({
+        databaseName: string()
+            .required(t('databasesPage.validation.nameRequired') as string)
+            .min(3, t('databasesPage.validation.nameMin') as string)
+            .max(48, t('databasesPage.validation.nameMax') as string)
+            .matches(/^[\w\-.]{3,48}$/, t('databasesPage.validation.nameFormat') as string),
+        connectionsFrom: string().matches(/^[\w\-/.%:]+$/, t('databasesPage.validation.connectionsFrom') as string),
+    });
 
     const appendDatabase = ServerContext.useStoreActions(actions => actions.databases.appendDatabase);
 

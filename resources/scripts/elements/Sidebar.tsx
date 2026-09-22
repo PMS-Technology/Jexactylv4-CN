@@ -87,12 +87,13 @@ const Sidebar = styled.div<{ $collapsed?: boolean; theme: SiteTheme }>`
                 ${tw`px-5`};
 
                 & > a {
-                    ${tw`justify-center px-0`};
+                    ${tw`justify-center w-10 h-10 mx-auto px-0 rounded-full`};
                 }
             }
 
-            & > a {
-                ${tw`justify-center px-4`};
+            & > a,
+            & > span > a {
+                ${tw`justify-center w-10 h-10 mx-auto px-0 rounded-full`};
             }
 
             & > a > span,

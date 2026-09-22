@@ -24,8 +24,10 @@ import { Category, Product } from '@definitions/account/billing';
 import LimitBox from '@/elements/billing/LimitBox';
 import Money from '@/elements/billing/Money';
 import { hexToRgba } from '@/lib/helpers';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('dashboard');
     const [category, setCategory] = useState<number>();
     const [products, setProducts] = useState<Product[] | undefined>();
     const [categories, setCategories] = useState<Category[] | undefined>();
@@ -51,29 +53,22 @@ export default () => {
     }, [category]);
 
     if (!settings.keys.secret) {
-        return (
-            <Alert type={'danger'}>
-                Due to a configuration error, the store is currently unavailable. Please try again later, or refresh the
-                page.
-            </Alert>
-        );
+        return <Alert type={'danger'}>{t('billing.storeUnavailable')}</Alert>;
     }
 
     return (
-        <PageContentBlock title={'Available Products'}>
+        <PageContentBlock title={t('billing.availableProducts')}>
             <div className={'text-3xl lg:text-5xl font-bold mt-8 mb-12'}>
-                Order a Product
-                <p className={'text-gray-400 font-normal text-sm mt-1'}>
-                    Choose and configure any of the products below to your liking.
-                </p>
+                {t('billing.orderProduct')}
+                <p className={'text-gray-400 font-normal text-sm mt-1'}>{t('billing.orderProductDescription')}</p>
             </div>
             <div className={'grid lg:grid-cols-4 gap-4 lg:gap-12'}>
                 <div>
-                    <p className={'text-2xl text-gray-300 mb-6 mt-4 font-bold'}>Categories</p>
+                    <p className={'text-2xl text-gray-300 mb-6 mt-4 font-bold'}>{t('billing.categories')}</p>
                     {(!categories || categories.length < 1) && (
                         <div className={'font-semibold my-4 text-gray-400'}>
                             <FontAwesomeIcon icon={faExclamationTriangle} className={'w-5 h-5 mr-2 text-yellow-400'} />
-                            No categories found.
+                            {t('billing.noCategories')}
                         </div>
                     )}
                     <div className={'flex flex-col gap-1'}>
@@ -123,7 +118,7 @@ export default () => {
                                         icon={faExclamationTriangle}
                                         className={'w-5 h-5 mr-2 text-yellow-400'}
                                     />
-                                    No products could be found in this category.
+                                    {t('billing.noProducts')}
                                 </div>
                             )}
                             <div className={'grid grid-cols-1 xl:grid-cols-3 gap-4'}>
@@ -159,7 +154,7 @@ export default () => {
                                             <p className={'text-center mt-1 mb-6'}>
                                                 <Money
                                                     value={product.price}
-                                                    suffix={' / mo'}
+                                                    suffix={` ${t('billing.mo')}`}
                                                     accent
                                                     className={'text-2xl font-bold'}
                                                 />
@@ -168,31 +163,54 @@ export default () => {
                                                 <LimitBox icon={faMicrochip} limit={<>{product.limits.cpu}% CPU</>} />
                                                 <LimitBox
                                                     icon={faMemory}
-                                                    limit={<>{product.limits.memory / 1024} GiB RAM</>}
+                                                    limit={
+                                                        <>
+                                                            {t('billing.ram', { amount: product.limits.memory / 1024 })}
+                                                        </>
+                                                    }
                                                 />
                                                 <LimitBox
                                                     icon={faHdd}
-                                                    limit={<>{product.limits.disk / 1024} GiB Disk</>}
+                                                    limit={
+                                                        <>
+                                                            {t('billing.diskLimit', {
+                                                                amount: product.limits.disk / 1024,
+                                                            })}
+                                                        </>
+                                                    }
                                                 />
                                                 <LimitBox
                                                     icon={faEthernet}
                                                     limit={
                                                         <>
-                                                            {product.limits.allocation} port
-                                                            {product.limits.allocation > 1 && 's'}
+                                                            {t('billing.networkPorts', {
+                                                                count: product.limits.allocation,
+                                                            })}
                                                         </>
                                                     }
                                                 />
                                                 {!!product.limits.backup && (
                                                     <LimitBox
                                                         icon={faArchive}
-                                                        limit={<>{product.limits.backup} backups</>}
+                                                        limit={
+                                                            <>
+                                                                {t('billing.backupSlots', {
+                                                                    count: product.limits.backup,
+                                                                })}
+                                                            </>
+                                                        }
                                                     />
                                                 )}
                                                 {!!product.limits.database && (
                                                     <LimitBox
                                                         icon={faDatabase}
-                                                        limit={<>{product.limits.database} databases</>}
+                                                        limit={
+                                                            <>
+                                                                {t('billing.databaseSlots', {
+                                                                    count: product.limits.database,
+                                                                })}
+                                                            </>
+                                                        }
                                                     />
                                                 )}
                                             </div>
@@ -203,7 +221,7 @@ export default () => {
                                             >
                                                 <Link to={`/account/billing/order/${product.id}`}>
                                                     <Button size={Button.Sizes.Large} className={'w-full'}>
-                                                        Configure
+                                                        {t('billing.configure')}
                                                     </Button>
                                                 </Link>
                                             </div>

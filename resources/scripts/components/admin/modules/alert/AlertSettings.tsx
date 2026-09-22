@@ -34,7 +34,7 @@ export default () => {
                 addFlash({
                     type: 'success',
                     key: 'settings:alert',
-                    message: 'Settings have been updated successfully.',
+                    message: t('settings.savedSuccessfully') as string,
                 });
             })
             .catch(error => {
@@ -96,13 +96,18 @@ export default () => {
                             </p>
                         </div>
                     </AdminBox>
-                    <AdminBox title={t('alertModule.alertContent') as string} icon={faPaintBrush} className={'md:col-span-2'}>
+                    <AdminBox
+                        title={t('alertModule.alertContent') as string}
+                        icon={faPaintBrush}
+                        className={'md:col-span-2'}
+                    >
                         <Field id={'content'} name={'content'} type={'text'} description={''} />
                         <p className={'text-gray-400 text-xs mt-1.5'}>
                             {t('alertModule.alertContentDescription') as string}
                         </p>
                         <p className={'text-gray-400 text-xs mt-1'}>
-                            {t('alertModule.currentUuid') as string} <span className={'text-gray-600'}>{alert.uuid}</span>
+                            {t('alertModule.currentUuid') as string}{' '}
+                            <span className={'text-gray-600'}>{alert.uuid}</span>
                         </p>
                     </AdminBox>
                 </div>

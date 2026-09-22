@@ -173,7 +173,9 @@ const Suspended = ({
                             <ArrowLeftIcon className={'w-4 h-4'} />
                         </ActionButton>
                     </div>
-                    <h2 css={tw`text-white font-bold text-4xl`}>{isFree ? t('suspended') : t('suspended') + ' - 未付款'}</h2>
+                    <h2 css={tw`text-white font-bold text-4xl`}>
+                        {isFree ? t('suspended') : t('suspended') + ' - 未付款'}
+                    </h2>
                     <p css={tw`text-sm text-neutral-400 mt-2`}>
                         {isFree ? (
                             <>
@@ -181,9 +183,9 @@ const Suspended = ({
                                     <>
                                         您的免费服务器因未续费已被暂停超过 {suspensionThreshold} 天。
                                         <span className={'font-bold text-red-400'}>
-                                            {' '}请创建工单以恢复访问。
-                                        </span>{' '}
-                                        超过 {suspensionThreshold} 天后自助续费将不再可用。
+                                            {' '}
+                                            请创建工单以恢复访问。
+                                        </span> 超过 {suspensionThreshold} 天后自助续费将不再可用。
                                     </>
                                 ) : (
                                     <>
@@ -200,9 +202,9 @@ const Suspended = ({
                                     <>
                                         您的服务器因未付款已被暂停超过 {suspensionThreshold} 天。
                                         <span className={'font-bold text-red-400'}>
-                                            {' '}请创建工单以恢复访问。
-                                        </span>{' '}
-                                        超过 {suspensionThreshold} 天后自助付款将不再可用。
+                                            {' '}
+                                            请创建工单以恢复访问。
+                                        </span> 超过 {suspensionThreshold} 天后自助付款将不再可用。
                                     </>
                                 ) : (
                                     <>

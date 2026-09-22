@@ -7,8 +7,10 @@ import InputField from '@/elements/inputs/InputField';
 import { Dispatch, FormEvent, SetStateAction, useState } from 'react';
 import Switch from '@/elements/Switch';
 import { mutate } from 'swr';
+import { useTranslation } from 'react-i18next';
 
 export default ({ link, setOpen }: { link?: CustomLink; setOpen: Dispatch<SetStateAction<VisibleDialog>> }) => {
+    const { t } = useTranslation('admin');
     const [values, setValues] = useState<Values>({
         name: link?.name ?? '',
         url: link?.url ?? '',
@@ -35,23 +37,21 @@ export default ({ link, setOpen }: { link?: CustomLink; setOpen: Dispatch<SetSta
 
     return (
         <Dialog.Confirm
-            confirm={'Create'}
+            confirm={t('linksModule.create')}
             onConfirmed={onSubmit}
             open
             onClose={() => setOpen('none')}
-            title={'Create new link'}
+            title={t('linksModule.createNewLink')}
         >
             <div className={'mt-4'}>
-                <Label>Link Name</Label>
+                <Label>{t('linksModule.linkName')}</Label>
                 <InputField defaultValue={values.name} name={'name'} onChange={updateValues}></InputField>
-                <p className={'text-gray-400 text-sm mt-1'}>Give the link a friendly name which clients can read.</p>
+                <p className={'text-gray-400 text-sm mt-1'}>{t('linksModule.linkNameDescription')}</p>
             </div>
             <div className={'mt-2'}>
-                <Label>Link URL</Label>
+                <Label>{t('linksModule.linkUrl')}</Label>
                 <InputField defaultValue={values.url} name={'url'} onChange={updateValues}></InputField>
-                <p className={'text-gray-400 text-sm mt-1'}>
-                    This is the URL which the link points to outside of the Panel.
-                </p>
+                <p className={'text-gray-400 text-sm mt-1'}>{t('linksModule.linkUrlDescription')}</p>
             </div>
             <div className={'xl:col-span-2 bg-black/50 border border-black shadow-inner p-4 rounded mt-4'}>
                 <Switch
@@ -60,10 +60,8 @@ export default ({ link, setOpen }: { link?: CustomLink; setOpen: Dispatch<SetSta
                     onChange={() => {
                         setValues(prev => ({ ...prev, visible: !values.visible }));
                     }}
-                    label={'Link Visibility'}
-                    description={
-                        "Toggle this setting to 'on' if you want to allow users to view and use this link. You can change this setting to 'off' at any time."
-                    }
+                    label={t('linksModule.linkVisibility')}
+                    description={t('linksModule.linkVisibilityDescription')}
                 />
             </div>
         </Dialog.Confirm>

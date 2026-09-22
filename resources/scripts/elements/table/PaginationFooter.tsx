@@ -2,6 +2,7 @@ import { PaginationDataSet } from '@/api/http';
 import classNames from 'classnames';
 import { Button } from '@/elements/button/index';
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from '@heroicons/react/solid';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     className?: string;
@@ -10,6 +11,7 @@ interface Props {
 }
 
 const PaginationFooter = ({ pagination, className, onPageSelect }: Props) => {
+    const { t } = useTranslation('common');
     const start = (pagination.currentPage - 1) * pagination.perPage;
     const end = (pagination.currentPage - 1) * pagination.perPage + pagination.count;
 
@@ -39,13 +41,11 @@ const PaginationFooter = ({ pagination, className, onPageSelect }: Props) => {
     return (
         <div className={classNames('my-2 flex items-center justify-between', className)}>
             <p className={'text-sm text-neutral-500'}>
-                Showing&nbsp;
-                <span className={'font-semibold text-neutral-400'}>
-                    {Math.max(start, Math.min(pagination.total, 1))}
-                </span>
-                &nbsp;to&nbsp;
-                <span className={'font-semibold text-neutral-400'}>{end}</span> of&nbsp;
-                <span className={'font-semibold text-neutral-400'}>{pagination.total}</span> results.
+                {t('pagination.showingResults', {
+                    from: Math.max(start, Math.min(pagination.total, 1)),
+                    to: end,
+                    total: pagination.total,
+                })}
             </p>
             {pagination.totalPages > 1 && (
                 <div className={'flex space-x-1'}>

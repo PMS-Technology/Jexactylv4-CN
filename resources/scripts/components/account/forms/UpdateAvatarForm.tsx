@@ -8,8 +8,11 @@ import Avatar from '@/elements/Avatar';
 import { Button } from '@/elements/button/index';
 import { httpErrorToHuman } from '@/api/http';
 import { ApplicationStore } from '@/state';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('dashboard');
+    const { t: tCommon } = useTranslation('common');
     const [avatarUrl, setAvatarUrl] = useState('');
     const [loading, setLoading] = useState(false);
     const fileInput = useRef<HTMLInputElement>(null);
@@ -26,7 +29,12 @@ export default () => {
         promise
             .then(() => addFlash({ type: 'success', key: 'account:avatar', message }))
             .catch(error =>
-                addFlash({ type: 'error', key: 'account:avatar', title: 'Error', message: httpErrorToHuman(error) }),
+                addFlash({
+                    type: 'error',
+                    key: 'account:avatar',
+                    title: tCommon('error.title') as string,
+                    message: httpErrorToHuman(error),
+                }),
             )
             .then(() => setLoading(false));
     };
@@ -36,7 +44,7 @@ export default () => {
             return;
         }
 
-        withFlashHandling(updateUserAvatarUrl(avatarUrl.trim()), 'Your avatar has been updated.');
+        withFlashHandling(updateUserAvatarUrl(avatarUrl.trim()), t('account.avatarUpdated') as string);
         setAvatarUrl('');
     };
 
@@ -46,12 +54,12 @@ export default () => {
             return;
         }
 
-        withFlashHandling(uploadUserAvatar(file), 'Your avatar has been updated.');
+        withFlashHandling(uploadUserAvatar(file), t('account.avatarUpdated') as string);
         e.target.value = '';
     };
 
     const remove = () => {
-        withFlashHandling(removeUserAvatar(), 'Your avatar has been reset to the default.');
+        withFlashHandling(removeUserAvatar(), t('account.avatarReset') as string);
     };
 
     return (
@@ -62,7 +70,7 @@ export default () => {
                 <Avatar.User size={64} />
             </div>
 
-            <Label htmlFor={'avatar_url'}>Avatar URL</Label>
+            <Label htmlFor={'avatar_url'}>{t('account.avatarUrl')}</Label>
             <Input
                 id={'avatar_url'}
                 type={'text'}
@@ -72,13 +80,13 @@ export default () => {
             />
             <div css={tw`mt-4 flex flex-wrap gap-2`}>
                 <Button type={'button'} disabled={!avatarUrl.trim() || loading} onClick={submitUrl}>
-                    Use Link
+                    {t('account.useAvatarLink')}
                 </Button>
                 <Button.Text type={'button'} disabled={loading} onClick={() => fileInput.current?.click()}>
-                    Upload Image
+                    {t('account.uploadAvatar')}
                 </Button.Text>
                 <Button.Text type={'button'} disabled={loading} onClick={remove}>
-                    Remove Avatar
+                    {t('account.removeAvatar')}
                 </Button.Text>
             </div>
             <input ref={fileInput} type={'file'} accept={'image/*'} onChange={submitFile} css={tw`hidden`} />

@@ -74,14 +74,21 @@ function ServersTable({ filters }: Props) {
                     addFlash({
                         key: 'servers',
                         type: 'error',
-                        title: 'Warning',
-                        message: `${result.failed.length} of ${result.total} server(s) failed to receive the "${action}" action.`,
+                        title: t('servers.warning') as string,
+                        message: t('servers.bulkActionFailed', {
+                            failed: result.failed.length,
+                            total: result.total,
+                            action: t(`servers.powerActions.${action}`),
+                        }) as string,
                     });
                 } else {
                     addFlash({
                         key: 'servers',
                         type: 'success',
-                        message: `Sent "${action}" to ${result.total} server(s).`,
+                        message: t('servers.bulkActionSent', {
+                            total: result.total,
+                            action: t(`servers.powerActions.${action}`),
+                        }) as string,
                     });
                 }
 
@@ -109,7 +116,9 @@ function ServersTable({ filters }: Props) {
             <ContentWrapper onSearch={onSearch}>
                 {selected.length > 0 && (
                     <div css={tw`flex flex-row items-center h-12 px-6 border-b border-neutral-500`}>
-                        <p css={tw`text-sm text-neutral-300 mr-4`}>{selected.length} selected</p>
+                        <p css={tw`text-sm text-neutral-300 mr-4`}>
+                            {t('servers.selectedCount', { count: selected.length }) as string}
+                        </p>
 
                         <div css={tw`flex flex-row ml-auto gap-2`}>
                             <Button.Success
@@ -117,28 +126,28 @@ function ServersTable({ filters }: Props) {
                                 disabled={submitting}
                                 onClick={() => doBulkPowerAction('start')}
                             >
-                                Start
+                                {t('servers.startServer') as string}
                             </Button.Success>
                             <Button.Warn
                                 size={Button.Sizes.Small}
                                 disabled={submitting}
                                 onClick={() => doBulkPowerAction('restart')}
                             >
-                                Restart
+                                {t('servers.restartServer') as string}
                             </Button.Warn>
                             <Button.Text
                                 size={Button.Sizes.Small}
                                 disabled={submitting}
                                 onClick={() => doBulkPowerAction('stop')}
                             >
-                                Stop
+                                {t('servers.stopServer') as string}
                             </Button.Text>
                             <Button.Danger
                                 size={Button.Sizes.Small}
                                 disabled={submitting}
                                 onClick={() => doBulkPowerAction('kill')}
                             >
-                                Kill
+                                {t('servers.sendKillSignal') as string}
                             </Button.Danger>
                         </div>
                     </div>

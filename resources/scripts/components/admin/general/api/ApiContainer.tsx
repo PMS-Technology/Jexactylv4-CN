@@ -17,13 +17,15 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/elements/button';
 import { useGetApiKeys, Context as ApiContext, ContextFilters } from '@/api/routes/admin/apiKeys';
 import { differenceInHours, format, formatDistanceToNow } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import DeleteApiKeyButton from './DeleteApiKeyButton';
 import FlashMessageRender from '@/elements/FlashMessageRender';
 import { useStoreState } from '@/state/hooks';
 import { PlusIcon } from '@heroicons/react/outline';
 
 function ApiContainer() {
-    const { t } = useTranslation('admin');
+    const { t, i18n } = useTranslation('admin');
+    const isChinese = i18n.language === 'zh_CN';
     const { data: apiKeys } = useGetApiKeys();
     const { colors } = useStoreState(state => state.theme.data!);
     const { setPage, setFilters, sort, setSort, sortDirection } = useContext(ApiContext);
@@ -92,14 +94,25 @@ function ApiContainer() {
                                                     </div>
                                                 </td>
                                                 <td css={tw`px-6 text-sm text-neutral-200 text-left whitespace-nowrap`}>
-                                                        {key.last_used_at && new Date(key.last_used_at).getTime() > 0
-                                                            ? format(key.last_used_at, 'MMM do, yyyy h:mma')
-                                                            : (t('api.never') as string)}
+                                                    {key.last_used_at && new Date(key.last_used_at).getTime() > 0
+                                                        ? format(
+                                                              key.last_used_at,
+                                                              isChinese ? 'yyyy年M月d日 H:mm' : 'MMM do, yyyy h:mma',
+                                                              { locale: isChinese ? zhCN : undefined },
+                                                          )
+                                                        : (t('api.never') as string)}
                                                 </td>
                                                 <td css={tw`px-6 text-sm text-neutral-200 text-left whitespace-nowrap`}>
                                                     {Math.abs(differenceInHours(key.created_at!, new Date())) > 48
-                                                        ? format(key.created_at!, 'MMM do, yyyy h:mma')
-                                                        : formatDistanceToNow(key.created_at!, { addSuffix: true })}
+                                                        ? format(
+                                                              key.created_at!,
+                                                              isChinese ? 'yyyy年M月d日 H:mm' : 'MMM do, yyyy h:mma',
+                                                              { locale: isChinese ? zhCN : undefined },
+                                                          )
+                                                        : formatDistanceToNow(key.created_at!, {
+                                                              addSuffix: true,
+                                                              locale: isChinese ? zhCN : undefined,
+                                                          })}
                                                 </td>
                                                 <DeleteApiKeyButton id={key.id!} />
                                             </TableRow>

@@ -14,6 +14,7 @@ import useFlash from '@/plugins/useFlash';
 import register from '@/api/routes/auth/register';
 import { login } from '@/api/routes/auth/login';
 import { faAt, faIdBadge, faKey, faUnlockKeyhole } from '@fortawesome/free-solid-svg-icons';
+import { useTranslation } from 'react-i18next';
 
 interface Values {
     username: string;
@@ -23,6 +24,7 @@ interface Values {
 }
 
 function RegisterContainer() {
+    const { t } = useTranslation('auth');
     const ref = useRef<Reaptcha>(null);
     const token = useRef('');
 
@@ -72,17 +74,19 @@ function RegisterContainer() {
             onSubmit={onSubmit}
             initialValues={{ username: '', email: '', password: '', confirm_password: '' }}
             validationSchema={object().shape({
-                username: string().required('A username must be provided.'),
-                email: string().email().required('You must provide a valid email.'),
-                password: string().required('Please enter your account password.'),
-                confirm_password: string().required('Please enter the password confirmation.'),
+                username: string().required(t('register.usernameRequired') as string),
+                email: string()
+                    .email()
+                    .required(t('register.emailRequired') as string),
+                password: string().required(t('register.passwordRequired') as string),
+                confirm_password: string().required(t('register.confirmRequired') as string),
             })}
         >
             {({ isSubmitting, setSubmitting, submitForm }) => (
-                <LoginFormContainer title={`Create an Account`}>
+                <LoginFormContainer title={t('register.title')}>
                     <Field
                         type={'text'}
-                        label={'Username'}
+                        label={t('register.username')}
                         icon={faIdBadge}
                         name={'username'}
                         placeholder={'user_account'}
@@ -91,7 +95,7 @@ function RegisterContainer() {
                     <div css={tw`mt-6`}>
                         <Field
                             type={'text'}
-                            label={'Email Address'}
+                            label={t('register.emailAddress')}
                             icon={faAt}
                             name={'email'}
                             placeholder={'user@jexpanel.com'}
@@ -101,7 +105,7 @@ function RegisterContainer() {
                     <div css={tw`mt-6`}>
                         <Field
                             type={'password'}
-                            label={'Password'}
+                            label={t('register.password')}
                             icon={faKey}
                             name={'password'}
                             placeholder={'••••••••••••'}
@@ -111,7 +115,7 @@ function RegisterContainer() {
                     <div css={tw`mt-6`}>
                         <Field
                             type={'password'}
-                            label={'Confirm Password'}
+                            label={t('register.confirmPassword')}
                             icon={faUnlockKeyhole}
                             name={'confirm_password'}
                             placeholder={'••••••••••••'}
@@ -126,7 +130,7 @@ function RegisterContainer() {
                             size={Button.Sizes.Large}
                             disabled={isSubmitting}
                         >
-                            Register
+                            {t('register.registerButton')}
                         </Button>
                     </div>
                     {recaptchaEnabled && (
@@ -149,7 +153,7 @@ function RegisterContainer() {
                             to={'/auth/login'}
                             css={tw`text-xs text-neutral-300 tracking-wide no-underline uppercase font-medium hover:text-neutral-600`}
                         >
-                            Return to Login
+                            {t('register.returnToLogin')}
                         </Link>
                     </div>
                 </LoginFormContainer>

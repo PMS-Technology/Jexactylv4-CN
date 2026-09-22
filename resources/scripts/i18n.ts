@@ -13,42 +13,50 @@ import zhCNServer from './locales/zh_CN/server.json';
 import zhCNActivity from './locales/zh_CN/activity.json';
 import zhCNAdmin from './locales/zh_CN/admin.json';
 
+function normalizeLanguage(language: string): string {
+    return /^(?:zh|zh[-_](?:cn|hans))$/i.test(language) ? 'zh_CN' : language;
+}
+
 function getInitialLanguage(): string {
     const user = (window as any).PterodactylUser;
-    if (user?.language) return user.language;
+    if (user?.language) return normalizeLanguage(user.language);
     const settings = (window as any).SiteConfiguration;
-    if (settings?.locale) return settings.locale;
+    if (settings?.locale) return normalizeLanguage(settings.locale);
     return 'en';
 }
 
-i18n.use(initReactI18next).init({
-    resources: {
-        en: {
-            common: enCommon,
-            auth: enAuth,
-            dashboard: enDashboard,
-            server: enServer,
-            activity: enActivity,
-            admin: enAdmin,
+i18n.use(initReactI18next)
+    .init({
+        resources: {
+            en: {
+                common: enCommon,
+                auth: enAuth,
+                dashboard: enDashboard,
+                server: enServer,
+                activity: enActivity,
+                admin: enAdmin,
+            },
+            zh_CN: {
+                common: zhCNCommon,
+                auth: zhCNAuth,
+                dashboard: zhCNDashboard,
+                server: zhCNServer,
+                activity: zhCNActivity,
+                admin: zhCNAdmin,
+            },
         },
-        zh_CN: {
-            common: zhCNCommon,
-            auth: zhCNAuth,
-            dashboard: zhCNDashboard,
-            server: zhCNServer,
-            activity: zhCNActivity,
-            admin: zhCNAdmin,
+        lng: getInitialLanguage(),
+        fallbackLng: 'en',
+        ns: ['common', 'auth', 'dashboard', 'server', 'activity', 'admin'],
+        defaultNS: 'common',
+        interpolation: {
+            escapeValue: false,
         },
-    },
-    lng: getInitialLanguage(),
-    fallbackLng: 'en',
-    ns: ['common', 'auth', 'dashboard', 'server', 'activity', 'admin'],
-    defaultNS: 'common',
-    interpolation: {
-        escapeValue: false,
-    },
-    returnNull: false,
-    returnEmptyString: true,
-});
+        returnNull: false,
+        returnEmptyString: true,
+    })
+    .then(() => {
+        document.documentElement.lang = i18n.language.replace(/_/g, '-');
+    });
 
 export default i18n;

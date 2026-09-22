@@ -10,8 +10,10 @@ import ServerSvg from '@/assets/images/themed/ServerSvg';
 import { Dialog } from '@/elements/dialog';
 import { useState } from 'react';
 import { updateModeSettings } from '@/api/routes/admin/settings';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [warning, setWarning] = useState<boolean>(false);
     const { addFlash, clearFlashes, clearAndAddHttpError } = useFlash();
 
@@ -29,7 +31,7 @@ export default () => {
                 addFlash({
                     key: 'settings:mode',
                     type: 'success',
-                    message: 'Panel mode has been updated.',
+                    message: t('settings.modeUpdated'),
                 });
             })
             .catch(error => clearAndAddHttpError({ key: 'settings:mode', error }));
@@ -37,31 +39,31 @@ export default () => {
 
     return (
         <>
-            <Dialog open={warning} onClose={() => setWarning(false)} title={'How to activate Debug mode'}>
-                To set your application into debug mode:
+            <Dialog open={warning} onClose={() => setWarning(false)} title={t('settings.debugModeTitle')}>
+                {t('settings.debugModeInstructions')}
                 <ul className={'my-4 text-gray-300'}>
-                    <li>&bull; SSH into your Webserver console</li>
+                    <li>&bull; {t('settings.debugStep1')}</li>
                     <li className={'my-1'}>
-                        &bull; Navigate to <code className={'bg-black/50 p-1 rounded-lg'}>/var/www/jexactyl</code>
+                        &bull; {t('settings.debugStep2')}{' '}
+                        <code className={'bg-black/50 p-1 rounded-lg'}>/var/www/jexactyl</code>
                     </li>
                     <li className={'my-1'}>
-                        &bull; Open the environment file (<code className={'bg-black/50 p-1 rounded-lg'}>.env</code>)
+                        &bull; {t('settings.debugStep3')} (<code className={'bg-black/50 p-1 rounded-lg'}>.env</code>)
                     </li>
-                    <li className={'my-1'}>&bull; Set APP_ENV to local, and APP_DEBUG to true</li>
-                    <li className={'my-1'}>&bull; Set APP_ENV to production, and APP_DEBUG to false to deactivate</li>
+                    <li className={'my-1'}>&bull; {t('settings.debugStep4')}</li>
+                    <li className={'my-1'}>&bull; {t('settings.debugStep5')}</li>
                 </ul>
             </Dialog>
             <FeatureContainer
                 noHeight
                 icon={faDesktop}
-                title={'Standard Mode'}
+                title={t('settings.standardMode') as string}
                 image={<StandardModeSvg color={primary} />}
             >
-                Standard mode enables all the typical features of Jexactyl, including our billing system, tickets, user
-                registration and so much more.
+                {t('settings.standardModeDesc')}
                 <p className={'text-right mt-2'}>
                     <Button disabled={settings.mode === 'standard'} onClick={() => updateMode('standard')}>
-                        {settings.mode === 'standard' ? 'Currently Active' : 'Enable Now'}
+                        {settings.mode === 'standard' ? t('settings.currentlyActive') : t('settings.enableNow')}
                     </Button>
                 </p>
             </FeatureContainer>
@@ -69,25 +71,27 @@ export default () => {
             <FeatureContainer
                 noHeight
                 icon={faMoon}
-                title={'Personal Mode'}
+                title={t('settings.personalMode') as string}
                 image={<PersonalModeSvg color={primary} />}
             >
-                With Personal mode, the Panel automatically removes features mostly used by larger organisations and
-                hosting providers in order to make hosting and controlling servers much easier for a smaller audience.
+                {t('settings.personalModeDesc')}
                 <p className={'text-right mt-2'}>
                     <Button disabled={settings.mode === 'personal'} onClick={() => updateMode('personal')}>
-                        {settings.mode === 'personal' ? 'Currently Active' : 'Enable Now'}
+                        {settings.mode === 'personal' ? t('settings.currentlyActive') : t('settings.enableNow')}
                     </Button>
                 </p>
             </FeatureContainer>
             <div className={'h-px bg-gray-700 rounded-full my-4'} />
-            <FeatureContainer noHeight icon={faTerminal} title={'Debug Mode'} image={<ServerSvg color={primary} />}>
-                When Jexpanelis in Debug mode, all HTTP request data is exposed and errors are reported including
-                sensitive details. Use this mode with caution, and especially{' '}
-                <strong>do not use this mode in production.</strong>
+            <FeatureContainer
+                noHeight
+                icon={faTerminal}
+                title={t('settings.debugMode') as string}
+                image={<ServerSvg color={primary} />}
+            >
+                {t('settings.debugModeDesc')}
                 <p className={'text-right mt-2'}>
                     <Button onClick={() => setWarning(true)} disabled={settings.debug}>
-                        {settings.debug ? 'Currently Active' : 'Enable Now'}
+                        {settings.debug ? t('settings.currentlyActive') : t('settings.enableNow')}
                     </Button>
                 </p>
             </FeatureContainer>

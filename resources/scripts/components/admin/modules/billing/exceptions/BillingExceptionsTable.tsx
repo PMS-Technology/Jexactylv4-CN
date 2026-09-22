@@ -19,6 +19,8 @@ import { Button } from '@/elements/button';
 import { CheckCircleIcon } from '@heroicons/react/outline';
 import Pill, { PillStatus } from '@/elements/Pill';
 import { BillingExceptionType } from '@definitions/admin';
+import { zhCN } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 function getColor(type: BillingExceptionType): PillStatus {
     switch (type) {
@@ -34,6 +36,7 @@ function getColor(type: BillingExceptionType): PillStatus {
 }
 
 function BillingExceptionTable() {
+    const { t, i18n } = useTranslation('admin');
     const { data: exceptions } = useGetBillingExceptions();
     const [resolved, setResolved] = useState<number[]>([]);
     const { setPage, setFilters, sort, setSort, sortDirection } = useContext(BillingExceptionContext);
@@ -57,19 +60,19 @@ function BillingExceptionTable() {
                         <table css={tw`w-full table-auto`}>
                             <TableHead>
                                 <TableHeader
-                                    name={'ID'}
+                                    name={t('billingModule.id')}
                                     direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('id')}
                                 />
-                                <TableHeader name={'Exception'} />
-                                <TableHeader name={'Resolution'} />
+                                <TableHeader name={t('billingModule.exception')} />
+                                <TableHeader name={t('billingModule.resolution')} />
                                 <TableHeader
-                                    name={'Type'}
+                                    name={t('billingModule.type')}
                                     direction={sort === 'exception_type' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('exception_type')}
                                 />
                                 <TableHeader
-                                    name={'Created At'}
+                                    name={t('billingModule.createdAt')}
                                     direction={sort === 'created_at' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('created_at')}
                                 />
@@ -91,11 +94,14 @@ function BillingExceptionTable() {
                                             <td className={'px-6 py-4'}>{exception.description}</td>
                                             <td className={'px-6 py-4'}>
                                                 <Pill type={getColor(exception.exception_type)}>
-                                                    {exception.exception_type}
+                                                    {t(`billingModule.exceptionType.${exception.exception_type}`)}
                                                 </Pill>
                                             </td>
                                             <td className={'px-6 py-4'}>
-                                                {formatDistanceToNowStrict(exception.created_at, { addSuffix: true })}
+                                                {formatDistanceToNowStrict(exception.created_at, {
+                                                    addSuffix: true,
+                                                    locale: i18n.language === 'zh_CN' ? zhCN : undefined,
+                                                })}
                                             </td>
                                             <td className={'px-6 py-4'}>
                                                 {resolved.includes(exception.id) ? (
@@ -105,7 +111,7 @@ function BillingExceptionTable() {
                                                         disabled
                                                     >
                                                         <CheckCircleIcon className={'w-4 h-4 mt-[2px] mr-0.5'} />{' '}
-                                                        Resolved
+                                                        {t('billingModule.resolved')}
                                                     </Button.Text>
                                                 ) : (
                                                     <Button
@@ -120,7 +126,7 @@ function BillingExceptionTable() {
                                                         }}
                                                     >
                                                         <CheckCircleIcon className={'w-4 h-4 mt-[2px] mr-0.5'} />{' '}
-                                                        Resolve
+                                                        {t('billingModule.resolve')}
                                                     </Button>
                                                 )}
                                             </td>

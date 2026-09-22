@@ -2,6 +2,7 @@ import classNames from 'classnames';
 import copy from 'copy-to-clipboard';
 import type { MouseEvent, ReactNode } from 'react';
 import { Children, cloneElement, isValidElement, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import Portal from '@/elements/Portal';
 import FadeTransition from '@/elements/transitions/FadeTransition';
@@ -13,6 +14,7 @@ interface CopyOnClickProps {
 }
 
 const CopyOnClick = ({ text, showInNotification = true, children }: CopyOnClickProps) => {
+    const { t } = useTranslation('common');
     const [copied, setCopied] = useState(false);
 
     useEffect(() => {
@@ -54,8 +56,8 @@ const CopyOnClick = ({ text, showInNotification = true, children }: CopyOnClickP
                             <div className="rounded-xl bg-neutral-600/90 backdrop-blur-md py-3 px-4 text-slate-200 shadow-xl ring-1 ring-white/10">
                                 <p>
                                     {showInNotification
-                                        ? `Copied "${String(text)}" to clipboard.`
-                                        : 'Copied text to clipboard.'}
+                                        ? t('clipboard.copiedValue', { value: String(text) })
+                                        : t('clipboard.copiedText')}
                                 </p>
                             </div>
                         </div>

@@ -19,6 +19,7 @@ import Switch from '@/elements/Switch';
 import type { ApplicationStore } from '@/state';
 import NodeBillingContainer from './NodeBillingContainer';
 import { PlusIcon } from '@heroicons/react/outline';
+import { useTranslation } from 'react-i18next';
 
 type Values2 = Omit<Omit<Values, 'behindProxy'>, 'public' | 'deployable' | 'deployableFree'> & {
     behindProxy: string;
@@ -53,21 +54,18 @@ const initialValues: Values2 = {
 };
 
 function InternalForm() {
+    const { t } = useTranslation('admin');
     const { isSubmitting, isValid } = useFormikContext();
     const [advanced, setAdvanced] = useState(false);
 
     return (
         <Form>
             <div css={tw`w-full mb-4`}>
-                <AdminBox title={'Setup Mode'} css={tw`w-full relative`}>
+                <AdminBox title={t('nodes.setupMode') as string} css={tw`w-full relative`}>
                     <Switch
                         name={'advancedSetup'}
-                        label={advanced ? 'Advanced' : 'Express'}
-                        description={
-                            advanced
-                                ? 'Configure every setting for this node.'
-                                : 'Configure only the essentials — everything else uses sensible defaults.'
-                        }
+                        label={advanced ? t('nodes.advanced') : t('nodes.express')}
+                        description={advanced ? t('nodes.advancedDesc') : t('nodes.expressDesc')}
                         defaultChecked={advanced}
                         onChange={() => setAdvanced(!advanced)}
                     />
@@ -115,7 +113,7 @@ function InternalForm() {
                         disabled={isSubmitting || !isValid}
                         icon={PlusIcon}
                     >
-                        Create
+                        {t('nodes.create')}
                     </Button>
                 </div>
             </div>
@@ -124,6 +122,7 @@ function InternalForm() {
 }
 
 export default () => {
+    const { t } = useTranslation('admin');
     const navigate = useNavigate();
 
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
@@ -167,8 +166,8 @@ export default () => {
                 disk: number().required(),
                 diskOverallocate: number().required(),
                 deploymentFee: number()
-                    .typeError('Deployment fee must be a number')
-                    .min(0, 'Deployment fee cannot be negative'),
+                    .typeError(t('nodes.deploymentFeeNumber'))
+                    .min(0, t('nodes.deploymentFeeNonNegative')),
             })}
         >
             <InternalForm />

@@ -5,6 +5,7 @@ import { Button } from '@/elements/button';
 import { useStoreState } from '@/state/hooks';
 import Tooltip from '@/elements/tooltip/Tooltip';
 import { PlusIcon, ServerIcon, SparklesIcon, TicketIcon, UserAddIcon, ViewGridAddIcon } from '@heroicons/react/outline';
+import { useTranslation } from 'react-i18next';
 
 interface QuickActionProps {
     link: string;
@@ -23,6 +24,7 @@ const QuickAction = ({ tooltip, icon: Icon, link }: QuickActionProps) => (
 );
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [open, setOpen] = useState<boolean>(false);
     const ai = useStoreState(s => s.everest.data!.ai.enabled);
     const enabled = useStoreState(s => s.settings.data!.speed_dial);
@@ -45,11 +47,15 @@ export default () => {
                         }}
                     >
                         {[
-                            ai && { icon: SparklesIcon, link: '/admin/ai', tooltip: 'Ask AI' },
-                            { icon: ViewGridAddIcon, link: '/admin/nodes/new', tooltip: 'Create Node' },
-                            { icon: ServerIcon, link: '/admin/servers/new', tooltip: 'Create Server' },
-                            { icon: UserAddIcon, link: '/admin/users/new', tooltip: 'New User' },
-                            tickets && { icon: TicketIcon, link: '/admin/tickets', tooltip: 'View Tickets' },
+                            ai && { icon: SparklesIcon, link: '/admin/ai', tooltip: t('speedDial.askAI') },
+                            { icon: ViewGridAddIcon, link: '/admin/nodes/new', tooltip: t('speedDial.createNode') },
+                            { icon: ServerIcon, link: '/admin/servers/new', tooltip: t('speedDial.createServer') },
+                            { icon: UserAddIcon, link: '/admin/users/new', tooltip: t('speedDial.newUser') },
+                            tickets && {
+                                icon: TicketIcon,
+                                link: '/admin/tickets',
+                                tooltip: t('speedDial.viewTickets'),
+                            },
                         ]
                             .filter(Boolean)
                             .map((action, index) => {

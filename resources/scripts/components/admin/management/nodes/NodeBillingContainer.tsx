@@ -27,9 +27,7 @@ export default () => {
                         <span css={tw`text-neutral-300 ml-2`}>{t('nodes.disabled') as string}</span>
                     </label>
                 </div>
-                <p className={'text-sm text-gray-400 mt-1'}>
-                    {t('nodes.deployablePaidDesc') as string}
-                </p>
+                <p className={'text-sm text-gray-400 mt-1'}>{t('nodes.deployablePaidDesc') as string}</p>
             </div>
             <div className={'mt-6'}>
                 <Label htmlFor={'deployableFree'}>{t('nodes.deployableFree') as string}</Label>
@@ -44,19 +42,15 @@ export default () => {
                         <span css={tw`text-neutral-300 ml-2`}>{t('nodes.disabled') as string}</span>
                     </label>
                 </div>
-                <p className={'text-sm text-gray-400 mt-1'}>
-                    {t('nodes.deployableFreeDesc') as string}
-                </p>
+                <p className={'text-sm text-gray-400 mt-1'}>{t('nodes.deployableFreeDesc') as string}</p>
             </div>
             <div className={'mt-6'}>
                 <Field
                     id={'deploymentFee'}
                     name={'deploymentFee'}
                     type={'text'}
-                    label={'Deployment Fee'}
-                    description={
-                        'Optional one-time fee charged in addition to the product price when a paid server is first deployed to this node. Leave at 0 for no fee.'
-                    }
+                    label={t('nodes.deploymentFee') as string}
+                    description={t('nodes.deploymentFeeDescription') as string}
                 />
             </div>
         </AdminBox>

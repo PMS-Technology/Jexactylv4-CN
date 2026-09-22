@@ -26,9 +26,11 @@ import SettingsContainer from '@admin/modules/billing/SettingsContainer';
 import BillingExceptionsContainer from './exceptions/BillingExceptionsContainer';
 import RenewalDatesContainer from '@admin/modules/billing/RenewalDatesContainer';
 import DiscountCodesContainer from '@/components/admin/modules/billing/discounts/DiscountCodesContainer';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
     const enabled = useStoreState(state => state.everest.data!.billing.enabled);
+    const { t } = useTranslation('admin');
 
     if (!enabled) return <EnableBilling />;
 
@@ -36,9 +38,9 @@ export default () => {
         <>
             <div className={'w-full flex flex-row items-center mb-8'}>
                 <div className={'flex flex-col flex-shrink'} style={{ minWidth: '0' }}>
-                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>Billing</h2>
+                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>{t('billingModule.billing')}</h2>
                     <p className={'text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden'}>
-                        Configure the billing settings for this panel.
+                        {t('billingModule.configureBillingSettings')}
                     </p>
                 </div>
             </div>
@@ -46,28 +48,28 @@ export default () => {
             <FlashMessageRender byKey={'admin:billing'} className={'mb-4'} />
 
             <SubNavigation>
-                <SubNavigationLink to={'/admin/billing'} name={'Overview'} base>
+                <SubNavigationLink to={'/admin/billing'} name={t('billingModule.overview')} base>
                     <DesktopComputerIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to={'/admin/billing/categories'} name={'Products'}>
+                <SubNavigationLink to={'/admin/billing/categories'} name={t('billingModule.products')}>
                     <ViewGridIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to={'/admin/billing/orders'} name={'Orders'}>
+                <SubNavigationLink to={'/admin/billing/orders'} name={t('billingModule.orders')}>
                     <ShoppingCartIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to={'/admin/billing/invoices'} name={'Invoices'}>
+                <SubNavigationLink to={'/admin/billing/invoices'} name={t('billingModule.invoices')}>
                     <DocumentTextIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to={'/admin/billing/exceptions'} name={'Exceptions'}>
+                <SubNavigationLink to={'/admin/billing/exceptions'} name={t('billingModule.exceptions')}>
                     <XCircleIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to={'/admin/billing/renewal-dates'} name={'Renewal Dates'}>
+                <SubNavigationLink to={'/admin/billing/renewal-dates'} name={t('billingModule.renewalDates')}>
                     <CalendarIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to={'/admin/billing/discount-codes'} name={'Discount Codes'}>
+                <SubNavigationLink to={'/admin/billing/discount-codes'} name={t('billingModule.discountCodes')}>
                     <CurrencyDollarIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to={'/admin/billing/settings'} name={'Settings'}>
+                <SubNavigationLink to={'/admin/billing/settings'} name={t('billingModule.settings')}>
                     <CogIcon />
                 </SubNavigationLink>
             </SubNavigation>

@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { XIcon } from '@heroicons/react/outline';
+import { useTranslation } from 'react-i18next';
 
 export type FlashMessageType = 'success' | 'info' | 'warning' | 'error';
 
@@ -49,6 +50,7 @@ const Container = styled.div<{ $type?: FlashMessageType }>`
 Container.displayName = 'MessageBox.Container';
 
 const MessageBox = ({ title, children, type }: Props) => {
+    const { t } = useTranslation('common');
     const [open, setOpen] = useState(true);
 
     return (
@@ -75,7 +77,7 @@ const MessageBox = ({ title, children, type }: Props) => {
                         <span css={tw`mr-2 text-left flex-auto`}>{children}</span>
                         <button
                             type={'button'}
-                            aria-label={'Dismiss'}
+                            aria-label={t('dismiss') as string}
                             onClick={() => setOpen(false)}
                             className={
                                 'inline-flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-gray-200 duration-150 hover:rotate-90 transition-transform'

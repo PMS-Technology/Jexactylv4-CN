@@ -19,12 +19,6 @@ interface Values {
     author: string;
 }
 
-const schema = object().shape({
-    name: string().required('A nest name must be provided.').max(32, 'Nest name must not exceed 32 characters.'),
-    description: string().max(255, 'Nest description must not exceed 255 characters.'),
-    author: string().email().required('You must enter an author email to continue.'),
-});
-
 export default () => {
     const { t } = useTranslation('admin');
     const [visible, setVisible] = useState(false);
@@ -51,7 +45,15 @@ export default () => {
             <Formik
                 onSubmit={submit}
                 initialValues={{ name: '', description: '', author: '' }}
-                validationSchema={schema}
+                validationSchema={object().shape({
+                    name: string()
+                        .required(t('nests.nameRequired') as string)
+                        .max(32, t('nests.nameMaxLength') as string),
+                    description: string().max(255, t('nests.descriptionMaxLength') as string),
+                    author: string()
+                        .email(t('nests.authorEmailInvalid') as string)
+                        .required(t('nests.authorEmailRequired') as string),
+                })}
             >
                 {({ isSubmitting, resetForm }) => (
                     <Modal

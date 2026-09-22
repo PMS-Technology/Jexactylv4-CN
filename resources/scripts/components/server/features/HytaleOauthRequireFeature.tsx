@@ -7,8 +7,10 @@ import { Variant } from '@/elements/button/types';
 import FlashMessageRender from '@/elements/FlashMessageRender';
 import useFlash from '@/plugins/useFlash';
 import { SocketEvent } from '@/components/server/events';
+import { useTranslation } from 'react-i18next';
 
 const HytaleOauthRequireFeature = () => {
+    const { t } = useTranslation('server');
     const [visible, setVisible] = useState(false);
     const [link, setLink] = useState('');
 
@@ -56,21 +58,18 @@ const HytaleOauthRequireFeature = () => {
             showSpinnerOverlay={false}
         >
             <FlashMessageRender key={'feature:hytaleOauth'} css={tw`mb-4`} />
-            <h2 css={tw`text-2xl mb-4 text-neutral-100`}>Authentication Required</h2>
-            <p css={tw`text-neutral-200`}>
-                You need to authenticate with your Hytale account to download or update server files. Please log in to
-                continue.
-            </p>
+            <h2 css={tw`text-2xl mb-4 text-neutral-100`}>{t('featuresPage.hytaleAuthRequired') as string}</h2>
+            <p css={tw`text-neutral-200`}>{t('featuresPage.hytaleAuthDescription') as string}</p>
             <div css={tw`mt-8 sm:flex items-center justify-end`}>
                 <Button
                     variant={Variant.Secondary}
                     onClick={() => setVisible(false)}
                     css={tw`w-full sm:w-auto border-transparent`}
                 >
-                    Cancel
+                    {t('featuresPage.cancel') as string}
                 </Button>
                 <Button onClick={handleLogin} css={tw`mt-4 sm:mt-0 sm:ml-4 w-full sm:w-auto`}>
-                    Log in
+                    {t('featuresPage.hytaleLogIn') as string}
                 </Button>
             </div>
         </Modal>

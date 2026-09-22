@@ -19,6 +19,7 @@ import {
     TicketMessageFilters,
 } from '@/api/routes/admin/tickets';
 import { differenceInHours, format, formatDistanceToNow } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import { useStoreState } from '@/state/hooks';
 import { useContext, useState } from 'react';
 import CopyOnClick from '@/elements/CopyOnClick';
@@ -27,19 +28,29 @@ import { Dialog } from '@/elements/dialog';
 import { Alert } from '@/elements/alert';
 
 const MessagesTable = ({ ticketId }: { ticketId: number }) => {
-    const { t } = useTranslation('admin');
+    const { t, i18n } = useTranslation('admin');
+    const isChinese = i18n.language === 'zh_CN';
     const { data: messages, error } = getTicketMessages(ticketId);
     const [visible, setVisible] = useState<string | null>(null);
     const { colors } = useStoreState(state => state.theme.data!);
     const { setPage, sort, setSort, sortDirection } = useContext(TicketMessageContext);
 
-    if (error) return <Alert type={'danger'}>{t('ticketsModule.unableToRenderMessages') as string} {error}</Alert>;
+    if (error)
+        return (
+            <Alert type={'danger'}>
+                {t('ticketsModule.unableToRenderMessages') as string} {error}
+            </Alert>
+        );
 
     return (
         <>
             {/* this is a really dumb comparison but TS is dumber. */}
             {visible !== null && (
-                <Dialog open={Boolean(visible)} onClose={() => setVisible(null)} title={t('ticketsModule.messageContent') as string}>
+                <Dialog
+                    open={Boolean(visible)}
+                    onClose={() => setVisible(null)}
+                    title={t('ticketsModule.messageContent') as string}
+                >
                     <p className={'text-gray-300 italic'}>{visible.toString()}</p>
                 </Dialog>
             )}
@@ -111,9 +122,16 @@ const MessagesTable = ({ ticketId }: { ticketId: number }) => {
                                                     >
                                                         {Math.abs(differenceInHours(message.created_at, new Date())) >
                                                         48
-                                                            ? format(message.created_at!, 'MMM do, yyyy h:mma')
+                                                            ? format(
+                                                                  message.created_at!,
+                                                                  isChinese
+                                                                      ? 'yyyy年M月d日 H:mm'
+                                                                      : 'MMM do, yyyy h:mma',
+                                                                  { locale: isChinese ? zhCN : undefined },
+                                                              )
                                                             : formatDistanceToNow(message.created_at!, {
                                                                   addSuffix: true,
+                                                                  locale: isChinese ? zhCN : undefined,
                                                               })}
                                                     </td>
                                                     <td

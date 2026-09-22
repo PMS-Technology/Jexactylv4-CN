@@ -16,6 +16,7 @@ import { Button } from '@/elements/button/index';
 import ScheduleTaskRow from '@server/schedules/ScheduleTaskRow';
 import isEqual from 'react-fast-compare';
 import { format } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import ScheduleCronRow from '@server/schedules/ScheduleCronRow';
 import RunScheduleButton from '@server/schedules/RunScheduleButton';
 import { useStoreState } from '@/state/hooks';
@@ -39,7 +40,8 @@ const ActivePill = ({ active, label }: { active: boolean; label: string }) => (
 );
 
 export default () => {
-    const { t } = useTranslation('server');
+    const { t, i18n } = useTranslation('server');
+    const isChinese = i18n.language === 'zh_CN';
     const { id: scheduleId } = useParams<'id'>();
     const navigate = useNavigate();
 
@@ -115,14 +117,22 @@ export default () => {
                                 <p css={tw`mt-1 text-sm text-neutral-200`}>
                                     {t('schedulesPage.lastRunLabel') as string}&nbsp;
                                     {schedule.lastRunAt ? (
-                                        format(schedule.lastRunAt, "MMM do 'at' h:mma")
+                                        format(schedule.lastRunAt, isChinese ? 'M月d日 H:mm' : "MMM do 'at' h:mma", {
+                                            locale: isChinese ? zhCN : undefined,
+                                        })
                                     ) : (
                                         <span css={tw`text-neutral-300`}>n/a</span>
                                     )}
                                     <span css={tw`ml-4 pl-4 border-l-4 border-neutral-600 py-px`}>
                                         {t('schedulesPage.nextRunLabel') as string}&nbsp;
                                         {schedule.nextRunAt ? (
-                                            format(schedule.nextRunAt, "MMM do 'at' h:mma")
+                                            format(
+                                                schedule.nextRunAt,
+                                                isChinese ? 'M月d日 H:mm' : "MMM do 'at' h:mma",
+                                                {
+                                                    locale: isChinese ? zhCN : undefined,
+                                                },
+                                            )
                                         ) : (
                                             <span css={tw`text-neutral-300`}>n/a</span>
                                         )}
@@ -139,14 +149,26 @@ export default () => {
                             </div>
                         </div>
                         <div css={tw`hidden sm:grid grid-cols-5 md:grid-cols-5 gap-4 mb-4 mt-4`}>
-                            <CronBox color={colors.secondary} title={t('schedulesPage.minute') as string} value={schedule.cron.minute} />
-                            <CronBox color={colors.secondary} title={t('schedulesPage.hour') as string} value={schedule.cron.hour} />
+                            <CronBox
+                                color={colors.secondary}
+                                title={t('schedulesPage.minute') as string}
+                                value={schedule.cron.minute}
+                            />
+                            <CronBox
+                                color={colors.secondary}
+                                title={t('schedulesPage.hour') as string}
+                                value={schedule.cron.hour}
+                            />
                             <CronBox
                                 color={colors.secondary}
                                 title={t('schedulesPage.dayOfMonthShort') as string}
                                 value={schedule.cron.dayOfMonth}
                             />
-                            <CronBox color={colors.secondary} title={t('schedulesPage.month') as string} value={schedule.cron.month} />
+                            <CronBox
+                                color={colors.secondary}
+                                title={t('schedulesPage.month') as string}
+                                value={schedule.cron.month}
+                            />
                             <CronBox
                                 color={colors.secondary}
                                 title={t('schedulesPage.dayOfWeekShort') as string}

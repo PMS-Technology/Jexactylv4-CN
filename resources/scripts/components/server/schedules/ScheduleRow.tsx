@@ -2,6 +2,7 @@ import { type Schedule } from '@definitions/server';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
 import { format } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import tw from 'twin.macro';
 import ScheduleCronRow from '@server/schedules/ScheduleCronRow';
@@ -9,7 +10,9 @@ import GreyRowBox from '@/elements/GreyRowBox';
 import { Link } from 'react-router-dom';
 
 export default ({ schedule, to }: { schedule: Schedule; to: string }) => {
-    const { t } = useTranslation('server');
+    const { t, i18n } = useTranslation('server');
+    const isChinese = i18n.language === 'zh_CN';
+
     return (
         <Link to={to}>
             <GreyRowBox>
@@ -19,7 +22,15 @@ export default ({ schedule, to }: { schedule: Schedule; to: string }) => {
                 <div css={tw`flex-1 md:ml-4`}>
                     <p>{schedule.name}</p>
                     <p css={tw`text-xs text-neutral-400`}>
-                        {t('schedulesPage.lastRun', { time: schedule.lastRunAt ? format(schedule.lastRunAt, "MMM do 'at' h:mma") : (t('schedulesPage.never') as string) }) as string}
+                        {
+                            t('schedulesPage.lastRun', {
+                                time: schedule.lastRunAt
+                                    ? format(schedule.lastRunAt, isChinese ? 'M月d日 H:mm' : "MMM do 'at' h:mma", {
+                                          locale: isChinese ? zhCN : undefined,
+                                      })
+                                    : (t('schedulesPage.never') as string),
+                            }) as string
+                        }
                     </p>
                 </div>
                 <div>
@@ -29,7 +40,9 @@ export default ({ schedule, to }: { schedule: Schedule; to: string }) => {
                             schedule.isActive ? tw`bg-green-600` : tw`bg-neutral-400`,
                         ]}
                     >
-                        {schedule.isActive ? (t('schedulesPage.active') as string) : (t('schedulesPage.inactive') as string)}
+                        {schedule.isActive
+                            ? (t('schedulesPage.active') as string)
+                            : (t('schedulesPage.inactive') as string)}
                     </p>
                 </div>
                 <ScheduleCronRow cron={schedule.cron} css={tw`mx-auto sm:mx-8 w-full sm:w-auto mt-4 sm:mt-0`} />
@@ -40,7 +53,11 @@ export default ({ schedule, to }: { schedule: Schedule; to: string }) => {
                             schedule.isActive && !schedule.isProcessing ? tw`bg-green-600` : tw`bg-neutral-400`,
                         ]}
                     >
-                        {schedule.isProcessing ? (t('schedulesPage.processing') as string) : schedule.isActive ? (t('schedulesPage.active') as string) : (t('schedulesPage.inactive') as string)}
+                        {schedule.isProcessing
+                            ? (t('schedulesPage.processing') as string)
+                            : schedule.isActive
+                            ? (t('schedulesPage.active') as string)
+                            : (t('schedulesPage.inactive') as string)}
                     </p>
                 </div>
             </GreyRowBox>

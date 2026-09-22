@@ -5,6 +5,7 @@ import Money from '@/elements/billing/Money';
 import { CheckCircleIcon, ServerIcon } from '@heroicons/react/solid';
 import classNames from 'classnames';
 import { type Node } from '@definitions/account/billing';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     node: Node;
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export default ({ node, selected, setSelected, disabled }: Props) => {
+    const { t } = useTranslation('dashboard');
     const { colors } = useStoreState(s => s.theme.data!);
 
     return (
@@ -34,11 +36,11 @@ export default ({ node, selected, setSelected, disabled }: Props) => {
                 <p className={'text-gray-200 font-semibold'}>
                     {node.name}{' '}
                     <span className={'font-medium ml-2 text-gray-400 italic text-sm'}>
-                        <code>{node.fqdn}</code> - {disabled ? 'Available for paid servers only' : 'available'}
+                        <code>{node.fqdn}</code> - {disabled ? t('billing.paidServersOnly') : t('billing.available')}
                     </span>
                     {!disabled && node.deploymentFee > 0 && (
                         <span className={'block text-xs text-yellow-400 mt-0.5'}>
-                            + <Money value={node.deploymentFee} /> one-time deployment fee
+                            + <Money value={node.deploymentFee} /> {t('billing.oneTimeDeploymentFee')}
                         </span>
                     )}
                 </p>

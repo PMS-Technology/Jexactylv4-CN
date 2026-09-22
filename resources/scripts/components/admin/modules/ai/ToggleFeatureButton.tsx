@@ -1,12 +1,14 @@
 import { Button } from '@/elements/button';
 import { useStoreState } from '@/state/hooks';
 import { updateSettings } from '@/api/routes/admin/ai';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const ai = useStoreState(state => state.everest.data!.ai);
 
     const submit = () => {
-        updateSettings({ ...ai, enabled: !ai.enabled }).then(() => {
+        updateSettings({ enabled: !ai.enabled }).then(() => {
             // @ts-expect-error this is fine
             window.location = '/admin/ai';
         });
@@ -14,7 +16,11 @@ export default () => {
 
     return (
         <div className={'mr-4'} onClick={submit}>
-            {!ai.enabled ? <Button>Enable JexpanelAI</Button> : <Button.Danger>Disable JexpanelAI</Button.Danger>}
+            {!ai.enabled ? (
+                <Button>{t('aiModule.enableJexactylAI')}</Button>
+            ) : (
+                <Button.Danger>{t('aiModule.disableJexactylAI')}</Button.Danger>
+            )}
         </div>
     );
 };

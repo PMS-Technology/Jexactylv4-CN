@@ -76,6 +76,12 @@ class EverestComposer
                 'enabled' => boolval(config('modules.ai.enabled', false)),
                 'key' => !empty(config('modules.ai.key')),
                 'user_access' => boolval(config('modules.ai.user_access', false)),
+                'format' => config('modules.ai.format'),
+                'model' => config('modules.ai.model'),
+                'base_url' => config('modules.ai.base_url'),
+                'project' => config('modules.ai.project'),
+                'location' => config('modules.ai.location'),
+                'models' => json_decode(config('modules.ai.models', '[]'), true) ?: [],
             ],
             'webhooks' => [
                 'enabled' => boolval(config('modules.webhooks.enabled', false)),

@@ -10,6 +10,7 @@ import Input from '@/elements/Input';
 import { useFlashKey } from '@/plugins/useFlash';
 import { createPasskey, usePasskeys } from '@/api/routes/account/passkeys';
 import { passkeysSupported, isPasskeyCancellation } from '@/api/routes/auth/passkey';
+import { useTranslation } from 'react-i18next';
 
 interface Values {
     name: string;
@@ -17,6 +18,7 @@ interface Values {
 }
 
 export default () => {
+    const { t } = useTranslation('dashboard');
     const { clearAndAddHttpError } = useFlashKey('account');
     const { mutate } = usePasskeys();
 
@@ -38,11 +40,7 @@ export default () => {
     };
 
     if (!passkeysSupported()) {
-        return (
-            <p css={tw`text-sm`}>
-                This browser cannot use passkeys. Passkeys require a secure connection and a recent browser.
-            </p>
-        );
+        return <p css={tw`text-sm`}>{t('account.passkeys.unsupported')}</p>;
     }
 
     return (
@@ -50,32 +48,31 @@ export default () => {
             onSubmit={submit}
             initialValues={{ name: '', password: '' }}
             validationSchema={object().shape({
-                name: string().required('Give this passkey a name so you can recognise it later.'),
-                password: hasPassword ? string().required('Please enter your account password.') : string(),
+                name: string().required(t('account.passkeys.nameRequired') as string),
+                password: hasPassword
+                    ? string().required(t('account.currentAccountPasswordRequired') as string)
+                    : string(),
             })}
         >
             {({ isSubmitting }) => (
                 <Form>
                     <SpinnerOverlay visible={isSubmitting} />
                     <FormikFieldWrapper
-                        label={'Passkey Name'}
+                        label={t('account.passkeys.name')}
                         name={'name'}
-                        description={'Something that identifies the device, such as "Work Laptop".'}
+                        description={t('account.passkeys.nameDescription')}
                         css={tw`mb-6`}
                     >
                         <Field name={'name'} as={Input} />
                     </FormikFieldWrapper>
                     {hasPassword && (
-                        <FormikFieldWrapper label={'Current Password'} name={'password'}>
+                        <FormikFieldWrapper label={t('account.currentPassword')} name={'password'}>
                             <Field name={'password'} type={'password'} as={Input} />
                         </FormikFieldWrapper>
                     )}
-                    <p css={tw`text-xs text-gray-400 mt-6`}>
-                        Your device will ask you to confirm with a fingerprint, face, PIN, or security key. Once added,
-                        you can sign in with it in a single step — no password or two-step code needed.
-                    </p>
+                    <p css={tw`text-xs text-gray-400 mt-6`}>{t('account.passkeys.confirmationDescription')}</p>
                     <div css={tw`flex justify-end mt-6`}>
-                        <Button type={'submit'}>Add Passkey</Button>
+                        <Button type={'submit'}>{t('account.passkeys.add')}</Button>
                     </div>
                 </Form>
             )}

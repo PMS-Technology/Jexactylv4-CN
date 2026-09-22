@@ -20,6 +20,8 @@ import useFlash from '@/plugins/useFlash';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { InvoiceContext, InvoiceFilters, useGetInvoices, downloadInvoice } from '@/api/routes/admin/billing';
 import { DownloadIcon } from '@heroicons/react/outline';
+import { zhCN } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 function type(state: string | null): PillStatus {
     switch (state) {
@@ -74,6 +76,7 @@ const FilterField = ({
 };
 
 function InvoicesTable() {
+    const { t, i18n } = useTranslation('admin');
     const { data: invoices, error } = useGetInvoices();
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { setSort, sort, setPage, sortDirection, filters, setFilters } = useContext(InvoiceContext);
@@ -107,14 +110,14 @@ function InvoicesTable() {
         <AdminTable>
             <div css={tw`flex flex-wrap items-end gap-4 px-6 py-4`}>
                 <FilterField
-                    label={'Billed To'}
-                    placeholder={'Filter by username or email...'}
+                    label={t('billingModule.billedTo')}
+                    placeholder={t('billingModule.filterByUsernameOrEmail')}
                     value={filters?.user ?? ''}
                     onChange={value => setFilters(current => ({ ...current, user: value || undefined }))}
                 />
                 <FilterField
-                    label={'Status'}
-                    placeholder={'pending, processed, failed, expired...'}
+                    label={t('billingModule.status')}
+                    placeholder={t('billingModule.filterByInvoiceStatus')}
                     value={filters?.status ?? ''}
                     onChange={value => setFilters(current => ({ ...current, status: value || undefined }))}
                 />
@@ -125,15 +128,15 @@ function InvoicesTable() {
                         <table css={tw`w-full table-auto`}>
                             <TableHead>
                                 <TableHeader
-                                    name={'Invoice #'}
+                                    name={t('billingModule.invoiceNumber')}
                                     direction={sort === 'number' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('number')}
                                 />
-                                <TableHeader name={'Billed To'} />
-                                <TableHeader name={'Total'} />
-                                <TableHeader name={'Status'} />
+                                <TableHeader name={t('billingModule.billedTo')} />
+                                <TableHeader name={t('billingModule.total')} />
+                                <TableHeader name={t('billingModule.status')} />
                                 <TableHeader
-                                    name={'Generated At'}
+                                    name={t('billingModule.generatedAt')}
                                     direction={sort === 'generated_at' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('generated_at')}
                                 />
@@ -157,10 +160,14 @@ function InvoicesTable() {
                                                         to={`/admin/users/${invoice.user.id}`}
                                                         css={tw`hover:brightness-125`}
                                                     >
-                                                        {invoice.user.username ?? invoice.user.email ?? 'Unknown'}
+                                                        {invoice.user.username ??
+                                                            invoice.user.email ??
+                                                            t('billingModule.unknown')}
                                                     </Link>
                                                 ) : (
-                                                    invoice.user.username ?? invoice.user.email ?? 'Unknown'
+                                                    invoice.user.username ??
+                                                    invoice.user.email ??
+                                                    t('billingModule.unknown')
                                                 )}
                                             </td>
                                             <td css={tw`px-6 py-4 text-white font-bold`}>
@@ -169,7 +176,7 @@ function InvoicesTable() {
                                             <td css={tw`px-6 py-4 text-left`}>
                                                 {invoice.status ? (
                                                     <Pill size={'small'} type={type(invoice.status)}>
-                                                        {invoice.status}
+                                                        {t(`billingModule.invoiceStatus.${invoice.status}`)}
                                                     </Pill>
                                                 ) : (
                                                     '—'
@@ -179,13 +186,14 @@ function InvoicesTable() {
                                                 {invoice.generated_at
                                                     ? formatDistanceToNowStrict(invoice.generated_at, {
                                                           addSuffix: true,
+                                                          locale: i18n.language === 'zh_CN' ? zhCN : undefined,
                                                       })
-                                                    : 'Pending'}
+                                                    : t('billingModule.pending')}
                                             </td>
                                             <td css={tw`pr-6 py-4 text-right`}>
                                                 <button
                                                     type={'button'}
-                                                    aria-label={'Download invoice'}
+                                                    aria-label={t('billingModule.downloadInvoice')}
                                                     disabled={downloading === invoice.id}
                                                     onClick={() => download(invoice.id, invoice.number)}
                                                     css={tw`text-neutral-400 hover:text-neutral-100 transition-colors duration-150 disabled:opacity-50`}

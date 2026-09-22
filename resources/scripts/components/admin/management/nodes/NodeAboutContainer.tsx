@@ -26,6 +26,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Tooltip from '@/elements/tooltip/Tooltip';
 import { getNodeUtilization, NodeUtilization } from '@/api/routes/admin/nodes';
 import { useStoreState } from '@/state/hooks';
+import { useTranslation } from 'react-i18next';
 
 const Code = ({ className, children }: { className?: string; children: ReactNode }) => {
     return (
@@ -87,6 +88,8 @@ const AllocatedBox = ({ title, percent }: { title: string; percent?: number }) =
 };
 
 export default () => {
+    const { t } = useTranslation('admin');
+    const { t: tCommon } = useTranslation('common');
     const { clearFlashes } = useFlash();
     const [error, setError] = useState<boolean>(false);
 
@@ -120,7 +123,7 @@ export default () => {
 
     if (loading) {
         return (
-            <AdminBox title={'Node Information'} icon={faServer} css={tw`relative`}>
+            <AdminBox title={t('nodes.nodeInfo') as string} icon={faServer} css={tw`relative`}>
                 <SpinnerOverlay visible={loading} />
             </AdminBox>
         );
@@ -130,48 +133,50 @@ export default () => {
         <div className={'grid lg:grid-cols-3 gap-4'}>
             {error ? (
                 <Alert type={'danger'} className={'col-span-2'}>
-                    We were unable to connect to this node, so no information can be displayed.
+                    {t('nodes.unableToConnect')}
                 </Alert>
             ) : (
                 <>
-                    <AdminBox title={'System Information'} icon={faServer}>
+                    <AdminBox title={t('nodes.systemInformation') as string} icon={faServer}>
                         <table>
                             <tbody>
                                 <tr>
-                                    <td css={tw`py-1 pr-6`}>Version</td>
+                                    <td css={tw`py-1 pr-6`}>{t('nodes.version')}</td>
                                     <td css={tw`py-1`}>
                                         <Code css={tw`ml-auto`}>{info?.version}</Code>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td css={tw`py-1 pr-6`}>Operating System</td>
+                                    <td css={tw`py-1 pr-6`}>{t('nodes.operatingSystem')}</td>
                                     <td css={tw`py-1`}>
                                         <Code css={tw`ml-auto`}>{info?.system.type}</Code>
                                         <Code css={tw`ml-1`}>{info?.system.release}</Code>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td css={tw`py-1 pr-6`}>Architecture</td>
+                                    <td css={tw`py-1 pr-6`}>{t('nodes.architecture')}</td>
                                     <td css={tw`py-1`}>
                                         <Code css={tw`ml-auto`}>{info?.system.arch}</Code>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td css={tw`py-1 pr-6`}>CPU Threads</td>
+                                    <td css={tw`py-1 pr-6`}>{t('nodes.cpuThreads')}</td>
                                     <td css={tw`py-1`}>
                                         <Code css={tw`ml-auto`}>{info?.system.cpus}</Code>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td css={tw`py-1 pr-6`}>Supercharged</td>
+                                    <td css={tw`py-1 pr-6`}>{t('nodes.supercharged')}</td>
                                     <td css={tw`py-1`}>
-                                        <Code css={tw`ml-auto`}>{info?.system.supercharged ? 'Yes' : 'No'}</Code>
+                                        <Code css={tw`ml-auto`}>
+                                            {info?.system.supercharged ? tCommon('yes') : tCommon('no')}
+                                        </Code>
                                         <Tooltip
                                             placement={'right-end'}
                                             content={
                                                 info?.system.supercharged
-                                                    ? 'This node is running JexpanelSuperDaemon, which adds more features.'
-                                                    : 'This node is running Pterodactyl Wings. Consider moving to JexpanelSuperDaemon for more features.'
+                                                    ? t('nodes.superDaemonDesc')
+                                                    : t('nodes.wingsDesc')
                                             }
                                         >
                                             <FontAwesomeIcon
@@ -185,21 +190,21 @@ export default () => {
                             </tbody>
                         </table>
                     </AdminBox>
-                    <AdminBox icon={faMicrochip} title={'Resources'} css={tw`w-full relative`}>
+                    <AdminBox icon={faMicrochip} title={t('nodes.resources') as string} css={tw`w-full relative`}>
                         <div css={tw`md:w-full md:flex md:flex-row mb-6`}>
                             <div css={tw`md:w-full md:flex md:flex-col md:mr-4 mb-6 md:mb-0`}>
-                                <Label>Memory Limit</Label>
+                                <Label>{t('nodes.memoryLimit')}</Label>
                                 <Input disabled placeholder={`${(node.memory / 1024).toString()} GiB`}></Input>
                             </div>
 
                             <div css={tw`md:w-full md:flex md:flex-col md:ml-4 mb-6 md:mb-0`}>
-                                <Label>Disk Limit</Label>
+                                <Label>{t('nodes.diskLimit')}</Label>
                                 <Input disabled placeholder={`${(node.disk / 1024).toString()} GiB`}></Input>
                             </div>
                         </div>
                         <div css={tw`md:w-full md:flex md:flex-row mb-6`}>
                             <div css={tw`md:w-full md:flex md:flex-col mb-6 md:mb-0`}>
-                                <Label>FQDN Address</Label>
+                                <Label>{t('nodes.fqdnAddress')}</Label>
                                 <Input
                                     disabled
                                     placeholder={`${node.scheme}://${node.fqdn}:${node.listenPortHTTP}`}
@@ -207,46 +212,46 @@ export default () => {
                             </div>
                         </div>
                     </AdminBox>
-                    <AdminBox icon={faChartBar} title={'Allocation Information'} css={tw`w-full relative`}>
+                    <AdminBox icon={faChartBar} title={t('nodes.allocationInfo') as string} css={tw`w-full relative`}>
                         <div className={'grid space-y-6'}>
-                            <AllocatedBox title={'Memory allocated to servers'} percent={node.memoryUsedPercent} />
-                            <AllocatedBox title={'Disk allocated to servers'} percent={node.diskUsedPercent} />
-                            <AllocatedBox title={'Used Allocations'} percent={node.allocationsUsedPercent} />
+                            <AllocatedBox title={t('nodes.memoryAllocated')} percent={node.memoryUsedPercent} />
+                            <AllocatedBox title={t('nodes.diskAllocated')} percent={node.diskUsedPercent} />
+                            <AllocatedBox title={t('nodes.usedAllocations')} percent={node.allocationsUsedPercent} />
                         </div>
                     </AdminBox>
                     {utilization && (
-                        <AdminBox icon={faBarChart} title={'Resource Utilization'} css={tw`w-full relative`}>
+                        <AdminBox
+                            icon={faBarChart}
+                            title={t('nodes.resourceUtilization') as string}
+                            css={tw`w-full relative`}
+                        >
                             <div className={'grid lg:grid-cols-3 gap-6'}>
                                 <ResourceBox
                                     icon={faMicrochip}
-                                    title={'CPU usage'}
+                                    title={t('nodes.cpuUsage')}
                                     usage={`${utilization.cpu.toFixed(2)}%`}
                                 />
                                 <ResourceBox
                                     large
                                     icon={faMemory}
-                                    title={'RAM utilization'}
-                                    usage={`${(utilization.memory.used / 1024 / 1024 / 1024).toFixed(1)} GB of ${(
-                                        utilization.memory.total /
-                                        1024 /
-                                        1024 /
-                                        1024
-                                    ).toFixed(1)} GB`}
+                                    title={t('nodes.ramUtilization')}
+                                    usage={t('nodes.storageUsage', {
+                                        used: (utilization.memory.used / 1024 / 1024 / 1024).toFixed(1),
+                                        total: (utilization.memory.total / 1024 / 1024 / 1024).toFixed(1),
+                                    })}
                                 />
                                 <ResourceBox
                                     large
                                     icon={faHdd}
-                                    title={'Disk utilization'}
-                                    usage={`${(utilization.disk.used / 1024 / 1024 / 1024).toFixed(1)} GB of ${(
-                                        utilization.disk.total /
-                                        1024 /
-                                        1024 /
-                                        1024
-                                    ).toFixed(1)} GB`}
+                                    title={t('nodes.diskUtilization')}
+                                    usage={t('nodes.storageUsage', {
+                                        used: (utilization.disk.used / 1024 / 1024 / 1024).toFixed(1),
+                                        total: (utilization.disk.total / 1024 / 1024 / 1024).toFixed(1),
+                                    })}
                                 />
                                 <ResourceBox
                                     icon={faShuffle}
-                                    title={'Swap usage'}
+                                    title={t('nodes.swapUsage')}
                                     usage={`${(utilization.swap.used / 1024 / 1024 / 1024).toFixed(1)} GB`}
                                 />
                             </div>

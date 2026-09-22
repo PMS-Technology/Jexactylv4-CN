@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import tw from 'twin.macro';
 import styled from 'styled-components';
 
@@ -10,6 +11,7 @@ import CopyOnClick from '@/elements/CopyOnClick';
 import UpdateAvatarForm from '@account/forms/UpdateAvatarForm';
 import { breakpoint } from '@/assets/theme';
 import { useStoreState } from '@/state/hooks';
+import { useTranslation } from 'react-i18next';
 
 const Container = styled.div`
     ${tw`flex flex-wrap`};
@@ -35,31 +37,39 @@ const Detail = ({ label, children }: { label: string; children: ReactNode }) => 
 );
 
 export default () => {
+    const { t, i18n } = useTranslation('dashboard');
+    const { t: tCommon } = useTranslation('common');
     const user = useStoreState(state => state.user.data!);
 
     return (
-        <PageContentBlock title="Account" header description={'An overview of the details on your account.'}>
+        <PageContentBlock
+            title={t('account.overviewPageTitle')}
+            header
+            description={t('account.overviewPageDescription')}
+        >
             <Container css={tw`lg:grid lg:grid-cols-2 mb-10 mt-10`}>
-                <ContentBox title="Avatar" showFlashes="account:avatar">
+                <ContentBox title={t('account.avatar')} showFlashes="account:avatar">
                     <UpdateAvatarForm />
                 </ContentBox>
 
-                <ContentBox css={tw`mt-8 lg:mt-0 lg:ml-8`} title="Account Information">
-                    <Detail label={'Username'}>{user.username}</Detail>
-                    <Detail label={'Email Address'}>{user.email}</Detail>
-                    <Detail label={'Account ID'}>
+                <ContentBox css={tw`mt-8 lg:mt-0 lg:ml-8`} title={t('account.accountInformation')}>
+                    <Detail label={tCommon('username')}>{user.username}</Detail>
+                    <Detail label={tCommon('emailAddress')}>{user.email}</Detail>
+                    <Detail label={t('account.accountId')}>
                         <CopyOnClick text={user.uuid}>
                             <code css={tw`font-mono text-xs`}>{user.uuid}</code>
                         </CopyOnClick>
                     </Detail>
-                    {user.roleName && <Detail label={'Role'}>{user.roleName}</Detail>}
-                    <Detail label={'Member Since'}>{format(user.createdAt, 'MMMM do, yyyy')}</Detail>
+                    {user.roleName && <Detail label={t('account.role')}>{user.roleName}</Detail>}
+                    <Detail label={t('account.memberSince')}>
+                        {format(user.createdAt, i18n.language === 'zh_CN' ? 'yyyy年M月d日' : 'MMMM do, yyyy', {
+                            locale: i18n.language === 'zh_CN' ? zhCN : undefined,
+                        })}
+                    </Detail>
                     <p css={tw`text-xs text-gray-400 mt-6`}>
-                        Your email, password, and sign-in methods are managed under{' '}
                         <Link to={'/account/security'} css={tw`text-green-400 hover:text-green-200 duration-300`}>
-                            Security
+                            {t('account.securityManagement', { security: tCommon('security') })}
                         </Link>
-                        .
                     </p>
                 </ContentBox>
             </Container>

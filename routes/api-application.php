@@ -127,6 +127,7 @@ Route::middleware([AdminSubject::class])->group(function () {
     Route::group(['prefix' => '/ai'], function () {
         Route::put('/settings', [Application\IntelligenceController::class, 'update']);
         Route::post('/query', [Application\IntelligenceController::class, 'query']);
+        Route::post('/models/sync', [Application\IntelligenceController::class, 'syncModels']);
     });
 
     /*

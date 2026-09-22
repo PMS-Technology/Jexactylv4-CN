@@ -23,6 +23,7 @@ import { CogIcon, DesktopComputerIcon, PuzzleIcon, ReplyIcon } from '@heroicons/
 import SidebarControls from '@server/console/SidebarControls';
 import classNames from 'classnames';
 import NavigationBar from '@/elements/NavigationBar';
+import { useTranslation } from 'react-i18next';
 
 function statusToColor(status: ServerStatus): string {
     switch (status) {
@@ -40,6 +41,7 @@ function statusToColor(status: ServerStatus): string {
 }
 
 function ServerRouter() {
+    const { t } = useTranslation(['server', 'common']);
     const params = useParams<'id'>();
     const location = useLocation();
 
@@ -60,6 +62,10 @@ function ServerRouter() {
     const status = ServerContext.useStoreState(state => state.status.value);
 
     const categories = ['data', 'configuration'] as const;
+    const routeName = (route: (typeof routes.server)[number]): string =>
+        route.nameKey
+            ? (t(`server:${route.nameKey}` as any, { defaultValue: route.name }) as string)
+            : route.name || '';
 
     useEffect(() => {
         clearServerState();
@@ -99,19 +105,21 @@ function ServerRouter() {
                     <MobileSidebar.Home />
                     {routes.server
                         .filter(
-                            route => route.name && (!route.condition || route.condition({ billable, activityEnabled })),
+                            route =>
+                                (route.nameKey || route.name) &&
+                                (!route.condition || route.condition({ billable, activityEnabled })),
                         )
                         .map(route => (
                             <MobileSidebar.Link
                                 key={route.route}
                                 icon={route.icon ?? PuzzleIcon}
-                                text={route.name}
+                                text={routeName(route)}
                                 linkTo={route.path}
                                 end={route.end}
                             />
                         ))}
                     {(user.rootAdmin || user.admin_role_id) && (
-                        <MobileSidebar.Link icon={CogIcon} text={'Admin'} linkTo={'/admin'} />
+                        <MobileSidebar.Link icon={CogIcon} text={t('common:adminControl')} linkTo={'/admin'} />
                     )}
                 </MobileSidebar>
                 <Sidebar className={'flex-none'} $collapsed={collapsed} theme={theme}>
@@ -127,42 +135,46 @@ function ServerRouter() {
                             <img
                                 src={logo?.toString() || 'https://avatars.githubusercontent.com/u/91636558'}
                                 className={'mt-4 w-12'}
-                                alt={'Logo'}
+                                alt={t('common:logo')}
                             />
                         )}
                     </div>
                     <Sidebar.Wrapper theme={theme} className={'mb-auto'}>
                         <NavLink to={'/'} end className={'mb-[18px]'}>
                             <DesktopComputerIcon />
-                            <span>Dashboard</span>
+                            <span>{t('common:dashboard')}</span>
                         </NavLink>
-                        <Sidebar.Section>Server {server?.uuid?.slice(0, 8)}</Sidebar.Section>
+                        <Sidebar.Section>
+                            {t('server:server')} {server?.uuid?.slice(0, 8)}
+                        </Sidebar.Section>
                         {routes.server
                             .filter(
                                 route =>
                                     !route.category &&
-                                    route.name &&
+                                    (route.nameKey || route.name) &&
                                     (!route.condition || route.condition({ billable, activityEnabled })),
                             )
                             .map(route => (
                                 <NavLink to={route.path} key={route.path} end={route.end}>
                                     <Sidebar.Icon icon={route.icon ?? PuzzleIcon} />
-                                    <span>{route.name}</span>
+                                    <span>{routeName(route)}</span>
                                 </NavLink>
                             ))}
                         {categories.map(category => {
                             const categoryRoutes = routes.server.filter(
-                                route => route.category === category && route.name,
+                                route => route.category === category && (route.nameKey || route.name),
                             );
                             if (categoryRoutes.length === 0) return null;
 
                             return (
                                 <Fragment key={category}>
-                                    <Sidebar.Section>{category[0]!.toUpperCase() + category.slice(1)}</Sidebar.Section>
+                                    <Sidebar.Section>
+                                        {t(`server:categories.${category}` as any) as string}
+                                    </Sidebar.Section>
                                     {categoryRoutes.map(route => (
                                         <NavLink to={route.path} key={route.path} end={route.end}>
                                             <Sidebar.Icon icon={route.icon ?? PuzzleIcon} />
-                                            <span>{route.name}</span>
+                                            <span>{routeName(route)}</span>
                                         </NavLink>
                                     ))}
                                 </Fragment>
@@ -171,7 +183,7 @@ function ServerRouter() {
                         {user.rootAdmin && (
                             <NavLink to={`/admin/servers/${server?.internalId}`}>
                                 <ReplyIcon />
-                                <span>View as Admin</span>
+                                <span>{t('server:viewAsAdmin')}</span>
                             </NavLink>
                         )}
                     </Sidebar.Wrapper>

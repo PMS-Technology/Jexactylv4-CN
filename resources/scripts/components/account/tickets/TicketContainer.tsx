@@ -7,6 +7,7 @@ import PageContentBlock from '@/elements/PageContentBlock';
 import CreateTicketForm from '@account/tickets/CreateTicketForm';
 import SpinnerOverlay from '@/elements/SpinnerOverlay';
 import { format, formatDistanceToNow } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import classNames from 'classnames';
 import { Link } from 'react-router-dom';
 import { useStoreState } from '@/state/hooks';
@@ -26,7 +27,8 @@ export const statusToColor = (status: string): string => {
 };
 
 export default () => {
-    const { t } = useTranslation('dashboard');
+    const { t, i18n } = useTranslation('dashboard');
+    const isChinese = i18n.language === 'zh_CN';
     const { clearAndAddHttpError } = useFlashKey('account');
     const { colors } = useStoreState(state => state.theme.data!);
     const {
@@ -86,12 +88,19 @@ export default () => {
                                                     'flex-1 md:flex-none md:w-48 mt-4 md:mt-0 md:ml-8 md:text-center'
                                                 }
                                             >
-                                                <p className={'text-sm'}>{format(ticket.createdAt, 'MMMM do, yyyy')}</p>
+                                                <p className={'text-sm'}>
+                                                    {format(
+                                                        ticket.createdAt,
+                                                        isChinese ? 'yyyy年M月d日' : 'MMMM do, yyyy',
+                                                        { locale: isChinese ? zhCN : undefined },
+                                                    )}
+                                                </p>
                                                 <p className={'text-2xs text-gray-300 uppercase mt-1'}>
                                                     {t('tickets.created')}{' '}
                                                     {formatDistanceToNow(ticket.createdAt, {
                                                         includeSeconds: true,
                                                         addSuffix: true,
+                                                        locale: isChinese ? zhCN : undefined,
                                                     })}
                                                 </p>
                                             </div>

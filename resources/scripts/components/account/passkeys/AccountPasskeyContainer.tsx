@@ -10,8 +10,12 @@ import { usePasskeys } from '@/api/routes/account/passkeys';
 import { useFlashKey } from '@/plugins/useFlash';
 import CreatePasskeyForm from '@account/passkeys/CreatePasskeyForm';
 import DeletePasskeyButton from '@account/passkeys/DeletePasskeyButton';
+import { format } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t, i18n } = useTranslation('dashboard');
     const { clearAndAddHttpError } = useFlashKey('account');
     const { data, isValidating, error } = usePasskeys({
         revalidateOnMount: true,
@@ -24,13 +28,13 @@ export default () => {
 
     return (
         <div css={tw`md:flex flex-nowrap my-10`}>
-            <ContentBox title={'Add Passkey'} css={tw`flex-none w-full md:w-1/2`}>
+            <ContentBox title={t('account.passkeys.add')} css={tw`flex-none w-full md:w-1/2`}>
                 <CreatePasskeyForm />
             </ContentBox>
-            <ContentBox title={'Passkeys'} css={tw`flex-1 overflow-hidden mt-8 md:mt-0 md:ml-8`}>
+            <ContentBox title={t('account.passkeys.title')} css={tw`flex-1 overflow-hidden mt-8 md:mt-0 md:ml-8`}>
                 <SpinnerOverlay visible={!data && isValidating} />
                 {!data || !data.length ? (
-                    <p css={tw`text-center text-sm`}>{!data ? 'Loading...' : 'No passkeys exist for this account.'}</p>
+                    <p css={tw`text-center text-sm`}>{!data ? t('account.loading') : t('account.passkeys.none')}</p>
                 ) : (
                     data.map((passkey, index) => (
                         <GreyRowBox
@@ -41,12 +45,18 @@ export default () => {
                             <div css={tw`flex-1`}>
                                 <p css={tw`text-lg font-bold break-words`}>{passkey.name}</p>
                                 <p css={tw`text-xs mt-1 text-gray-400 uppercase`}>
-                                    Last used:&nbsp;
-                                    {passkey.lastUsedAt ? passkey.lastUsedAt.toLocaleString() : 'Never'}
+                                    {t('account.lastUsed')}:&nbsp;
+                                    {passkey.lastUsedAt
+                                        ? format(passkey.lastUsedAt, 'PPp', {
+                                              locale: i18n.language === 'zh_CN' ? zhCN : undefined,
+                                          })
+                                        : t('account.never')}
                                 </p>
                                 <p css={tw`text-xs mt-1 text-gray-400 uppercase`}>
-                                    Added on:&nbsp;
-                                    {passkey.createdAt.toLocaleString()}
+                                    {t('account.addedOn')}:&nbsp;
+                                    {format(passkey.createdAt, 'PPp', {
+                                        locale: i18n.language === 'zh_CN' ? zhCN : undefined,
+                                    })}
                                 </p>
                             </div>
                             <DeletePasskeyButton name={passkey.name} uuid={passkey.uuid} />

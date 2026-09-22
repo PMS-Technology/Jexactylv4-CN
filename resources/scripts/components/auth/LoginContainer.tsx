@@ -17,6 +17,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDiscord, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import Label from '@/elements/Label';
 import { faAt, faEnvelope, faFingerprint, faKey } from '@fortawesome/free-solid-svg-icons';
+import { useTranslation } from 'react-i18next';
 
 interface Values {
     username: string;
@@ -24,6 +25,7 @@ interface Values {
 }
 
 function LoginContainer() {
+    const { t } = useTranslation('auth');
     const ref = useRef<Reaptcha>(null);
     const token = useRef('');
 
@@ -127,29 +129,29 @@ function LoginContainer() {
             onSubmit={onSubmit}
             initialValues={{ username: '', password: '' }}
             validationSchema={object().shape({
-                username: string().required('A username or email must be provided.'),
-                password: string().required('Please enter your account password.'),
+                username: string().required(t('login.usernameRequired') as string),
+                password: string().required(t('login.passwordRequired') as string),
             })}
         >
             {({ isSubmitting, setSubmitting, submitForm }) => (
-                <LoginFormContainer title={`Welcome to ${appName}`}>
+                <LoginFormContainer title={t('login.title', { appName })}>
                     <Field
                         icon={faAt}
                         type={'text'}
-                        label={'Username or Email'}
+                        label={t('login.usernameOrEmail')}
                         name={'username'}
                         disabled={isSubmitting}
                         placeholder={'user@jexpanel.com'}
                     />
                     <div css={tw`mt-6`}>
                         <Label>
-                            Password
+                            {t('login.password')}
                             <Link
                                 to={'/auth/password'}
                                 tabIndex={-1}
                                 className={'ml-1 text-green-400 hover:text-green-200 duration-300 text-xs'}
                             >
-                                Forgot Password?
+                                {t('login.forgotPassword')}
                             </Link>
                         </Label>
                         <Field
@@ -168,7 +170,7 @@ function LoginContainer() {
                             size={Button.Sizes.Large}
                             disabled={isSubmitting}
                         >
-                            Login
+                            {t('login.loginButton')}
                         </Button>
                     </div>
                     {passkeysSupported() && (
@@ -181,8 +183,8 @@ function LoginContainer() {
                                 loading={passkeyPending}
                                 className={'w-full'}
                             >
-                                <FontAwesomeIcon icon={faFingerprint} className={'mr-2 my-auto'} /> Or, Sign in with a
-                                Passkey
+                                <FontAwesomeIcon icon={faFingerprint} className={'mr-2 my-auto'} />
+                                {t('login.usePasskey')}
                             </Button.Text>
                         </div>
                     )}
@@ -202,17 +204,18 @@ function LoginContainer() {
                         />
                     )}
                     {(modules.discord.enabled || modules.google.enabled || registration) && (
-                        <div className={'w-full text-center my-3 text-gray-400'}>OR</div>
+                        <div className={'w-full text-center my-3 text-gray-400'}>{t('login.or')}</div>
                     )}
                     <div className={'mt-4 w-full grid gap-4 grid-cols-2'}>
                         {modules.discord.enabled && (
                             <Button.Info type={'button'} onClick={() => useOauth('discord')} size={Button.Sizes.Small}>
-                                <FontAwesomeIcon icon={faDiscord} className={'mr-2 my-auto'} /> Use Discord SSO
+                                <FontAwesomeIcon icon={faDiscord} className={'mr-2 my-auto'} />{' '}
+                                {t('login.useDiscordSSO')}
                             </Button.Info>
                         )}
                         {modules.google.enabled && (
                             <Button.Text type={'button'} onClick={() => useOauth('google')} size={Button.Sizes.Small}>
-                                <FontAwesomeIcon icon={faGoogle} className={'mr-2 my-auto'} /> Use Google SSO
+                                <FontAwesomeIcon icon={faGoogle} className={'mr-2 my-auto'} /> {t('login.useGoogleSSO')}
                             </Button.Text>
                         )}
                         {registration && (
@@ -221,7 +224,8 @@ function LoginContainer() {
                                 onClick={() => navigate('/auth/register')}
                                 size={Button.Sizes.Small}
                             >
-                                <FontAwesomeIcon icon={faEnvelope} className={'mr-2 my-auto'} /> Register with Email
+                                <FontAwesomeIcon icon={faEnvelope} className={'mr-2 my-auto'} />{' '}
+                                {t('login.registerWithEmail')}
                             </Button.Text>
                         )}
                     </div>

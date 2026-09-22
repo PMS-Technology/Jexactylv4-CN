@@ -87,11 +87,11 @@ $style = [
                                             @if (! empty($greeting))
                                                 {{ $greeting }}
                                             @else
-                                                @if ($level == 'error')
-                                                    Whoops!
-                                                @else
-                                                    Hello!
-                                                @endif
+                                                 @if ($level == 'error')
+                                                    {{ __('strings.mail.whoops') }}
+                                                 @else
+                                                    {{ __('strings.mail.hello') }}
+                                                 @endif
                                             @endif
                                         </h1>
 

@@ -17,8 +17,19 @@ import http from '@/api/http';
 import NavigationBar from '@/elements/NavigationBar';
 import DashboardContainer from '@account/DashboardContainer';
 import PageTransition from '@/elements/transitions/PageTransition';
+import { useTranslation } from 'react-i18next';
 
 function DashboardRouter() {
+    const { t } = useTranslation(['common', 'dashboard']);
+    const accountLabels: Record<string, string> = {
+        Account: 'account',
+        Security: 'security',
+        Tickets: 'tickets',
+        Billing: 'billing',
+        Orders: 'orders',
+    };
+    const accountName = (name: string) =>
+        (name === 'Security' ? t('common:security') : t(`dashboard:nav.${accountLabels[name]}` as any)) as string;
     const location = useLocation();
     const user = useStoreState(s => s.user.data!);
     const { name, logo } = useStoreState(s => s.settings.data!);
@@ -49,13 +60,13 @@ function DashboardRouter() {
                         <MobileSidebar.Link
                             key={route.route}
                             icon={route.icon ?? PuzzleIcon}
-                            text={route.name}
+                            text={accountName(route.name!)}
                             linkTo={route.path !== '' ? `/account/${route.path}` : ''}
                             end={route.end}
                         />
                     ))}
                 {(user.rootAdmin || user.admin_role_id) && (
-                    <MobileSidebar.Link icon={CogIcon} text={'Admin'} linkTo={'/admin'} />
+                    <MobileSidebar.Link icon={CogIcon} text={t('common:adminControl')} linkTo={'/admin'} />
                 )}
             </MobileSidebar>
             <Sidebar className={'flex-none'} $collapsed={collapsed} theme={theme}>
@@ -71,21 +82,21 @@ function DashboardRouter() {
                         <img
                             src={logo?.toString() || 'https://avatars.githubusercontent.com/u/91636558'}
                             className={'mt-4 w-12'}
-                            alt={'Logo'}
+                            alt={t('common:logo')}
                         />
                     )}
                 </div>
                 <Sidebar.Wrapper theme={theme}>
                     <NavLink to={'/'} end className={'mb-[18px]'}>
                         <DesktopComputerIcon />
-                        <span>Dashboard</span>
+                        <span>{t('common:dashboard')}</span>
                     </NavLink>
                     {routes.account
                         .filter(route => route.name && (!route.condition || route.condition(flags)))
                         .map(route => (
                             <NavLink to={`/account/${route.path}`} key={route.path} end={route.end}>
                                 <Sidebar.Icon icon={route.icon ?? PuzzleIcon} />
-                                <span>{route.name}</span>
+                                <span>{accountName(route.name!)}</span>
                             </NavLink>
                         ))}
                 </Sidebar.Wrapper>
@@ -113,12 +124,12 @@ function DashboardRouter() {
                     {(user.rootAdmin || user.admin_role_id) && (
                         <NavLink to={'/admin'}>
                             <CogIcon />
-                            <span className={collapsed ? 'hidden' : ''}>Settings</span>
+                            <span className={collapsed ? 'hidden' : ''}>{t('common:settings')}</span>
                         </NavLink>
                     )}
                     <NavLink to={'/'} onClick={onTriggerLogout}>
                         <LogoutIcon />
-                        <span className={collapsed ? 'hidden' : ''}>Logout</span>
+                        <span className={collapsed ? 'hidden' : ''}>{t('common:logout')}</span>
                     </NavLink>
                 </span>
                 <Sidebar.User>
@@ -131,7 +142,7 @@ function DashboardRouter() {
                                 'font-sans font-normal text-xs text-gray-300 whitespace-nowrap leading-tight select-none'
                             }
                         >
-                            <div className={'text-gray-400 text-sm'}>Welcome back,</div>
+                            <div className={'text-gray-400 text-sm'}>{t('common:welcomeBack')}</div>
                             {user.email}
                         </span>
                     </div>

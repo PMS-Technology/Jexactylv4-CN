@@ -17,8 +17,10 @@ import { NotFound } from '@/elements/ScreenBlock';
 import { PuzzleIcon, ReplyIcon } from '@heroicons/react/outline';
 import { Fragment } from 'react';
 import PageTransition from '@/elements/transitions/PageTransition';
+import { useTranslation } from 'react-i18next';
 
 function AdminRouter() {
+    const { t } = useTranslation(['admin', 'common']);
     const location = useLocation();
     const theme = useStoreState(state => state.theme.data!);
     const user = useStoreState(state => state.user.data!);
@@ -28,6 +30,24 @@ function AdminRouter() {
     const activityEnabled: boolean = settings.activity.enabled.admin;
 
     const categories = ['general', 'modules', 'appearance', 'management', 'services'] as const;
+    const navLabels: Record<string, string> = {
+        Overview: 'overview',
+        Activity: 'activity',
+        Settings: 'settings',
+        API: 'api',
+        Auth: 'auth',
+        Billing: 'billing',
+        Tickets: 'tickets',
+        AI: 'ai',
+        Theme: 'theme',
+        Links: 'links',
+        Alerts: 'alerts',
+        Databases: 'databases',
+        Nodes: 'nodes',
+        Servers: 'servers',
+        Users: 'users',
+    };
+    const navLabel = (name: string): string => t(`admin:nav.${navLabels[name]}` as any) as string;
     const [collapsed, setCollapsed] = usePersistedState<boolean>(`sidebar_admin_${user.uuid}`, false);
 
     const canAccess = (route: (typeof routes.admin)[number]): boolean =>
@@ -49,7 +69,7 @@ function AdminRouter() {
                         <MobileSidebar.Link
                             key={route.route}
                             icon={route.icon ?? PuzzleIcon}
-                            text={route.name}
+                            text={navLabel(route.name!)}
                             linkTo={route.path}
                             end={route.end}
                         />
@@ -68,14 +88,14 @@ function AdminRouter() {
                         <img
                             src={settings.logo?.toString() || 'https://avatars.githubusercontent.com/u/91636558'}
                             className={'mt-4 w-12'}
-                            alt={'Logo'}
+                            alt={t('common:logo')}
                         />
                     )}
                 </div>
                 <Sidebar.Wrapper theme={theme} $admin>
                     <NavLink to="/" className={'mb-[18px]'}>
                         <Sidebar.Icon icon={ReplyIcon} />
-                        <span>Return</span>
+                        <span>{t('common:return')}</span>
                     </NavLink>
                     {categories.map(category => {
                         const categoryRoutes = routes.admin.filter(
@@ -89,11 +109,11 @@ function AdminRouter() {
 
                         return (
                             <Fragment key={category}>
-                                <Sidebar.Section>{category[0]!.toUpperCase() + category.slice(1)}</Sidebar.Section>
+                                <Sidebar.Section>{t(`admin:categories.${category}` as any) as string}</Sidebar.Section>
                                 {categoryRoutes.map(route => (
                                     <NavLink to={route.path} key={route.path} end={route.end}>
                                         <Sidebar.Icon icon={route.icon ?? PuzzleIcon} />
-                                        <span>{route.name}</span>
+                                        <span>{navLabel(route.name!)}</span>
                                     </NavLink>
                                 ))}
                             </Fragment>
@@ -107,9 +127,9 @@ function AdminRouter() {
                     <div className={'flex flex-col ml-3'}>
                         <span className={'font-sans font-normal text-xs text-gray-300 leading-tight select-none'}>
                             <div className={'w-full flex justify-between mb-1'}>
-                                <p className={'text-sm text-gray-400'}>Welcome,</p>
+                                <p className={'text-sm text-gray-400'}>{t('common:welcome')}</p>
                                 <Pill size={'xsmall'} type={'info'}>
-                                    {user.roleName === 'None' ? 'Root Admin' : user.roleName}
+                                    {user.roleName === 'None' ? t('common:rootAdmin') : user.roleName}
                                 </Pill>
                             </div>
                             {user.email}

@@ -2,10 +2,9 @@
 
 namespace Everest\Http\Controllers\Api\Client\Servers;
 
-use GeminiAPI\Client;
 use Everest\Models\Server;
 use Illuminate\Http\JsonResponse;
-use GeminiAPI\Resources\Parts\TextPart;
+use Everest\Services\AI\AIProviderService;
 use Everest\Http\Controllers\Api\Client\ClientApiController;
 use Everest\Http\Requests\Api\Client\Servers\QueryAIRequest;
 
@@ -14,7 +13,7 @@ class AIController extends ClientApiController
     /**
      * AIController constructor.
      */
-    public function __construct()
+    public function __construct(private AIProviderService $provider)
     {
         parent::__construct();
     }
@@ -25,15 +24,9 @@ class AIController extends ClientApiController
     public function index(QueryAIRequest $request, Server $server): JsonResponse
     {
         if (!config('modules.ai.enabled')) {
-            throw new \Exception('The JexpanelAI module is not enabled.');
+            throw new \Exception('The Jexactyl AI module is not enabled.');
         }
 
-        $client = new Client(config('modules.ai.key'));
-
-        $response = $client->geminiPro()->generateContent(
-            new TextPart($request->input('query')),
-        );
-
-        return response()->json($response->text());
+        return response()->json($this->provider->query($request->input('query')));
     }
 }

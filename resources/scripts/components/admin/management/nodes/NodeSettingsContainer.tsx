@@ -12,6 +12,7 @@ import SpinnerOverlay from '@/elements/SpinnerOverlay';
 
 export default function NodeSettingsContainer({ node }: { node?: Node }) {
     const { t } = useTranslation('admin');
+    const { t: tCommon } = useTranslation('common');
     const { isSubmitting } = useFormikContext();
 
     return (
@@ -34,11 +35,9 @@ export default function NodeSettingsContainer({ node }: { node?: Node }) {
                 <Field
                     id={'sftpAlias'}
                     name={'sftpAlias'}
-                    label={'SFTP Alias'}
+                    label={t('nodes.sftpAlias') as string}
                     type={'text'}
-                    description={
-                        'Optional hostname shown to server owners in the File Manager SFTP details instead of the FQDN.'
-                    }
+                    description={t('nodes.sftpAliasDesc') as string}
                 />
             </div>
 
@@ -74,12 +73,12 @@ export default function NodeSettingsContainer({ node }: { node?: Node }) {
                 <div>
                     <label css={tw`inline-flex items-center mr-2`}>
                         <FormikField name={'behindProxy'} type={'radio'} value={'false'} />
-                        <span css={tw`text-neutral-300 ml-2`}>{t('common.no') as string}</span>
+                        <span css={tw`text-neutral-300 ml-2`}>{tCommon('no') as string}</span>
                     </label>
 
                     <label css={tw`inline-flex items-center ml-2`}>
                         <FormikField name={'behindProxy'} type={'radio'} value={'true'} />
-                        <span css={tw`text-neutral-300 ml-2`}>{t('common.yes') as string}</span>
+                        <span css={tw`text-neutral-300 ml-2`}>{tCommon('yes') as string}</span>
                     </label>
                 </div>
             </div>

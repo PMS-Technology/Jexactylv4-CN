@@ -11,8 +11,10 @@ import { Context } from '@admin/management/nodes/NodeRouter';
 import CopyOnClick from '@/elements/CopyOnClick';
 import type { ApplicationStore } from '@/state';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Trans, useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { clearFlashes, clearAndAddHttpError } = useStoreActions(
         (actions: Actions<ApplicationStore>) => actions.flashes,
     );
@@ -41,12 +43,15 @@ export default () => {
         <>
             {searchParams.get('setup') === 'true' && (
                 <Alert type={'info'} css={tw`mb-4`}>
-                    Your node has been created. Copy the configuration below and paste it into&nbsp;
-                    <code className={'mx-1'}>/etc/pterodactyl/config.yml</code>&nbsp;on your new node to complete setup.
+                    <Trans
+                        ns={'admin'}
+                        i18nKey={'nodes.createdSetupInstructions'}
+                        components={{ code: <code className={'mx-1'} /> }}
+                    />
                 </Alert>
             )}
 
-            <AdminBox title={'Configuration'} icon={faCode} css={tw`mb-4`}>
+            <AdminBox title={t('nodes.nodeConfiguration') as string} icon={faCode} css={tw`mb-4`}>
                 <div css={tw`relative`}>
                     <div css={tw`absolute top-0 right-0`}>
                         <CopyOnClick text={configuration} showInNotification={false}>
@@ -64,8 +69,7 @@ export default () => {
 
             {searchParams.get('setup') === 'true' && (
                 <Alert type={'info'} css={tw`mb-4`}>
-                    After this is done, you&apos;ll need to set up Allocations for servers to connect to. Click
-                    &apos;Allocations&apos; at the top of your screen.
+                    {t('nodes.setupAllocationsInstructions') as string}
                 </Alert>
             )}
         </>

@@ -35,9 +35,7 @@ class ErrorBoundary extends Component<Props, State> {
                 >
                     <ExclamationIcon css={tw`h-4 w-4 flex-shrink-0 mr-2`} />
 
-                    <p css={tw`text-sm text-neutral-100`}>
-                        {this.props.t('error.appError')}
-                    </p>
+                    <p css={tw`text-sm text-neutral-100`}>{this.props.t('error.appError')}</p>
                 </div>
             </div>
         ) : (

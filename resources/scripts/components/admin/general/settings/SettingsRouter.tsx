@@ -19,7 +19,9 @@ const SettingsRouter = () => {
         <AdminContentBlock title={t('settings.settings') as string}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{t('settings.settings') as string}</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>
+                        {t('settings.settings') as string}
+                    </h2>
                     <p
                         css={tw`hidden lg:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
@@ -40,7 +42,7 @@ const SettingsRouter = () => {
                 <SubNavigationLink to="/admin/settings/webhooks" name={t('settings.webhooks') as string}>
                     <LinkIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to="/admin/settings/debug" name="Debug">
+                <SubNavigationLink to="/admin/settings/debug" name={t('settings.debugMode') as string}>
                     <TerminalIcon />
                 </SubNavigationLink>
             </SubNavigation>

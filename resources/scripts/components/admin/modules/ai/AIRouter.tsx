@@ -7,35 +7,36 @@ import FlashMessageRender from '@/elements/FlashMessageRender';
 import { SubNavigation, SubNavigationLink } from '@admin/SubNavigation';
 import EnableAI from '@admin/modules/ai/EnableAI';
 import OverviewContainer from '@admin/modules/ai/OverviewContainer';
-import ConfigureAI from '@admin/modules/ai/ConfigureAI';
 import SettingsContainer from './SettingsContainer';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const settings = useStoreState(state => state.everest.data!.ai);
 
     if (!settings.enabled) return <EnableAI />;
-    if (settings.enabled && !settings.key) return <ConfigureAI />;
-
     return (
-        <AdminContentBlock title={'JexpanelAI'}>
+        <AdminContentBlock title={t('aiModule.title') as string}>
             <FlashMessageRender byKey={'admin:ai'} className={'mb-4'} />
             <div className={'w-full flex flex-row items-center mb-8'}>
                 <div className={'flex flex-col flex-shrink'} style={{ minWidth: '0' }}>
-                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>JexpanelAI</h2>
+                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>
+                        {t('aiModule.title') as string}
+                    </h2>
                     <p
                         className={
                             'hidden lg:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden'
                         }
                     >
-                        Use Artificial Intelligence to add more power to Jexactyl.
+                        {t('aiModule.description') as string}
                     </p>
                 </div>
             </div>
             <SubNavigation>
-                <SubNavigationLink to={'/admin/ai'} name={'General'} base>
+                <SubNavigationLink to={'/admin/ai'} name={t('aiModule.general') as string} base>
                     <SparklesIcon />
                 </SubNavigationLink>
-                <SubNavigationLink to={'/admin/ai/settings'} name={'Options'}>
+                <SubNavigationLink to={'/admin/ai/settings'} name={t('aiModule.options') as string}>
                     <CogIcon />
                 </SubNavigationLink>
             </SubNavigation>

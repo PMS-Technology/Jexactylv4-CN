@@ -44,6 +44,13 @@ const EditSubuserModal = ({ subuser }: Props) => {
     // that they should not need.
     const loggedInPermissions = ServerContext.useStoreState(state => state.server.permissions);
     const [canEditUser] = usePermissions(subuser ? ['user.update'] : ['user.create']);
+    const validationSchema = object().shape({
+        email: string()
+            .max(191, t('usersPage.validation.emailMax') as string)
+            .email(t('usersPage.validation.emailValid') as string)
+            .required(t('usersPage.validation.emailValid') as string),
+        permissions: array().of(string()),
+    });
 
     // The permissions that can be modified by this user.
     const editablePermissions = useDeepCompareMemo(() => {
@@ -96,19 +103,15 @@ const EditSubuserModal = ({ subuser }: Props) => {
                     permissions: subuser?.permissions || [],
                 } as Values
             }
-            validationSchema={object().shape({
-                email: string()
-                    .max(191, 'Email addresses must not exceed 191 characters.')
-                    .email('A valid email address must be provided.')
-                    .required('A valid email address must be provided.'),
-                permissions: array().of(string()),
-            })}
+            validationSchema={validationSchema}
         >
             <Form>
                 <div css={tw`flex justify-between`}>
                     <h2 css={tw`text-2xl`} ref={ref}>
                         {subuser
-                            ? (canEditUser ? (t('usersPage.modifyPermissions', { email: subuser.email }) as string) : (t('usersPage.viewPermissions', { email: subuser.email }) as string))
+                            ? canEditUser
+                                ? (t('usersPage.modifyPermissions', { email: subuser.email }) as string)
+                                : (t('usersPage.viewPermissions', { email: subuser.email }) as string)
                             : (t('usersPage.createSubuser') as string)}
                     </h2>
                     <div>
@@ -120,9 +123,7 @@ const EditSubuserModal = ({ subuser }: Props) => {
                 <FlashMessageRender byKey={'user:edit'} css={tw`mt-4`} />
                 {!isRootAdmin && loggedInPermissions[0] !== '*' && (
                     <div css={tw`mt-4 pl-4 py-2 border-l-4 border-cyan-400`}>
-                        <p css={tw`text-sm text-neutral-300`}>
-                            {t('usersPage.permissionNote') as string}
-                        </p>
+                        <p css={tw`text-sm text-neutral-300`}>{t('usersPage.permissionNote') as string}</p>
                     </div>
                 )}
                 {!subuser && (

@@ -6,6 +6,7 @@ import SpinnerOverlay from '@/elements/SpinnerOverlay';
 import { Product } from '@definitions/account/billing';
 import { createCheckoutSession } from '@/api/routes/account/billing/orders/process';
 import { Alert } from '@/elements/alert';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     node: number;
@@ -21,6 +22,7 @@ export interface BillingServerVariables {
 }
 
 export default (data: Props) => {
+    const { t } = useTranslation('dashboard');
     const [loading, setLoading] = useState(false);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const eggMissing = data.product.eggId === null && !data.egg;
@@ -45,13 +47,13 @@ export default (data: Props) => {
             <SpinnerOverlay visible={loading} />
             <FlashMessageRender byKey={'account:billing:order'} className={'mb-4'} />
             {isNaN(data.node) ? (
-                <Alert type={'warning'}>A valid node must be selected to continue with your order.</Alert>
+                <Alert type={'warning'}>{t('billing.validNodeRequired')}</Alert>
             ) : eggMissing ? (
-                <Alert type={'warning'}>An egg must be selected to continue with your order.</Alert>
+                <Alert type={'warning'}>{t('billing.eggRequired')}</Alert>
             ) : (
                 <div className={'text-right'}>
                     <Button disabled={isNaN(data.node) || eggMissing} size={Button.Sizes.Large}>
-                        Pay Now
+                        {t('billing.payNow')}
                     </Button>
                 </div>
             )}

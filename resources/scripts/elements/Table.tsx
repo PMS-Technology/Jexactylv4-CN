@@ -2,6 +2,7 @@ import { useStoreState } from '@/state/hooks';
 import { UsePaginationResult } from '@/plugins/usePagination';
 import { Button } from './button';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/outline';
+import { useTranslation } from 'react-i18next';
 
 const PaginatedFooter = ({
     pagination,
@@ -10,6 +11,7 @@ const PaginatedFooter = ({
     pagination: UsePaginationResult<any>;
     noBackground?: boolean;
 }) => {
+    const { t } = useTranslation('common');
     const { colors } = useStoreState(s => s.theme.data!);
 
     return (
@@ -19,14 +21,18 @@ const PaginatedFooter = ({
         >
             <div className={'flex justify-between space-x-2'}>
                 <p className={'text-xs font-bold text-gray-400 my-auto'}>
-                    Showing <span className={'text-white'}>{pagination.startIndex + 1}</span> to{' '}
-                    <span className={'text-white'}>{pagination.endIndex}</span> of{' '}
-                    <span className={'text-white'}>{pagination.totalItems}</span> results
+                    {t('pagination.showingResults', {
+                        from: pagination.startIndex + 1,
+                        to: pagination.endIndex,
+                        total: pagination.totalItems,
+                    })}
                 </p>
                 <div className={'inline-flex'}>
                     <p className={'text-xs font-bold text-gray-400 my-auto mr-2'}>
-                        Page <span className={'text-white'}>{pagination.currentPage}</span> of{' '}
-                        <span className={'text-white'}>{pagination.totalPages}</span>
+                        {t('pagination.page', {
+                            current: pagination.currentPage,
+                            total: pagination.totalPages,
+                        })}
                     </p>
                     <Button.Text
                         disabled={pagination.currentPage === 1}

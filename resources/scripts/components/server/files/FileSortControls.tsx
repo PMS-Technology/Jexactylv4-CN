@@ -32,10 +32,26 @@ const FileSortControls = () => {
     };
 
     const sortOptions: Array<{ value: SortField; label: string; tooltip: string }> = [
-        { value: 'name', label: t('filesPage.sort.name') as string, tooltip: t('filesPage.sort.nameTooltip') as string },
-        { value: 'modified', label: t('filesPage.sort.modified') as string, tooltip: t('filesPage.sort.modifiedTooltip') as string },
-        { value: 'size', label: t('filesPage.sort.size') as string, tooltip: t('filesPage.sort.sizeTooltip') as string },
-        { value: 'type', label: t('filesPage.sort.type') as string, tooltip: t('filesPage.sort.typeTooltip') as string },
+        {
+            value: 'name',
+            label: t('filesPage.sort.name') as string,
+            tooltip: t('filesPage.sort.nameTooltip') as string,
+        },
+        {
+            value: 'modified',
+            label: t('filesPage.sort.modified') as string,
+            tooltip: t('filesPage.sort.modifiedTooltip') as string,
+        },
+        {
+            value: 'size',
+            label: t('filesPage.sort.size') as string,
+            tooltip: t('filesPage.sort.sizeTooltip') as string,
+        },
+        {
+            value: 'type',
+            label: t('filesPage.sort.type') as string,
+            tooltip: t('filesPage.sort.typeTooltip') as string,
+        },
     ];
 
     return (
@@ -84,7 +100,7 @@ const FileSortControls = () => {
                         value={searchTerm}
                         onChange={e => setSearchTerm(e.target.value)}
                         style={{ paddingLeft: '2.5rem', fontSize: '0.875rem' }}
-                        aria-label="Search files by name"
+                        aria-label={t('filesPage.sort.searchAriaLabel') as string}
                         role="searchbox"
                     />
                 </div>

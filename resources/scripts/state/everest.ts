@@ -68,6 +68,12 @@ export interface EverestSettings {
         enabled: boolean;
         key: boolean | string;
         user_access: boolean;
+        format: import('@/api/routes/admin/ai').AIFormat;
+        model: string;
+        base_url: string;
+        project: string;
+        location: string;
+        models: string[];
     };
     webhooks: {
         enabled: boolean;

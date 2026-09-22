@@ -33,21 +33,6 @@ interface Values {
     continueOnFailure: boolean;
 }
 
-const schema = object().shape({
-    action: string().required().oneOf(['command', 'power', 'backup']),
-    payload: string().when('action', {
-        is: (v: string) => v !== 'backup',
-        then: string().required('A task payload must be provided.'),
-        otherwise: string(),
-    }),
-    continueOnFailure: boolean(),
-    timeOffset: number()
-        .typeError('The time offset must be a valid number between 0 and 900.')
-        .required('A time offset value must be provided.')
-        .min(0, 'The time offset must be at least 0 seconds.')
-        .max(900, 'The time offset must be less than 900 seconds.'),
-});
-
 const ActionListener = () => {
     const [{ value }, { initialValue: initialAction }] = useField<string>('action');
     const [, { initialValue: initialPayload }, { setValue, setTouched }] = useField<string>('payload');
@@ -73,6 +58,20 @@ const TaskDetailsModal = ({ schedule, task }: Props) => {
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
     const appendSchedule = ServerContext.useStoreActions(actions => actions.schedules.appendSchedule);
     const backupLimit = ServerContext.useStoreState(state => state.server.data!.featureLimits.backups);
+    const schema = object().shape({
+        action: string().required().oneOf(['command', 'power', 'backup']),
+        payload: string().when('action', {
+            is: (v: string) => v !== 'backup',
+            then: string().required(t('schedulesPage.noPayload') as string),
+            otherwise: string(),
+        }),
+        continueOnFailure: boolean(),
+        timeOffset: number()
+            .typeError(t('schedulesPage.timeOffsetError') as string)
+            .required(t('schedulesPage.timeOffsetRequired') as string)
+            .min(0, t('schedulesPage.timeOffsetMin') as string)
+            .max(900, t('schedulesPage.timeOffsetMax') as string),
+    });
 
     useEffect(() => {
         return () => {
@@ -85,7 +84,7 @@ const TaskDetailsModal = ({ schedule, task }: Props) => {
         if (backupLimit === 0 && values.action === 'backup') {
             setSubmitting(false);
             addError({
-                message: "A backup task cannot be created when the server's backup limit is set to 0.",
+                message: t('schedulesPage.backupTaskError') as string,
                 key: 'schedule:task',
             });
         } else {
@@ -121,7 +120,9 @@ const TaskDetailsModal = ({ schedule, task }: Props) => {
             {({ isSubmitting, values }) => (
                 <Form css={tw`m-0`}>
                     <FlashMessageRender byKey={'schedule:task'} css={tw`mb-4`} />
-                    <h2 css={tw`text-2xl mb-6`}>{task ? (t('schedulesPage.editTask') as string) : (t('schedulesPage.createTask') as string)}</h2>
+                    <h2 css={tw`text-2xl mb-6`}>
+                        {task ? (t('schedulesPage.editTask') as string) : (t('schedulesPage.createTask') as string)}
+                    </h2>
                     <div css={tw`flex`}>
                         <div css={tw`mr-2 w-1/3`}>
                             <Label>{t('schedulesPage.action') as string}</Label>
@@ -183,7 +184,9 @@ const TaskDetailsModal = ({ schedule, task }: Props) => {
                     </div>
                     <div css={tw`flex justify-end mt-6`}>
                         <Button type={'submit'} disabled={isSubmitting}>
-                            {task ? (t('schedulesPage.saveChangesTask') as string) : (t('schedulesPage.createTaskButton') as string)}
+                            {task
+                                ? (t('schedulesPage.saveChangesTask') as string)
+                                : (t('schedulesPage.createTaskButton') as string)}
                         </Button>
                     </div>
                 </Form>

@@ -11,8 +11,10 @@ import ActivityLogEntry from '@/elements/activity/ActivityLogEntry';
 import Tooltip from '@/elements/tooltip/Tooltip';
 import useLocationHash from '@/plugins/useLocationHash';
 import { Context } from '@admin/management/users/UserRouter';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { hash } = useLocationHash();
     const user = Context.useStoreState(state => state.user);
     const { clearAndAddHttpError } = useFlashKey('user:activity');
@@ -39,14 +41,14 @@ export default () => {
                         className={classNames(btnStyles.button, btnStyles.text, 'w-full sm:w-auto')}
                         onClick={() => setFilters(value => ({ ...value, filters: {} }))}
                     >
-                        Clear Filters <XCircleIcon className={'ml-2 h-4 w-4'} />
+                        {t('activity.clearFilters') as string} <XCircleIcon className={'ml-2 h-4 w-4'} />
                     </Link>
                 </div>
             )}
             {!data && isValidating ? (
                 <Spinner centered />
             ) : !data?.items.length ? (
-                <p className={'text-center text-sm text-slate-400'}>No activity logs available for this user.</p>
+                <p className={'text-center text-sm text-slate-400'}>{t('activity.noUserLogs') as string}</p>
             ) : (
                 <div className={'bg-slate-700'}>
                     {data?.items.map(activity => (

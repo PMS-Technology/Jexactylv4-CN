@@ -76,7 +76,14 @@ export default () => {
                         </Pill>
                     )}
                     <Pill type={'success'}>
-                        <InformationCircleIcon className={'w-3 mr-1'} /> {server.status ?? (t('servers.active') as string)}
+                        <InformationCircleIcon className={'w-3 mr-1'} />{' '}
+                        {server.status === 'installing'
+                            ? (t('servers.installing') as string)
+                            : server.status === 'transferring'
+                            ? (t('servers.transferring') as string)
+                            : server.status === 'suspended'
+                            ? (t('servers.suspended') as string)
+                            : server.status ?? (t('servers.active') as string)}
                     </Pill>
                 </div>
             </div>
@@ -84,8 +91,17 @@ export default () => {
             <FlashMessageRender byKey={'server'} css={tw`mb-4`} />
 
             <SubNavigation>
-                <SubNavigationLink to={`/admin/servers/${params.id}`} name={t('servers.settings') as string} icon={CogIcon} base />
-                <SubNavigationLink to={`/admin/servers/${params.id}/startup`} name={t('servers.startup') as string} icon={AdjustmentsIcon} />
+                <SubNavigationLink
+                    to={`/admin/servers/${params.id}`}
+                    name={t('servers.settings') as string}
+                    icon={CogIcon}
+                    base
+                />
+                <SubNavigationLink
+                    to={`/admin/servers/${params.id}/startup`}
+                    name={t('servers.startup') as string}
+                    icon={AdjustmentsIcon}
+                />
                 <SubNavigationLink
                     to={`/admin/servers/${params.id}/databases`}
                     name={t('servers.databases') as string}
@@ -97,7 +113,11 @@ export default () => {
                     icon={CurrencyDollarIcon}
                     disabled={!billing.enabled || !server.billingProductId}
                 />
-                <SubNavigationLink to={`/admin/servers/${params.id}/activity`} name={'Activity'} icon={ClockIcon} />
+                <SubNavigationLink
+                    to={`/admin/servers/${params.id}/activity`}
+                    name={t('nav.activity') as string}
+                    icon={ClockIcon}
+                />
                 <SubNavigationLink
                     to={`/admin/servers/${params.id}/manage`}
                     name={t('servers.manage') as string}

@@ -19,7 +19,7 @@ export default () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [visible, setVisible] = useState<Visibility>('none');
 
-    const isEnabled = useStoreState(state => state.everest.data!.ai.enabled);
+    const isEnabled = useStoreState(state => state.everest.data!.ai.enabled && state.everest.data!.ai.user_access);
     const status = ServerContext.useStoreState(state => state.status.value);
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
     const { connected, instance } = ServerContext.useStoreState(state => state.socket);
@@ -34,7 +34,10 @@ export default () => {
                 setResponse(res);
                 setLoading(false);
             })
-            .catch(error => console.log(error));
+            .catch(() => {
+                setResponse(undefined);
+                setLoading(false);
+            });
     };
 
     useEffect(() => {
@@ -73,7 +76,7 @@ export default () => {
             ) : response ? (
                 <div className={'overflow-x-hidden bg-black/50 rounded-lg p-3'}>{response}</div>
             ) : (
-                t('ai.error') as string
+                (t('ai.error') as string)
             )}
         </Dialog>
     ) : (

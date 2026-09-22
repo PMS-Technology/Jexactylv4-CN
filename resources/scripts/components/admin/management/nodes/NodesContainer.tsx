@@ -21,7 +21,10 @@ import { Button } from '@/elements/button';
 import CopyOnClick from '@/elements/CopyOnClick';
 import { bytesToString, mbToBytes } from '@/lib/formatters';
 import { useStoreState } from '@/state/hooks';
+import { useTranslation } from 'react-i18next';
+
 const NodesContainer = () => {
+    const { t } = useTranslation('admin');
     const { colors } = useStoreState(state => state.theme.data!);
     const { setPage, setFilters, sort, setSort, sortDirection } = useContext(NodesContext);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
@@ -50,20 +53,20 @@ const NodesContainer = () => {
     };
 
     return (
-        <AdminContentBlock title={'Nodes'}>
+        <AdminContentBlock title={t('nodes.nodes') as string}>
             <div css={tw`w-full flex flex-row items-center mb-8`}>
                 <div css={tw`flex flex-col flex-shrink`} style={{ minWidth: '0' }}>
-                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>Nodes</h2>
+                    <h2 css={tw`text-2xl text-neutral-50 font-header font-medium`}>{t('nodes.nodes') as string}</h2>
                     <p
                         css={tw`hidden md:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden`}
                     >
-                        All nodes available on the system.
+                        {t('nodes.allNodes') as string}
                     </p>
                 </div>
 
                 <Link to={'/admin/nodes/new'} css={tw`flex ml-auto pl-4`}>
                     <Button type={'button'} css={tw`h-10 px-4 py-0 whitespace-nowrap`}>
-                        New Node
+                        {t('nodes.createNode') as string}
                     </Button>
                 </Link>
             </div>
@@ -77,27 +80,27 @@ const NodesContainer = () => {
                             <table css={tw`w-full table-auto`}>
                                 <TableHead>
                                     <TableHeader
-                                        name={'ID'}
+                                        name={t('nodes.id') as string}
                                         direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('id')}
                                     />
                                     <TableHeader
-                                        name={'Name'}
+                                        name={t('nodes.name') as string}
                                         direction={sort === 'name' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('name')}
                                     />
                                     <TableHeader
-                                        name={'FQDN'}
+                                        name={t('nodes.fqdn') as string}
                                         direction={sort === 'fqdn' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('fqdn')}
                                     />
                                     <TableHeader
-                                        name={'Total Memory'}
+                                        name={t('nodes.totalMemory') as string}
                                         direction={sort === 'memory' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('memory')}
                                     />
                                     <TableHeader
-                                        name={'Total Disk'}
+                                        name={t('nodes.totalDisk') as string}
                                         direction={sort === 'disk' ? (sortDirection ? 1 : 2) : null}
                                         onClick={() => setSort('disk')}
                                     />
@@ -148,13 +151,13 @@ const NodesContainer = () => {
                                                         <span
                                                             css={tw`px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-green-100 text-green-800`}
                                                         >
-                                                            Secure
+                                                            {t('nodes.secure') as string}
                                                         </span>
                                                     ) : (
                                                         <span
                                                             css={tw`px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-red-200 text-red-800`}
                                                         >
-                                                            Non-Secure
+                                                            {t('nodes.nonSecure') as string}
                                                         </span>
                                                     )}
                                                 </td>

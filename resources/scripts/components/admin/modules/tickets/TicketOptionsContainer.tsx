@@ -32,7 +32,7 @@ export default () => {
                 addFlash({
                     type: 'success',
                     key: 'admin:tickets',
-                    message: 'Settings have been updated successfully.',
+                    message: t('settings.savedSuccessfully') as string,
                 });
             })
             .catch(error => {
@@ -60,7 +60,9 @@ export default () => {
                     <AdminBox title={t('ticketsModule.maximumTicketCount') as string} icon={faFirstOrder}>
                         <div>
                             <div>
-                                <Label className={'mt-1 mr-2'}>{t('ticketsModule.whatShouldTheLimitBe') as string}</Label>
+                                <Label className={'mt-1 mr-2'}>
+                                    {t('ticketsModule.whatShouldTheLimitBe') as string}
+                                </Label>
                                 <Field id={'maxCount'} name={'maxCount'} defaultValue={settings.maxCount} />
                             </div>
                             <p className={'text-gray-400 text-xs mt-1.5'}>
@@ -70,9 +72,7 @@ export default () => {
                     </AdminBox>
                 </div>
                 <div css={tw`w-full flex flex-row items-center mt-6`}>
-                    <div css={tw`flex text-xs text-gray-500`}>
-                        {t('ticketsModule.changesMayNotApply') as string}
-                    </div>
+                    <div css={tw`flex text-xs text-gray-500`}>{t('ticketsModule.changesMayNotApply') as string}</div>
 
                     <div css={tw`flex ml-auto`}>
                         <ToggleTicketsButton />

@@ -12,6 +12,7 @@ import AdminTable, {
 } from '@/elements/AdminTable';
 import CopyOnClick from '@/elements/CopyOnClick';
 import { differenceInHours, format, formatDistanceToNow } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import { Link, NavLink } from 'react-router-dom';
 import tw from 'twin.macro';
 import { useStoreState } from '@/state/hooks';
@@ -24,7 +25,8 @@ import useFlash from '@/plugins/useFlash';
 import { CategoryFilters } from '@/api/routes/admin/billing';
 
 function CategoryTable() {
-    const { t } = useTranslation('admin');
+    const { t, i18n } = useTranslation('admin');
+    const isChinese = i18n.language === 'zh_CN';
     const { data: categories, error } = useGetCategories();
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { colors } = useStoreState(state => state.theme.data!);
@@ -54,7 +56,9 @@ function CategoryTable() {
         <>
             <div className={'w-full flex flex-row items-center my-8 px-8'}>
                 <div className={'flex flex-col flex-shrink'} style={{ minWidth: '0' }}>
-                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>{t('billingModule.categories')}</h2>
+                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>
+                        {t('billingModule.categories')}
+                    </h2>
                     <p
                         className={
                             'hidden lg:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden'
@@ -123,8 +127,15 @@ function CategoryTable() {
                                                 </td>
                                                 <td css={tw`px-6 text-sm text-neutral-200 text-left whitespace-nowrap`}>
                                                     {Math.abs(differenceInHours(category.createdAt, new Date())) > 48
-                                                        ? format(category.createdAt, 'MMM do, yyyy h:mma')
-                                                        : formatDistanceToNow(category.createdAt, { addSuffix: true })}
+                                                        ? format(
+                                                              category.createdAt,
+                                                              isChinese ? 'yyyy年M月d日 H:mm' : 'MMM do, yyyy h:mma',
+                                                              { locale: isChinese ? zhCN : undefined },
+                                                          )
+                                                        : formatDistanceToNow(category.createdAt, {
+                                                              addSuffix: true,
+                                                              locale: isChinese ? zhCN : undefined,
+                                                          })}
                                                 </td>
                                                 <td css={tw`px-6 text-sm text-neutral-200 text-left whitespace-nowrap`}>
                                                     <span
@@ -135,7 +146,9 @@ function CategoryTable() {
                                                                 : 'bg-red-200 text-red-800',
                                                         )}
                                                     >
-                                                        {category.visible ? t('billingModule.visible') : t('billingModule.hidden')}
+                                                        {category.visible
+                                                            ? t('billingModule.visible')
+                                                            : t('billingModule.hidden')}
                                                     </span>
                                                 </td>
                                             </TableRow>

@@ -15,6 +15,7 @@ import AdminTable, {
 } from '@/elements/AdminTable';
 import CopyOnClick from '@/elements/CopyOnClick';
 import { formatDistanceToNowStrict } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import { getAllOrders, useGetOrders } from '@/api/routes/account/billing/orders';
 import { Context as OrderContext } from '@/api/routes/account/billing/orders/index';
 import { OrderFilters } from '@/api/routes/account/billing/orders/types';
@@ -31,6 +32,7 @@ import {
 import StatTile from '@/elements/billing/StatTile';
 import Money from '@/elements/billing/Money';
 import InvoiceIcon from './InvoiceIcon';
+import { useTranslation } from 'react-i18next';
 
 export function type(state: string): PillStatus {
     switch (state) {
@@ -46,9 +48,42 @@ export function type(state: string): PillStatus {
 }
 
 function OrderTable({ server_id }: { server_id?: number }) {
+    const { t, i18n } = useTranslation('dashboard');
     const { data: orders, error } = useGetOrders();
     const { clearFlashes, clearAndAddHttpError } = useFlash();
     const { setPage, setFilters, sort, setSort, sortDirection } = useContext(OrderContext);
+
+    const orderStatusLabel = (status: string) => {
+        switch (status) {
+            case 'failed':
+                return t('billing.orderStatuses.failed');
+            case 'expired':
+                return t('billing.orderStatuses.expired');
+            case 'pending':
+                return t('billing.orderStatuses.pending');
+            case 'processing':
+                return t('billing.orderStatuses.processing');
+            case 'processed':
+                return t('billing.orderStatuses.processed');
+            default:
+                return status;
+        }
+    };
+
+    const orderTypeLabel = (orderType: string) => {
+        switch (orderType) {
+            case 'new':
+                return t('billing.orderTypes.new');
+            case 'upg':
+            case 'upgrade':
+                return t('billing.orderTypes.upgrade');
+            case 'ren':
+            case 'renewal':
+                return t('billing.orderTypes.renewal');
+            default:
+                return orderType;
+        }
+    };
 
     const onSearch = (query: string): Promise<void> => {
         return new Promise(resolve => {
@@ -83,29 +118,29 @@ function OrderTable({ server_id }: { server_id?: number }) {
                         <table className={`w-full table-auto`}>
                             <TableHead>
                                 <TableHeader
-                                    name={'ID'}
+                                    name={t('billing.orderId')}
                                     direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('id')}
                                 />
                                 <TableHeader
-                                    name={'Total Price'}
+                                    name={t('billing.totalPrice')}
                                     direction={sort === 'total' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('total')}
                                 />
-                                <TableHeader name={'Description'} />
+                                <TableHeader name={t('billing.description')} />
                                 <TableHeader
-                                    name={'Created At'}
+                                    name={t('billing.createdAt')}
                                     direction={sort === 'created_at' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('created_at')}
                                 />
-                                <TableHeader name={'Payment State'} />
+                                <TableHeader name={t('billing.paymentState')} />
                                 <TableHeader
-                                    name={'Order Type'}
+                                    name={t('billing.orderType')}
                                     direction={sort === 'type' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('type')}
                                 />
-                                {!server_id && <TableHeader name={'Active Service'} />}
-                                <TableHeader name={'Invoice'} />
+                                {!server_id && <TableHeader name={t('billing.activeService')} />}
+                                <TableHeader name={t('billing.invoice')} />
                             </TableHead>
                             <TableBody>
                                 {orders !== undefined &&
@@ -120,20 +155,23 @@ function OrderTable({ server_id }: { server_id?: number }) {
                                                 </CopyOnClick>
                                             </td>
                                             <td className={'px-6 py-4 text-white font-bold'}>
-                                                <Money value={order.total} suffix={'/mo'} />
+                                                <Money value={order.total} suffix={t('billing.mo')} />
                                             </td>
                                             <td className={'px-6 py-4'}>{order.description}</td>
                                             <td className={'px-6 py-4'}>
-                                                {formatDistanceToNowStrict(order.created_at, { addSuffix: true })}
+                                                {formatDistanceToNowStrict(order.created_at, {
+                                                    addSuffix: true,
+                                                    locale: i18n.language === 'zh_CN' ? zhCN : undefined,
+                                                })}
                                             </td>
                                             <td className={'px-6 py-4 text-left'}>
                                                 <Pill size={'small'} type={type(order.status)}>
-                                                    {order.status}
+                                                    {orderStatusLabel(order.status)}
                                                 </Pill>
                                             </td>
                                             <td className={'pr-12 py-4 text-center'}>
                                                 <Pill size={'small'} type={order.type === 'new' ? 'success' : 'info'}>
-                                                    {order.type.toUpperCase()}
+                                                    {orderTypeLabel(order.type)}
                                                 </Pill>
                                             </td>
                                             {!server_id && (
@@ -167,6 +205,7 @@ function OrderTable({ server_id }: { server_id?: number }) {
 }
 
 function BillingStats() {
+    const { t } = useTranslation('dashboard');
     const [orders, setOrders] = useState<Order[] | undefined>();
 
     useEffect(() => {
@@ -194,22 +233,22 @@ function BillingStats() {
         <div className={'grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8'}>
             <StatTile
                 icon={faServer}
-                label={'Active Services'}
+                label={t('billing.activeServices')}
                 value={orders === undefined ? '...' : activeServerIds.size}
             />
             <StatTile
                 icon={faWallet}
-                label={'Monthly Recurring'}
+                label={t('billing.monthlyRecurring')}
                 value={orders === undefined ? '...' : <Money value={monthlyRecurring} />}
             />
             <StatTile
                 icon={faReceipt}
-                label={'Lifetime Spend'}
+                label={t('billing.lifetimeSpend')}
                 value={orders === undefined ? '...' : <Money value={lifetimeSpend} />}
             />
             <StatTile
                 icon={faClockRotateLeft}
-                label={'Pending Orders'}
+                label={t('billing.pendingOrders')}
                 value={orders === undefined ? '...' : pending}
             />
         </div>
@@ -217,13 +256,14 @@ function BillingStats() {
 }
 
 export default ({ server_id }: { server_id?: number }) => {
+    const { t } = useTranslation('dashboard');
     const hooks = useTableHooks<OrderFilters>();
 
     return !server_id ? (
         <PageContentBlock
-            title={'Billing Activity'}
+            title={t('billing.billingActivity')}
             header
-            description={"View and manage the active and previous subscriptions you've created."}
+            description={t('billing.billingActivityDescription')}
             showFlashKey={'billing:orders'}
         >
             <BillingStats />

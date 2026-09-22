@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Tooltip from '@/elements/tooltip/Tooltip';
 import Translate from '@/elements/Translate';
 import { format, formatDistanceToNowStrict } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import { ActivityLog } from '@definitions/account';
 import ActivityLogMetaButton from '@/elements/activity/ActivityLogMetaButton';
 import { FolderOpenIcon, TerminalIcon } from '@heroicons/react/solid';
@@ -12,6 +13,7 @@ import Avatar from '@/elements/Avatar';
 import useLocationHash from '@/plugins/useLocationHash';
 import { getObjectKeys, isObject } from '@/lib/objects';
 import { useStoreState } from '@/state/hooks';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     activity: ActivityLog;
@@ -40,6 +42,8 @@ export function wrapProperties(value: unknown): any {
 }
 
 export default ({ activity, children }: Props) => {
+    const { t, i18n } = useTranslation('activity');
+    const isChinese = i18n.language === 'zh_CN';
     const { pathTo } = useLocationHash();
     const actor = activity.relationships.actor;
     const properties = wrapProperties(activity.properties);
@@ -74,12 +78,12 @@ export default ({ activity, children }: Props) => {
                         </Link>
                         <div className={classNames(style.icons, 'group-hover:text-slate-300')}>
                             {activity.isApi && (
-                                <Tooltip placement={'top'} content={'Using API Key'}>
+                                <Tooltip placement={'top'} content={t('usingApiKey')}>
                                     <TerminalIcon />
                                 </Tooltip>
                             )}
                             {activity.event.startsWith('server:sftp.') && (
-                                <Tooltip placement={'top'} content={'Using SFTP'}>
+                                <Tooltip placement={'top'} content={t('usingSftp')}>
                                     <FolderOpenIcon />
                                 </Tooltip>
                             )}
@@ -101,8 +105,22 @@ export default ({ activity, children }: Props) => {
                                 <span className={'text-slate-400'}>&nbsp;|&nbsp;</span>
                             </span>
                         )}
-                        <Tooltip placement={'right'} content={format(activity.timestamp, 'MMM do, yyyy H:mm:ss')}>
-                            <span>{formatDistanceToNowStrict(activity.timestamp, { addSuffix: true })}</span>
+                        <Tooltip
+                            placement={'right'}
+                            content={format(
+                                activity.timestamp,
+                                isChinese ? 'yyyy年M月d日 H:mm:ss' : 'MMM do, yyyy H:mm:ss',
+                                {
+                                    locale: isChinese ? zhCN : undefined,
+                                },
+                            )}
+                        >
+                            <span>
+                                {formatDistanceToNowStrict(activity.timestamp, {
+                                    addSuffix: true,
+                                    locale: isChinese ? zhCN : undefined,
+                                })}
+                            </span>
                         </Tooltip>
                     </div>
                 </div>

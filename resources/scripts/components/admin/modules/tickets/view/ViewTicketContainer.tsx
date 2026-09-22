@@ -2,6 +2,7 @@ import tw from 'twin.macro';
 import { useTranslation } from 'react-i18next';
 import AdminContentBlock from '@/elements/AdminContentBlock';
 import { differenceInHours, format, formatDistanceToNow } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import { statusToColor } from '@admin/modules/tickets/TicketsContainer';
 import classNames from 'classnames';
 import AdminBox from '@/elements/AdminBox';
@@ -25,7 +26,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { TicketStatus, Values, updateTicket, useTicketFromRoute } from '@/api/routes/admin/tickets';
 
 export default () => {
-    const { t } = useTranslation('admin');
+    const { t, i18n } = useTranslation('admin');
+    const isChinese = i18n.language === 'zh_CN';
     const { data: ticket, isLoading } = useTicketFromRoute();
     const boxStatus = useStatus();
 
@@ -85,8 +87,13 @@ export default () => {
                     >
                         {t('ticketsModule.firstCreated') as string}&nbsp;
                         {Math.abs(differenceInHours(ticket.created_at, new Date())) > 48
-                            ? format(ticket.created_at, 'MMM do, yyyy h:mma')
-                            : formatDistanceToNow(ticket.created_at, { addSuffix: true })}
+                            ? format(ticket.created_at, isChinese ? 'yyyy年M月d日 H:mm' : 'MMM do, yyyy h:mma', {
+                                  locale: isChinese ? zhCN : undefined,
+                              })
+                            : formatDistanceToNow(ticket.created_at, {
+                                  addSuffix: true,
+                                  locale: isChinese ? zhCN : undefined,
+                              })}
                     </p>
                 </div>
             </div>
@@ -101,7 +108,11 @@ export default () => {
             >
                 {({ isSubmitting }) => (
                     <Form>
-                        <AdminBox title={t('ticketsModule.ticketOptions') as string} icon={faGears} status={boxStatus.status}>
+                        <AdminBox
+                            title={t('ticketsModule.ticketOptions') as string}
+                            icon={faGears}
+                            status={boxStatus.status}
+                        >
                             <div className={'grid lg:grid-cols-3 gap-4'}>
                                 <div>
                                     <Label>{t('ticketsModule.updateTicketStatus') as string}</Label>
@@ -159,7 +170,9 @@ export default () => {
             <div className={'border-2 border-gray-700 rounded-full my-12'} />
             <div className={'w-full flex flex-row items-center'}>
                 <div className={'flex flex-col flex-shrink'} style={{ minWidth: '0' }}>
-                    <h2 className={'text-2xl font-header font-medium inline-flex'}>{t('ticketsModule.ticketMessages') as string}</h2>
+                    <h2 className={'text-2xl font-header font-medium inline-flex'}>
+                        {t('ticketsModule.ticketMessages') as string}
+                    </h2>
                 </div>
                 <div css={tw`flex ml-auto pl-4`}>
                     <NewMessageDialog ticketId={ticket.id} />

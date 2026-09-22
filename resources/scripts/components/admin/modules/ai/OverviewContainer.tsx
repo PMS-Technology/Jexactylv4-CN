@@ -10,6 +10,7 @@ import { handleQuery } from '@/api/routes/admin/ai';
 import { useFlashKey } from '@/plugins/useFlash';
 import Spinner from '@/elements/Spinner';
 import { Alert } from '@/elements/alert';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     primary: string;
@@ -18,6 +19,8 @@ interface Props {
 }
 
 function DisplayMessage({ primary, result, loading }: Props) {
+    const { t } = useTranslation('admin');
+
     if (result && result !== 'error') {
         return (
             <>
@@ -30,8 +33,7 @@ function DisplayMessage({ primary, result, loading }: Props) {
     if (result && result === 'error') {
         return (
             <>
-                <XCircleIcon className={'w-4 h-4 inline-flex text-red-400'} /> An error occurred. Please try again
-                later.
+                <XCircleIcon className={'w-4 h-4 inline-flex text-red-400'} /> {t('aiModule.errorOccurred')}
             </>
         );
     }
@@ -47,12 +49,14 @@ function DisplayMessage({ primary, result, loading }: Props) {
 
     return (
         <>
-            <SparklesIcon className={'w-4 h-4 inline-flex'} style={{ color: primary }} /> waiting for query
+            <SparklesIcon className={'w-4 h-4 inline-flex'} style={{ color: primary }} />
+            {t('aiModule.waitingForQuery')}
         </>
     );
 }
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [result, setResult] = useState<string>();
     const [loading, setLoading] = useState<boolean>(false);
     const { primary } = useStoreState(s => s.theme.data!.colors);
@@ -86,21 +90,20 @@ export default () => {
                 </div>
                 <div className={'w-full bg-zinc-800 rounded-b px-4 py-2 inline-flex'}>
                     <FontAwesomeIcon icon={faChevronRight} className={'my-auto mr-4'} />
-                    <Input className={'font-mono'} placeholder={'Ask JexpanelAI a question'} onKeyDown={submit} />
+                    <Input
+                        className={'font-mono'}
+                        placeholder={t('aiModule.askQuestion') as string}
+                        onKeyDown={submit}
+                    />
                 </div>
             </div>
             <div className={'col-span-2 space-y-4'}>
                 <Alert type={'warning'} className={'mt-16 md:mt-0'}>
-                    JexpanelAI relies on Google Gemini models for requests. Information provided could be inaccurate or
-                    outdated. Use with caution!
+                    {t('aiModule.aiWarning')}
                 </Alert>
-                <Alert type={'info'}>
-                    API requests are limited on Gemini&apos;s public API to 120/second - if you experience ratelimiting,
-                    you may need to upgrade your license.
-                </Alert>
-                <AdminBox title={'Disable JexpanelAI'} className={'col-span-2 h-min'}>
-                    Clicking the button below will disable JexpanelAI for both clients and administrators. Your API key
-                    will remain in the database unless you choose to delete it manually.
+                <Alert type={'info'}>{t('aiModule.apiLimitInfo')}</Alert>
+                <AdminBox title={t('aiModule.disableJexactylAI') as string} className={'col-span-2 h-min'}>
+                    {t('aiModule.disableDescription')}
                     <div className={'text-right mt-2'}>
                         <ToggleFeatureButton />
                     </div>

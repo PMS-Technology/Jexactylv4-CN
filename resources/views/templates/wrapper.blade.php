@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', config('app.locale')) }}">
     <head>
         <title>{{ config('app.name', 'Everest') }}</title>
 

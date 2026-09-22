@@ -10,8 +10,10 @@ import classNames from 'classnames';
 import ActivityLogEntry from '@/elements/activity/ActivityLogEntry';
 import Tooltip from '@/elements/tooltip/Tooltip';
 import useLocationHash from '@/plugins/useLocationHash';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('server');
     const { hash } = useLocationHash();
     const { clearAndAddHttpError } = useFlashKey('account');
     const [filters, setFilters] = useState<ActivityLogFilters>({ page: 1, sorts: { timestamp: -1 } });
@@ -37,7 +39,7 @@ export default () => {
                         className={classNames(btnStyles.button, btnStyles.text, 'w-full sm:w-auto')}
                         onClick={() => setFilters(value => ({ ...value, filters: {} }))}
                     >
-                        Clear Filters <XCircleIcon className={'ml-2 h-4 w-4'} />
+                        {t('activityPage.clearFilters')} <XCircleIcon className={'ml-2 h-4 w-4'} />
                     </Link>
                 </div>
             )}

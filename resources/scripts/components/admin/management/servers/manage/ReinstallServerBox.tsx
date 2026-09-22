@@ -8,8 +8,10 @@ import { useState } from 'react';
 import { reinstallServerEntry as reinstallServer } from '@/api/routes/admin/servers';
 import { useServerFromRoute } from '@/api/routes/admin/servers';
 import useFlash from '@/plugins/useFlash';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const { data: server } = useServerFromRoute();
     const [visible, setVisible] = useState<boolean>(false);
     const { addFlash, clearAndAddHttpError } = useFlash();
@@ -22,13 +24,13 @@ export default () => {
                 addFlash({
                     key: 'server:manage',
                     type: 'success',
-                    message: 'This server will begin the reinstallation process now.',
+                    message: t('servers.reinstallStarted') as string,
                 });
             })
             .catch(error => {
                 clearAndAddHttpError({
                     key: 'server:manage',
-                    error: `Failed to reinstall server: ${error.message}`,
+                    error: t('servers.reinstallFailed', { error: error.message }) as string,
                 });
             });
 
@@ -38,25 +40,24 @@ export default () => {
     return (
         <>
             <Dialog.Confirm
-                title={'Confirm server reinstallation'}
+                title={t('servers.confirmReinstallation') as string}
                 onConfirmed={submit}
                 open={visible}
                 onClose={() => setVisible(false)}
-                confirm={'I understand, proceed'}
+                confirm={t('servers.iUnderstandProceed') as string}
             >
-                Are you sure you wish to reinstall this server now? This could lead to a loss of data or files becoming
-                corrupted by the install process.
+                {t('servers.reinstallConfirmationDescription') as string}
             </Dialog.Confirm>
             <div css={tw`h-auto flex flex-col`}>
-                <AdminBox icon={faWrench} title={'Reinstall Server'} css={tw`relative w-full`}>
+                <AdminBox icon={faWrench} title={t('servers.reinstallServer') as string} css={tw`relative w-full`}>
                     <Button.Danger size={Button.Sizes.Large} css={tw`w-full`} onClick={() => setVisible(true)}>
-                        Reinstall Server
+                        {t('servers.reinstallServer') as string}
                     </Button.Danger>
                     <p css={tw`text-xs text-neutral-400 mt-2`}>
-                        This will reinstall the server with the assigned service scripts.
+                        {t('servers.reinstallServerDescription') as string}
                         <br />
                         <FontAwesomeIcon icon={faExclamationTriangle} className={'mr-1 text-red-500'} />
-                        This could overwrite server data.
+                        {t('servers.couldOverwriteData') as string}
                     </p>
                 </AdminBox>
             </div>

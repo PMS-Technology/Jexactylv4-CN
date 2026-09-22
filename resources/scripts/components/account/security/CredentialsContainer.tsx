@@ -6,6 +6,7 @@ import { breakpoint } from '@/assets/theme';
 import UpdatePasswordForm from '@account/forms/UpdatePasswordForm';
 import UpdateEmailAddressForm from '@account/forms/UpdateEmailAddressForm';
 import ConfigureTwoFactorForm from '@account/forms/ConfigureTwoFactorForm';
+import { useTranslation } from 'react-i18next';
 
 const Container = styled.div`
     ${tw`flex flex-wrap`};
@@ -23,18 +24,22 @@ const Container = styled.div`
     }
 `;
 
-export default () => (
-    <Container css={tw`lg:grid lg:grid-cols-3 my-10`}>
-        <ContentBox title="Update Password" showFlashes="account:password">
-            <UpdatePasswordForm />
-        </ContentBox>
+export default () => {
+    const { t } = useTranslation('dashboard');
 
-        <ContentBox css={tw`mt-8 lg:mt-0 lg:ml-8`} title="Update Email Address" showFlashes="account:email">
-            <UpdateEmailAddressForm />
-        </ContentBox>
+    return (
+        <Container css={tw`lg:grid lg:grid-cols-3 my-10`}>
+            <ContentBox title={t('account.updatePassword')} showFlashes="account:password">
+                <UpdatePasswordForm />
+            </ContentBox>
 
-        <ContentBox css={tw`mt-8 lg:mt-0 lg:ml-8`} title="Two-Step Verification">
-            <ConfigureTwoFactorForm />
-        </ContentBox>
-    </Container>
-);
+            <ContentBox css={tw`mt-8 lg:mt-0 lg:ml-8`} title={t('account.updateEmail')} showFlashes="account:email">
+                <UpdateEmailAddressForm />
+            </ContentBox>
+
+            <ContentBox css={tw`mt-8 lg:mt-0 lg:ml-8`} title={t('account.twoStepVerification')}>
+                <ConfigureTwoFactorForm />
+            </ContentBox>
+        </Container>
+    );
+};

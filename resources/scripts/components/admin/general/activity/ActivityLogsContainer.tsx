@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import classNames from 'classnames';
 import { debounce } from 'debounce';
 import { format, formatDistanceToNowStrict } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import AdminContentBlock from '@/elements/AdminContentBlock';
 import AdminTable, {
     Loading,
@@ -27,6 +28,7 @@ import useLocationHash from '@/plugins/useLocationHash';
 import { useStoreState } from '@/state/hooks';
 import { ActivityLogSubject } from '@definitions/account';
 import { ActivityLogListFilters, Context as ActivityContext, useGetActivityLogs } from '@/api/routes/admin/activity';
+import { useTranslation } from 'react-i18next';
 
 const subjectHref = (subject: ActivityLogSubject): string | null => {
     switch (subject.type) {
@@ -93,6 +95,7 @@ const FilterField = ({
 };
 
 function ActivityLogsContainer() {
+    const { t, i18n } = useTranslation('admin');
     const { hash, pathTo } = useLocationHash();
     const { colors } = useStoreState(state => state.theme.data!);
     const { setPage, filters, setFilters, sort, setSort, sortDirection } = useContext(ActivityContext);
@@ -103,18 +106,19 @@ function ActivityLogsContainer() {
     }, [hash]);
 
     const hasActiveFilters = Boolean(filters?.actor || filters?.subject || filters?.event || filters?.ip);
+    const dateLocale = i18n.language === 'zh_CN' ? zhCN : undefined;
 
     return (
-        <AdminContentBlock title={'Activity Log'}>
+        <AdminContentBlock title={t('activity.title') as string}>
             <div className={'w-full flex flex-row items-center mb-8'}>
                 <div className={'flex flex-col flex-shrink'} style={{ minWidth: '0' }}>
-                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>Activity Log</h2>
+                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>{t('activity.title')}</h2>
                     <p
                         className={
                             'hidden lg:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden'
                         }
                     >
-                        A paper-trail of administrative actions taken across the panel.
+                        {t('activity.description')}
                     </p>
                 </div>
                 {hasActiveFilters && (
@@ -124,7 +128,7 @@ function ActivityLogsContainer() {
                             className={classNames(btnStyles.button, btnStyles.text, 'w-full sm:w-auto')}
                             onClick={() => setFilters(null)}
                         >
-                            Clear Filters <XCircleIcon className={'ml-2 h-4 w-4'} />
+                            {t('activity.clearFilters')} <XCircleIcon className={'ml-2 h-4 w-4'} />
                         </Link>
                     </div>
                 )}
@@ -132,26 +136,26 @@ function ActivityLogsContainer() {
             <AdminTable>
                 <div className={'flex flex-wrap items-end gap-4 px-6 py-4'}>
                     <FilterField
-                        label={'Actor'}
-                        placeholder={'Filter by username...'}
+                        label={t('activity.actor')}
+                        placeholder={t('activity.filterByUsername')}
                         value={filters?.actor ?? ''}
                         onChange={value => setFilters(current => ({ ...current, actor: value || undefined }))}
                     />
                     <FilterField
-                        label={'Subject'}
-                        placeholder={'Filter by subject...'}
+                        label={t('activity.subject')}
+                        placeholder={t('activity.filterBySubject')}
                         value={filters?.subject ?? ''}
                         onChange={value => setFilters(current => ({ ...current, subject: value || undefined }))}
                     />
                     <FilterField
-                        label={'Event'}
-                        placeholder={'Filter by event key...'}
+                        label={t('activity.event')}
+                        placeholder={t('activity.filterByEvent')}
                         value={filters?.event ?? ''}
                         onChange={value => setFilters(current => ({ ...current, event: value || undefined }))}
                     />
                     <FilterField
-                        label={'IP Address'}
-                        placeholder={'Filter by IP address...'}
+                        label={t('activity.ipAddress')}
+                        placeholder={t('activity.filterByIp')}
                         value={filters?.ip ?? ''}
                         onChange={value => setFilters(current => ({ ...current, ip: value || undefined }))}
                     />
@@ -160,19 +164,19 @@ function ActivityLogsContainer() {
                     <div className={'overflow-x-auto'}>
                         <table className={'w-full table-auto'}>
                             <TableHead>
-                                <TableHeader name={'ID'} />
+                                <TableHeader name={t('activity.id') as string} />
                                 <TableHeader
-                                    name={'Time'}
+                                    name={t('activity.time') as string}
                                     direction={sort === 'timestamp' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('timestamp')}
                                 />
-                                <TableHeader name={'Actor'} />
+                                <TableHeader name={t('activity.actor') as string} />
                                 <TableHeader
-                                    name={'Event'}
+                                    name={t('activity.event') as string}
                                     direction={sort === 'event' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('event')}
                                 />
-                                <TableHeader name={'IP'} />
+                                <TableHeader name={t('activity.ip') as string} />
                             </TableHead>
                             <TableBody>
                                 {logs !== undefined &&
@@ -204,9 +208,12 @@ function ActivityLogsContainer() {
                                                         placement={'top'}
                                                         content={formatDistanceToNowStrict(item.timestamp, {
                                                             addSuffix: true,
+                                                            locale: dateLocale,
                                                         })}
                                                     >
-                                                        <span>{format(item.timestamp, 'MMM do, yyyy H:mm:ss')}</span>
+                                                        <span>
+                                                            {format(item.timestamp, 'PPpp', { locale: dateLocale })}
+                                                        </span>
                                                     </Tooltip>
                                                 </td>
                                                 <td className={'px-6 py-4 text-sm text-neutral-200 text-left'}>
@@ -225,11 +232,11 @@ function ActivityLogsContainer() {
                                                                     className={'font-bold hover:brightness-125'}
                                                                     style={{ color: colors.primary }}
                                                                 >
-                                                                    {actor?.username || 'System'}
+                                                                    {actor?.username || t('activity.system')}
                                                                 </Link>
                                                             ) : (
                                                                 <span className={'font-bold'}>
-                                                                    {actor?.username || 'System'}
+                                                                    {actor?.username || t('activity.system')}
                                                                 </span>
                                                             )}
                                                         </div>
@@ -271,9 +278,7 @@ function ActivityLogsContainer() {
                                                         ) : (
                                                             <Tooltip
                                                                 placement={'top'}
-                                                                content={
-                                                                    'A system-level action with no specific server or user target'
-                                                                }
+                                                                content={t('activity.systemAction')}
                                                             >
                                                                 <div
                                                                     className={
@@ -284,7 +289,7 @@ function ActivityLogsContainer() {
                                                                         className={'h-4 w-4 flex-shrink-0'}
                                                                     />
                                                                     <CogIcon className={'h-3.5 w-3.5'} />
-                                                                    <span>System</span>
+                                                                    <span>{t('activity.system')}</span>
                                                                 </div>
                                                             </Tooltip>
                                                         )}
@@ -304,12 +309,18 @@ function ActivityLogsContainer() {
                                                             </p>
                                                         </Link>
                                                         {item.isApi && (
-                                                            <Tooltip placement={'top'} content={'Using API Key'}>
+                                                            <Tooltip
+                                                                placement={'top'}
+                                                                content={t('activity.usingApiKey')}
+                                                            >
                                                                 <TerminalIcon className={'h-4 w-4 text-slate-400'} />
                                                             </Tooltip>
                                                         )}
                                                         {item.event.startsWith('server:sftp.') && (
-                                                            <Tooltip placement={'top'} content={'Using SFTP'}>
+                                                            <Tooltip
+                                                                placement={'top'}
+                                                                content={t('activity.usingSftp')}
+                                                            >
                                                                 <FolderOpenIcon className={'h-4 w-4 text-slate-400'} />
                                                             </Tooltip>
                                                         )}

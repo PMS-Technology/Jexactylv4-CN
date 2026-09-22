@@ -9,8 +9,10 @@ import { ServerContext } from '@/state/server';
 import { useStoreState } from '@/state/hooks';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCreditCard } from '@fortawesome/free-solid-svg-icons';
+import { useTranslation } from 'react-i18next';
 
 export default ({ product }: { product: Product }) => {
+    const { t, i18n } = useTranslation(['server', 'dashboard']);
     const { clearFlashes, clearAndAddHttpError } = useFlash();
 
     const settings = useStoreState(s => s.everest.data!.billing);
@@ -36,12 +38,14 @@ export default ({ product }: { product: Product }) => {
             <SpinnerOverlay visible={loading} />
             <FlashMessageRender byKey={'server:billing:payment'} className={'mb-4'} />
             <p className={'mb-4'}>
-                Renewing your server now will add another {days} days to your server, making your renewal date{' '}
-                {new Date(updatedRenewalDate).toLocaleDateString()} (+{days} days).
+                {t('server:billingPage.renewalPaymentDescription', {
+                    days,
+                    date: updatedRenewalDate.toLocaleDateString(i18n.language.replace('_', '-')),
+                })}
             </p>
             <div className={'text-right'}>
                 <Button className={'mt-4'} size={Button.Sizes.Large}>
-                    Pay Now <FontAwesomeIcon icon={faCreditCard} className={'ml-2'} />
+                    {t('dashboard:billing.payNow')} <FontAwesomeIcon icon={faCreditCard} className={'ml-2'} />
                 </Button>
             </div>
         </form>

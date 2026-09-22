@@ -11,6 +11,7 @@ import AdminTable, {
 } from '@/elements/AdminTable';
 import CopyOnClick from '@/elements/CopyOnClick';
 import { differenceInHours, format, formatDistanceToNow } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import { NavLink, useParams } from 'react-router-dom';
 import tw from 'twin.macro';
 import { useStoreState } from '@/state/hooks';
@@ -22,7 +23,8 @@ import { ProductContext, useGetProducts } from '@/api/routes/admin/billing';
 import { ProductFilters } from '@/api/routes/admin/billing';
 
 function ProductTable() {
-    const { t } = useTranslation('admin');
+    const { t, i18n } = useTranslation('admin');
+    const isChinese = i18n.language === 'zh_CN';
     const params = useParams<'id'>();
     const { data: products, error } = useGetProducts(Number(params.id));
     const { clearFlashes, clearAndAddHttpError } = useFlash();
@@ -115,8 +117,15 @@ function ProductTable() {
                                             </td>
                                             <td css={tw`px-6 text-sm text-neutral-200 text-left whitespace-nowrap`}>
                                                 {Math.abs(differenceInHours(product.createdAt, new Date())) > 48
-                                                    ? format(product.createdAt, 'MMM do, yyyy h:mma')
-                                                    : formatDistanceToNow(product.createdAt, { addSuffix: true })}
+                                                    ? format(
+                                                          product.createdAt,
+                                                          isChinese ? 'yyyy年M月d日 H:mm' : 'MMM do, yyyy h:mma',
+                                                          { locale: isChinese ? zhCN : undefined },
+                                                      )
+                                                    : formatDistanceToNow(product.createdAt, {
+                                                          addSuffix: true,
+                                                          locale: isChinese ? zhCN : undefined,
+                                                      })}
                                             </td>
                                         </TableRow>
                                     ))}

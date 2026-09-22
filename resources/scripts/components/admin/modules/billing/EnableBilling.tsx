@@ -10,10 +10,12 @@ export default () => {
     const primary = useStoreState(state => state.theme.data!.colors.primary);
 
     return (
-        <FeatureContainer image={<BillingSvg color={primary} />} icon={faMoneyBillWave} title={t('billingModule.billingSystem') as string}>
-            Use Jexactyl&apos;s billing and payment system to create subscriptions, manage customers and update
-            balances. View PDF invoices, manually change subscription details and so much more with our easy-to-use
-            interface and deep integration with third-party payment gateways like Stripe and PayPal.
+        <FeatureContainer
+            image={<BillingSvg color={primary} />}
+            icon={faMoneyBillWave}
+            title={t('billingModule.billingSystem') as string}
+        >
+            {t('billingModule.enableDescription') as string}
             <p className={'text-right mt-2'}>
                 <ToggleFeatureButton />
             </p>

@@ -6,9 +6,9 @@ import { SocketEvent, SocketRequest } from '@server/events';
 import UptimeDuration from '@server/UptimeDuration';
 import StatBlock from '@server/console/StatBlock';
 import { bytesToString, ip, mbToBytes } from '@/lib/formatters';
-import { capitalize } from '@/lib/strings';
 import { ServerContext } from '@/state/server';
 import useWebsocketEvent from '@/plugins/useWebsocketEvent';
+import { useTranslation } from 'react-i18next';
 
 type Stats = Record<'memory' | 'cpu' | 'disk' | 'uptime' | 'rx' | 'tx', number>;
 
@@ -35,6 +35,7 @@ function Limit({ limit, children }: { limit: string | null; children: ReactNode 
 }
 
 function ServerDetailsBlock({ className }: { className?: string }) {
+    const { t } = useTranslation('server');
     const [stats, setStats] = useState<Stats>({ memory: 0, cpu: 0, disk: 0, uptime: 0, tx: 0, rx: 0 });
 
     const status = ServerContext.useStoreState(state => state.status.value);
@@ -91,50 +92,55 @@ function ServerDetailsBlock({ className }: { className?: string }) {
 
     return (
         <div className={classNames('grid grid-cols-10 gap-2 md:gap-4 mb-6', className)}>
-            <StatBlock icon={faWifi} title={'Address'} className={'col-span-5 lg:col-span-2'} copyOnClick={allocation}>
+            <StatBlock
+                icon={faWifi}
+                title={t('consolePage.address') as string}
+                className={'col-span-5 lg:col-span-2'}
+                copyOnClick={allocation}
+            >
                 {allocationDisplay}
             </StatBlock>
             <StatBlock
                 icon={faClock}
-                title={'Uptime'}
+                title={t('consolePage.uptime') as string}
                 className={'col-span-5 lg:col-span-2'}
                 color={getBackgroundColor(status === 'running' ? 0 : status !== 'offline' ? 9 : 10, 10)}
             >
                 {status === null ? (
-                    'Offline'
+                    (t('consolePage.offline') as string)
                 ) : stats.uptime > 0 ? (
                     <UptimeDuration uptime={stats.uptime / 1000} />
                 ) : (
-                    capitalize(status)
+                    (t(`consolePage.status.${status}` as any) as string)
                 )}
             </StatBlock>
             <StatBlock
                 icon={faMicrochip}
-                title={'CPU Load'}
+                title={t('consolePage.cpuLoad') as string}
                 className={'col-span-5 lg:col-span-2'}
                 color={getBackgroundColor(stats.cpu, limits.cpu)}
             >
                 {status === 'offline' ? (
-                    <span className={'text-slate-400'}>Offline</span>
+                    <span className={'text-slate-400'}>{t('consolePage.offline') as string}</span>
                 ) : (
                     <Limit limit={textLimits.cpu}>{stats.cpu.toFixed(2)}%</Limit>
                 )}
             </StatBlock>
             <StatBlock
                 icon={faMemory}
-                title={'Memory'}
+                title={t('consolePage.memory') as string}
                 className={'col-span-5 lg:col-span-2'}
                 color={getBackgroundColor(stats.memory / 1024, limits.memory * 1024)}
             >
                 {status === 'offline' ? (
-                    <span className={'text-slate-400'}>Offline</span>
+                    <span className={'text-slate-400'}>{t('consolePage.offline') as string}</span>
                 ) : (
                     <Limit limit={textLimits.memory}>{bytesToString(stats.memory)}</Limit>
                 )}
             </StatBlock>
             <StatBlock
                 icon={faHdd}
-                title={'Disk'}
+                title={t('consolePage.disk') as string}
                 className={'col-span-5 lg:col-span-2'}
                 color={getBackgroundColor(stats.disk / 1024, limits.disk * 1024)}
             >

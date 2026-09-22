@@ -3,8 +3,10 @@ import Box from '@/components/admin/modules/auth/Box';
 import { faDoorOpen, faShieldHalved } from '@fortawesome/free-solid-svg-icons';
 import FlashMessageRender from '@/elements/FlashMessageRender';
 import { faDiscord, faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const modules = useStoreState(state => state.everest.data!.auth.modules);
     /**
      * Everest - Authentication Extensions
@@ -21,35 +23,31 @@ export default () => {
             <Box
                 icon={faDoorOpen}
                 name={'onboarding'}
-                title={'Onboarding'}
+                title={t('authModule.onboardingTitle') as string}
                 disabled={modules.onboarding.enabled}
-                recommended={
-                    "It is strongly recommended you use this module with OAuth modules. If you don't, users may be without a password."
-                }
-                description={
-                    'This module allows users to create usernames and passwords after signing up with an OAuth provider.'
-                }
+                recommended={t('authModule.onboardingOAuthRecommended') as string}
+                description={t('authModule.onboardingDescription') as string}
             />
             <Box
                 name={'jguard'}
                 icon={faShieldHalved}
-                title={'jGuard'}
+                title={t('authModule.jguardTitle') as string}
                 disabled={modules.jguard.enabled}
-                description={'Detects alt account signups and adds an optional access delay for new users.'}
+                description={t('authModule.jguardDescription') as string}
             />
             <Box
                 name={'discord'}
                 icon={faDiscord}
-                title={'Discord SSO'}
+                title={t('authModule.discordSSO') as string}
                 disabled={modules.discord.enabled}
-                description={'This module allows users to sign up and login via the Discord Authentication API.'}
+                description={t('authModule.discordDescription') as string}
             />
             <Box
                 name={'google'}
                 icon={faGoogle}
-                title={'Google SSO'}
+                title={t('authModule.googleSSO') as string}
                 disabled={modules.google.enabled}
-                description={'This module allows users to sign up and login via the Google Auth API.'}
+                description={t('authModule.googleDescription') as string}
             />
         </>
     );

@@ -38,7 +38,7 @@ export default () => {
                     addFlash({
                         key: 'server:manage',
                         type: 'error',
-                        message: 'Unable to load available nodes. Please try again.',
+                        message: t('servers.loadAvailableNodesFailed') as string,
                     });
                 });
         }
@@ -66,7 +66,7 @@ export default () => {
                     addFlash({
                         key: 'server:manage',
                         type: 'error',
-                        message: 'Unable to load available allocations for the selected node.',
+                        message: t('servers.loadAvailableAllocationsFailed') as string,
                     });
                     setLoading(false);
                 });
@@ -81,7 +81,7 @@ export default () => {
             addFlash({
                 key: 'server:manage',
                 type: 'error',
-                message: 'Please select both a node and an allocation.',
+                message: t('servers.selectNodeAndAllocation') as string,
             });
             return;
         }
@@ -95,7 +95,7 @@ export default () => {
                 addFlash({
                     key: 'server:manage',
                     type: 'success',
-                    message: 'Server transfer has been initiated. This may take several minutes.',
+                    message: t('servers.transferInitiated') as string,
                 });
                 setVisible(false);
                 // Reset form
@@ -108,8 +108,7 @@ export default () => {
                 addFlash({
                     key: 'server:manage',
                     type: 'error',
-                    message:
-                        'Failed to initiate server transfer. Please ensure the server is not suspended or already being transferred.',
+                    message: t('servers.transferFailed') as string,
                 });
             })
             .finally(() => {
@@ -154,7 +153,9 @@ export default () => {
 
                     {selectedNodeId && (
                         <div>
-                            <label css={tw`block text-sm font-medium mb-2`}>{t('servers.targetAllocation') as string}</label>
+                            <label css={tw`block text-sm font-medium mb-2`}>
+                                {t('servers.targetAllocation') as string}
+                            </label>
                             <select
                                 css={tw`shadow-none block p-3 pr-8 rounded border w-full text-sm transition-colors duration-150 ease-linear border-neutral-500 text-neutral-200 bg-neutral-800 outline-none disabled:opacity-50`}
                                 value={selectedAllocationId?.toString() || ''}
@@ -203,9 +204,7 @@ export default () => {
                     <Button size={Button.Sizes.Large} css={tw`w-full`} onClick={() => setVisible(true)}>
                         {t('servers.transferServer') as string}
                     </Button>
-                    <p css={tw`text-xs text-neutral-400 mt-2`}>
-                        {t('servers.transferServerDescription') as string}
-                    </p>
+                    <p css={tw`text-xs text-neutral-400 mt-2`}>{t('servers.transferServerDescription') as string}</p>
                 </AdminBox>
             </div>
         </>

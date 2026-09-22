@@ -1,7 +1,9 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileAlt, faFileArchive, faFileImport, faFolder } from '@fortawesome/free-solid-svg-icons';
 import { differenceInHours, format, formatDistanceToNow } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import { memo, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import FileDropdownMenu from '@server/files/FileDropdownMenu';
 import { ServerContext } from '@/state/server';
 import { NavLink } from 'react-router-dom';
@@ -35,6 +37,8 @@ function Clickable({ file, children }: { file: FileObject; children: ReactNode }
     );
 }
 const FileObjectRow = ({ file }: { file: FileObject }) => {
+    const { i18n } = useTranslation();
+    const isChinese = i18n.language === 'zh_CN';
     const { colors } = useStoreState(state => state.theme.data!);
 
     return (
@@ -62,8 +66,13 @@ const FileObjectRow = ({ file }: { file: FileObject }) => {
                 {file.isFile && <div css={tw`w-1/6 text-right mr-4 hidden sm:block`}>{bytesToString(file.size)}</div>}
                 <div css={tw`w-1/5 text-right mr-6 hidden md:block text-white/50`} title={file.modifiedAt.toString()}>
                     {Math.abs(differenceInHours(file.modifiedAt, new Date())) > 48
-                        ? format(file.modifiedAt, 'MMM do, yyyy h:mma')
-                        : formatDistanceToNow(file.modifiedAt, { addSuffix: true })}
+                        ? format(file.modifiedAt, isChinese ? 'yyyy年M月d日 HH:mm' : 'MMM do, yyyy h:mma', {
+                              locale: isChinese ? zhCN : undefined,
+                          })
+                        : formatDistanceToNow(file.modifiedAt, {
+                              addSuffix: true,
+                              locale: isChinese ? zhCN : undefined,
+                          })}
                 </div>
             </Clickable>
             <FileDropdownMenu file={file} />

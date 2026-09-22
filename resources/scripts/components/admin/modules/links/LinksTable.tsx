@@ -19,6 +19,7 @@ import Pill from '@/elements/Pill';
 import { Button } from '@/elements/button';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
     setOpen: Dispatch<SetStateAction<VisibleDialog>>;
@@ -26,6 +27,7 @@ interface Props {
 }
 
 const LinksTable = ({ setOpen, setLink }: Props) => {
+    const { t } = useTranslation('admin');
     const { data: links, error, isValidating } = getLinks();
     const { colors } = useStoreState(state => state.theme.data!);
     const { setPage, sort, sortDirection, setSort, setFilters } = useContext(LinksContext);
@@ -54,26 +56,26 @@ const LinksTable = ({ setOpen, setLink }: Props) => {
                         <table css={tw`w-full table-auto`}>
                             <TableHead>
                                 <TableHeader
-                                    name={'ID'}
+                                    name={t('linksModule.id')}
                                     direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('id')}
                                 />
                                 <TableHeader
-                                    name={'Name'}
+                                    name={t('linksModule.name')}
                                     direction={sort === 'name' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('name')}
                                 />
                                 <TableHeader
-                                    name={'URL'}
+                                    name={t('linksModule.url')}
                                     direction={sort === 'url' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('url')}
                                 />
                                 <TableHeader
-                                    name={'Is Visible'}
+                                    name={t('linksModule.isVisible')}
                                     direction={sort === 'visibe' ? (sortDirection ? 1 : 2) : null}
                                     onClick={() => setSort('visible')}
                                 />
-                                <TableHeader name={'Actions'} />
+                                <TableHeader name={t('linksModule.actions')} />
                             </TableHead>
 
                             <TableBody>
@@ -103,9 +105,9 @@ const LinksTable = ({ setOpen, setLink }: Props) => {
                                                 css={tw`px-6 text-sm text-neutral-200 text-left whitespace-nowrap font-bold hover:brightness-125`}
                                             >
                                                 {link.visible ? (
-                                                    <Pill type={'success'}>Visible</Pill>
+                                                    <Pill type={'success'}>{t('linksModule.visible')}</Pill>
                                                 ) : (
-                                                    <Pill type={'danger'}>Hidden</Pill>
+                                                    <Pill type={'danger'}>{t('linksModule.hidden')}</Pill>
                                                 )}
                                             </td>
                                             <td className={'px-6 py-4 space-x-3'}>

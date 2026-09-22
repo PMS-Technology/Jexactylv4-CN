@@ -76,12 +76,10 @@ export default () => {
                     defaultValue={delay || 0}
                     onChange={e => update('delay', parseInt(e.target.value))}
                 />
-                <p className={'text-xs text-gray-400 mt-1'}>
-                    {t('authModule.jguardDelayDescription') as string}
-                </p>
+                <p className={'text-xs text-gray-400 mt-1'}>{t('authModule.jguardDelayDescription') as string}</p>
             </div>
             <div className={'mt-6'}>
-                <Label>Alt account detection sensitivity</Label>
+                <Label>{t('authModule.altAccountDetectionSensitivity') as string}</Label>
                 <Select
                     id={'sensitivity'}
                     name={'sensitivity'}
@@ -89,15 +87,11 @@ export default () => {
                     onChange={e => update('sensitivity', e.target.value)}
                     autoComplete={'off'}
                 >
-                    <option value={'low'}>Low</option>
-                    <option value={'medium'}>Medium</option>
-                    <option value={'high'}>High</option>
+                    <option value={'low'}>{t('authModule.sensitivityLow') as string}</option>
+                    <option value={'medium'}>{t('authModule.sensitivityMedium') as string}</option>
+                    <option value={'high'}>{t('authModule.sensitivityHigh') as string}</option>
                 </Select>
-                <p className={'text-xs text-gray-400 mt-1'}>
-                    Controls how quickly jGuard blocks new signups from an IP address that has recently registered or
-                    failed to log in multiple times. Higher sensitivity blocks alt accounts more aggressively, but may
-                    also affect legitimate users signing up from a shared IP (e.g. school or office networks).
-                </p>
+                <p className={'text-xs text-gray-400 mt-1'}>{t('authModule.jguardSensitivityDescription') as string}</p>
             </div>
         </AdminBox>
     );

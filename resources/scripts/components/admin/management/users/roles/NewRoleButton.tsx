@@ -17,12 +17,6 @@ interface Values {
     color: string;
 }
 
-const schema = object().shape({
-    name: string().required('A role name must be provided.').max(32, 'Role name must not exceed 32 characters.'),
-    description: string().max(255, 'Role description must not exceed 255 characters.'),
-    color: string().nullable(),
-});
-
 export default () => {
     const { t } = useTranslation('admin');
     const [visible, setVisible] = useState(false);
@@ -49,7 +43,13 @@ export default () => {
             <Formik
                 onSubmit={submit}
                 initialValues={{ name: '', description: '', color: '' }}
-                validationSchema={schema}
+                validationSchema={object().shape({
+                    name: string()
+                        .required(t('users.roleNameRequired') as string)
+                        .max(32, t('users.roleNameMaxLength') as string),
+                    description: string().max(255, t('users.roleDescriptionMaxLength') as string),
+                    color: string().nullable(),
+                })}
             >
                 {({ isSubmitting, resetForm }) => (
                     <Dialog

@@ -40,7 +40,9 @@ export default ({ subuser }: Props) => {
                     />
                     &nbsp;
                 </p>
-                <p css={tw`text-2xs text-neutral-300 uppercase hidden md:block`}>{t('usersPage.twoFaEnabled') as string}</p>
+                <p css={tw`text-2xs text-neutral-300 uppercase hidden md:block`}>
+                    {t('usersPage.twoFaEnabled') as string}
+                </p>
             </div>
             <div css={tw`ml-4 hidden md:block`}>
                 <p css={tw`font-medium text-center`}>
@@ -53,7 +55,7 @@ export default ({ subuser }: Props) => {
                     <Can action={'user.update'}>
                         <button
                             type={'button'}
-                            aria-label={'Edit subuser'}
+                            aria-label={t('usersPage.editSubuser') as string}
                             css={tw`block text-sm p-1 md:p-2 text-neutral-500 hover:text-neutral-100 transition-colors duration-150 mx-4`}
                             onClick={() => setVisible(true)}
                         >

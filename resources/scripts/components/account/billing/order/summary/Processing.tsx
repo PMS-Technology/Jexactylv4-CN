@@ -5,8 +5,10 @@ import PageContentBlock from '@/elements/PageContentBlock';
 import Spinner from '@/elements/Spinner';
 import { processCheckoutSession } from '@/api/routes/account/billing/orders/process';
 import { useStoreState } from '@/state/hooks';
+import { useTranslation } from 'react-i18next';
 
 export default () => {
+    const { t } = useTranslation('dashboard');
     const navigate = useNavigate();
     const { colors } = useStoreState(state => state.theme.data!);
 
@@ -34,12 +36,9 @@ export default () => {
                 >
                     <FlashMessageRender byKey={'billing:process'} className={'mb-6'} />
                     <h2 className={'text-white font-bold text-4xl'}>
-                        Processing Order <Spinner centered />
+                        {t('billing.processingOrder')} <Spinner centered />
                     </h2>
-                    <p className={'text-sm text-neutral-200 mt-2'}>
-                        Our systems are currently working on deploying your server to our systems. Sit tight while your
-                        new server is deployed!
-                    </p>
+                    <p className={'text-sm text-neutral-200 mt-2'}>{t('billing.processingOrderDescription')}</p>
                 </div>
             </div>
         </PageContentBlock>

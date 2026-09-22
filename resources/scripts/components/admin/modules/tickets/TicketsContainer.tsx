@@ -17,6 +17,7 @@ import AdminTable, {
 import { Button } from '@/elements/button';
 import CopyOnClick from '@/elements/CopyOnClick';
 import { differenceInHours, format, formatDistanceToNow } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 import classNames from 'classnames';
 import { useStoreState } from '@/state/hooks';
 import Avatar from '@/elements/Avatar';
@@ -36,7 +37,8 @@ export const statusToColor = (status: TicketStatus): string => {
 };
 
 function TicketContainer() {
-    const { t } = useTranslation('admin');
+    const { t, i18n } = useTranslation('admin');
+    const isChinese = i18n.language === 'zh_CN';
     const { data: tickets } = getTickets();
     const { colors } = useStoreState(state => state.theme.data!);
     const { setPage, setFilters, sort, setSort, sortDirection } = useContext(TicketsContext);
@@ -56,7 +58,9 @@ function TicketContainer() {
         <AdminContentBlock title={t('ticketsModule.tickets') as string}>
             <div className={'w-full flex flex-row items-center mb-8'}>
                 <div className={'flex flex-col flex-shrink'} style={{ minWidth: '0' }}>
-                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>{t('ticketsModule.tickets') as string}</h2>
+                    <h2 className={'text-2xl text-neutral-50 font-header font-medium'}>
+                        {t('ticketsModule.tickets') as string}
+                    </h2>
                     <p
                         className={
                             'hidden lg:block text-base text-neutral-400 whitespace-nowrap overflow-ellipsis overflow-hidden'
@@ -140,8 +144,15 @@ function TicketContainer() {
                                                 </td>
                                                 <td css={tw`px-6 text-sm text-neutral-200 text-left whitespace-nowrap`}>
                                                     {Math.abs(differenceInHours(ticket.created_at, new Date())) > 48
-                                                        ? format(ticket.created_at, 'MMM do, yyyy h:mma')
-                                                        : formatDistanceToNow(ticket.created_at, { addSuffix: true })}
+                                                        ? format(
+                                                              ticket.created_at,
+                                                              isChinese ? 'yyyy年M月d日 H:mm' : 'MMM do, yyyy h:mma',
+                                                              { locale: isChinese ? zhCN : undefined },
+                                                          )
+                                                        : formatDistanceToNow(ticket.created_at, {
+                                                              addSuffix: true,
+                                                              locale: isChinese ? zhCN : undefined,
+                                                          })}
                                                 </td>
                                             </TableRow>
                                         ))}

@@ -8,8 +8,11 @@ import FlashMessageRender from '@/elements/FlashMessageRender';
 import useFlash from '@/plugins/useFlash';
 import { bytesToString } from '@/lib/formatters';
 import { downloadLogArchive, downloadLogFile, getLogFiles, LogFile } from '@/api/routes/admin/settings';
+import { useTranslation } from 'react-i18next';
+import { zhCN } from 'date-fns/locale';
 
 export default () => {
+    const { t, i18n } = useTranslation('admin');
     const { clearFlashes, clearAndAddHttpError } = useFlash();
 
     const [logs, setLogs] = useState<LogFile[] | undefined>(undefined);
@@ -45,6 +48,7 @@ export default () => {
 
     const totalErrors = (logs ?? []).reduce((total, log) => total + log.errors, 0);
     const totalWarnings = (logs ?? []).reduce((total, log) => total + log.warnings, 0);
+    const dateLocale = i18n.language === 'zh_CN' ? zhCN : undefined;
 
     return (
         <>
@@ -53,18 +57,20 @@ export default () => {
                 <div className={'flex flex-col flex-shrink'} style={{ minWidth: '0' }}>
                     <p className={'text-base text-neutral-400'}>
                         {logs === undefined
-                            ? 'Checking for issues with the Panel...'
+                            ? t('settings.debugChecking')
                             : totalErrors > 0
-                            ? `Found ${totalErrors} error${totalErrors === 1 ? '' : 's'} and ${totalWarnings} warning${
-                                  totalWarnings === 1 ? '' : 's'
-                              } across ${logs.length} log file${logs.length === 1 ? '' : 's'}.`
-                            : 'No errors have been found in the Panel logs.'}
+                            ? t('settings.debugIssuesFound', {
+                                  errors: totalErrors,
+                                  warnings: totalWarnings,
+                                  files: logs.length,
+                              })
+                            : t('settings.debugNoErrors')}
                     </p>
                 </div>
                 <div className={'flex ml-auto pl-4'}>
                     <Button onClick={downloadAll} disabled={!logs?.length || downloading !== null}>
                         <ArchiveIcon className={'h-4 w-4 mr-2'} />
-                        {downloading === '__archive__' ? 'Preparing...' : 'Download All (.zip)'}
+                        {downloading === '__archive__' ? t('settings.debugPreparing') : t('settings.debugDownloadAll')}
                     </Button>
                 </div>
             </div>
@@ -72,11 +78,11 @@ export default () => {
                 <div className={'overflow-x-auto'}>
                     <table className={'w-full table-auto'}>
                         <TableHead>
-                            <TableHeader name={'File'} />
-                            <TableHeader name={'Size'} />
-                            <TableHeader name={'Last Modified'} />
-                            <TableHeader name={'Errors'} />
-                            <TableHeader name={'Warnings'} />
+                            <TableHeader name={t('settings.debugFile') as string} />
+                            <TableHeader name={t('settings.debugSize') as string} />
+                            <TableHeader name={t('settings.debugLastModified') as string} />
+                            <TableHeader name={t('settings.debugErrors') as string} />
+                            <TableHeader name={t('settings.debugWarnings') as string} />
                             <TableHeader name={''} />
                         </TableHead>
                         <TableBody>
@@ -94,10 +100,13 @@ export default () => {
                                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                                             <Tooltip
                                                 placement={'top'}
-                                                content={format(log.modifiedAt, 'MMM do, yyyy H:mm:ss')}
+                                                content={format(log.modifiedAt, 'PPpp', { locale: dateLocale })}
                                             >
                                                 <span>
-                                                    {formatDistanceToNowStrict(log.modifiedAt, { addSuffix: true })}
+                                                    {formatDistanceToNowStrict(log.modifiedAt, {
+                                                        addSuffix: true,
+                                                        locale: dateLocale,
+                                                    })}
                                                 </span>
                                             </Tooltip>
                                         </td>
@@ -113,6 +122,7 @@ export default () => {
                                         </td>
                                         <td className={'px-6 py-4 text-sm text-right whitespace-nowrap'}>
                                             <button
+                                                aria-label={t('settings.debugDownloadFile') as string}
                                                 className={
                                                     'text-neutral-400 hover:text-cyan-400 transition-colors duration-75 disabled:opacity-50'
                                                 }

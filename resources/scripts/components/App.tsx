@@ -14,6 +14,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AuthenticatedRoute from '@/elements/AuthenticatedRoute';
 import { NotFound } from '@/elements/ScreenBlock';
 import { EverestSettings } from '@/state/everest';
+import { useTranslation } from 'react-i18next';
 
 const AdminRouter = lazy(() => import('@/routers/AdminRouter'));
 const AuthenticationRouter = lazy(() => import('@/routers/AuthenticationRouter'));
@@ -46,6 +47,7 @@ interface ExtendedWindow extends Window {
 }
 
 function App() {
+    const { t } = useTranslation('common');
     const { PterodactylUser, SiteConfiguration, EverestConfiguration, ThemeConfiguration } = window as ExtendedWindow;
 
     if (PterodactylUser && !store.getState().user.data) {
@@ -82,7 +84,7 @@ function App() {
     if (PterodactylUser?.state === 'suspended') {
         return (
             <div style={{ color: 'white', fontWeight: 'bold', marginTop: '10px', marginLeft: '10px' }}>
-                Your account has been suspended and blocked by an administrator.
+                {t('error.suspended')}
             </div>
         );
     }

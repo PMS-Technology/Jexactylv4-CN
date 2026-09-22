@@ -273,12 +273,14 @@ export const NoItems = ({ className }: { className?: string }) => {
             style={{ backgroundColor: colors.secondary }}
         >
             <div css={tw`h-48 flex`}>
-                <img src={'/assets/svgs/not_found.svg'} alt={t('table.noItemsAlt') as string} css={tw`h-full select-none`} />
+                <img
+                    src={'/assets/svgs/not_found.svg'}
+                    alt={t('table.noItemsAlt') as string}
+                    css={tw`h-full select-none`}
+                />
             </div>
 
-            <p css={tw`text-lg text-neutral-300 text-center font-normal sm:mt-8`}>
-                {t('table.noItems')}
-            </p>
+            <p css={tw`text-lg text-neutral-300 text-center font-normal sm:mt-8`}>{t('table.noItems')}</p>
         </div>
     );
 };

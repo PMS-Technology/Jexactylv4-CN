@@ -7,15 +7,16 @@ import { Dialog } from '@/elements/dialog';
 import { faCheckCircle, faExclamationTriangle, faExternalLink } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useStoreState } from 'easy-peasy';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/elements/button';
 
 export default () => {
+    const { t } = useTranslation('admin');
     const [key, setKey] = useState<string>();
     const settings = useStoreState(s => s.everest.data!.ai);
     const [loading, setLoading] = useState<boolean>(false);
     const { clearFlashes, clearAndAddHttpError } = useFlashKey('admin:ai');
-
-    const theme = useStoreState(s => s.theme.data!.colors);
 
     const submit = () => {
         clearFlashes();
@@ -28,36 +29,36 @@ export default () => {
             .catch(error => clearAndAddHttpError(error));
     };
 
-    useEffect(() => {
-        if (key && key.length > 30 && key.length < 60) {
-            submit();
-        }
-    }, [key]);
-
     return (
-        <Dialog open onClose={() => undefined} preventExternalClose hideCloseIcon title={'Configure JexpanelAI'}>
+        <Dialog
+            open
+            onClose={() => undefined}
+            preventExternalClose
+            hideCloseIcon
+            title={t('aiModule.configureJexactylAI')}
+        >
             <SpinnerOverlay visible={loading} />
-            <p className={'text-gray-400'}>
-                In order to use <span style={{ color: theme.primary }}>JexpanelAI</span>, you must get a Gemini API key
-                from Google.
-            </p>
+            <p className={'text-gray-400'}>{t('aiModule.configureDescription')}</p>
             <p className={'text-gray-400 my-2'}>
-                You can visit the{' '}
+                {t('aiModule.configureKeyHelpPrefix')}{' '}
                 <a
-                    href={'https://aistudio.google.com/'}
+                    href={'https://opencode.ai/docs/providers/'}
                     rel={'noreferrer'}
                     target={'_blank'}
                     className={'text-blue-400'}
                 >
-                    AI Studio
+                    {t('aiModule.providerDocumentation')}
                     <FontAwesomeIcon icon={faExternalLink} className={'mb-1.5 ml-0.5 h-2 w-2'} />
                 </a>
-                &nbsp;and obtain an API key to use.
+                &nbsp;{t('aiModule.configureKeyHelpSuffix')}
             </p>
             <div className={'relative'}>
-                <Input placeholder={'Enter API key here...'} onChange={e => setKey(e.currentTarget.value)} />
-                {!key || key.length < 30 || key.length > 60 ? (
-                    <Tooltip placement={'right'} content={'You must enter a valid Google AI key to continue.'}>
+                <Input
+                    placeholder={t('aiModule.enterApiKey') as string}
+                    onChange={e => setKey(e.currentTarget.value)}
+                />
+                {!key ? (
+                    <Tooltip placement={'right'} content={t('aiModule.invalidApiKey')}>
                         <FontAwesomeIcon
                             icon={faExclamationTriangle}
                             className={'absolute top-1/3 right-4 text-yellow-500'}
@@ -66,6 +67,11 @@ export default () => {
                 ) : (
                     <FontAwesomeIcon icon={faCheckCircle} className={'absolute top-1/3 right-4 text-green-500'} />
                 )}
+            </div>
+            <div className={'flex justify-end mt-4'}>
+                <Button onClick={submit} disabled={!key || loading}>
+                    {t('aiModule.saveAndContinue')}
+                </Button>
             </div>
         </Dialog>
     );

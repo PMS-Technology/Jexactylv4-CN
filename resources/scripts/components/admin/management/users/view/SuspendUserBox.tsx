@@ -15,7 +15,7 @@ export default () => {
     const [visible, setVisible] = useState<boolean>(false);
     const user = Context.useStoreState(state => state.user);
 
-    const action = user?.state === 'suspended' ? 'unsuspend' : 'suspend';
+    const isSuspended = user?.state === 'suspended';
 
     const submit = () => {
         suspendUser(user!.id)
@@ -23,7 +23,7 @@ export default () => {
                 addFlash({
                     key: 'user:manage',
                     type: 'success',
-                    message: 'This user has been suspended.',
+                    message: t(isSuspended ? 'users.unsuspendSuccess' : 'users.suspendSuccess') as string,
                 });
             })
             .catch(error => {
@@ -39,29 +39,24 @@ export default () => {
     return (
         <>
             <Dialog.Confirm
-                title={t('users.confirmActionRequest', { action }) as string}
+                title={t('users.confirmActionRequest') as string}
                 onConfirmed={submit}
                 open={visible}
                 onClose={() => setVisible(false)}
                 confirm={t('users.iUnderstandProceed') as string}
             >
-                {t('users.confirmSuspendAction', { action }) as string}
+                {t(isSuspended ? 'users.confirmUnsuspend' : 'users.confirmSuspend') as string}
             </Dialog.Confirm>
             <div css={tw`h-auto flex flex-col`}>
                 <AdminBox
-                    icon={action === 'suspend' ? faEyeSlash : faEye}
-                    title={t('users.actionUser', { action }) as string}
+                    icon={isSuspended ? faEye : faEyeSlash}
+                    title={t(isSuspended ? 'users.unsuspendUser' : 'users.suspendUser') as string}
                     css={tw`relative w-full`}
                 >
                     <Button.Warn size={Button.Sizes.Large} css={tw`w-full capitalize`} onClick={() => setVisible(true)}>
-                        {t('users.actionUserButton', { action }) as string}
+                        {t(isSuspended ? 'users.unsuspendUser' : 'users.suspendUser') as string}
                     </Button.Warn>
-                    <p css={tw`text-xs text-neutral-400 mt-2`}>
-                        {t('users.suspendUserDescription', {
-                            action,
-                            state: user?.state === 'suspended' ? t('users.suspended') as string : t('users.active') as string,
-                        }) as string}
-                    </p>
+                    <p css={tw`text-xs text-neutral-400 mt-2`}>{t('users.suspendUserDescription') as string}</p>
                 </AdminBox>
             </div>
         </>

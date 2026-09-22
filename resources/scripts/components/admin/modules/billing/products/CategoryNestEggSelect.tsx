@@ -6,8 +6,10 @@ import { searchEggs } from '@/api/routes/admin/eggs';
 import type { CategoryValues } from '@/api/routes/admin/billing';
 import Label from '@/elements/Label';
 import Select from '@/elements/Select';
+import { useTranslation } from 'react-i18next';
 
 const NestSelect = () => {
+    const { t } = useTranslation('admin');
     const { values, setFieldValue } = useFormikContext<CategoryValues>();
     const [nests, setNests] = useState<Nest[] | null>(null);
 
@@ -25,7 +27,7 @@ const NestSelect = () => {
 
     return (
         <div>
-            <Label>Nest</Label>
+            <Label>{t('billingModule.nest')}</Label>
             <Select
                 value={values.nestId?.toString() ?? ''}
                 onChange={e => {
@@ -34,7 +36,7 @@ const NestSelect = () => {
                 }}
             >
                 {!nests ? (
-                    <option disabled>Loading...</option>
+                    <option disabled>{t('billingModule.loading')}</option>
                 ) : (
                     nests.map(v => (
                         <option key={v.uuid} value={v.id.toString()}>
@@ -43,14 +45,13 @@ const NestSelect = () => {
                     ))
                 )}
             </Select>
-            <p className={'text-xs text-gray-400 mt-1'}>
-                The nest this category&apos;s products will deploy servers from.
-            </p>
+            <p className={'text-xs text-gray-400 mt-1'}>{t('billingModule.categoryNestDescription')}</p>
         </div>
     );
 };
 
 const EggSelect = () => {
+    const { t } = useTranslation('admin');
     const { values, setFieldValue } = useFormikContext<CategoryValues>();
     const [eggs, setEggs] = useState<Egg[] | null>(null);
 
@@ -67,23 +68,21 @@ const EggSelect = () => {
 
     return (
         <div>
-            <Label>Egg</Label>
+            <Label>{t('billingModule.egg')}</Label>
             <Select
                 value={values.eggId?.toString() ?? 'none'}
                 onChange={e =>
                     setFieldValue('eggId', e.currentTarget.value === 'none' ? null : Number(e.currentTarget.value))
                 }
             >
-                <option value={'none'}>Any egg in this nest (customer chooses)</option>
+                <option value={'none'}>{t('billingModule.anyEggCustomerChooses')}</option>
                 {eggs?.map(v => (
                     <option key={v.uuid} value={v.id.toString()}>
                         {v.name}
                     </option>
                 ))}
             </Select>
-            <p className={'text-xs text-gray-400 mt-1'}>
-                Leave unset to let customers pick which egg in this nest to deploy at checkout.
-            </p>
+            <p className={'text-xs text-gray-400 mt-1'}>{t('billingModule.eggSelectionDescription')}</p>
         </div>
     );
 };
