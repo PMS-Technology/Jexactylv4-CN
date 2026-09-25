@@ -11,7 +11,6 @@ import StatGraphs from '@server/console/StatGraphs';
 import Features from '@feature/Features';
 import { ServerContext, ServerStatus } from '@/state/server';
 import classNames from 'classnames';
-import { usePersistedState } from '@/plugins/usePersistedState';
 import { useStoreState } from '@/state/hooks';
 import Pill from '@/elements/Pill';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -35,12 +34,10 @@ function statusToColor(status: ServerStatus): string {
 
 function ServerConsoleContainer() {
     const { t } = useTranslation('server');
-    const user = useStoreState(state => state.user.data!);
     const uuid = ServerContext.useStoreState(state => state.server.data!.uuid);
     const name = ServerContext.useStoreState(state => state.server.data!.name);
     const description = ServerContext.useStoreState(state => state.server.data!.description);
     const isInstalling = ServerContext.useStoreState(state => state.server.isInstalling);
-    const [expand, setExpand] = usePersistedState<boolean>(`console_expand_${user.uuid}`, false);
     const isTransferring = ServerContext.useStoreState(state => state.server.data!.isTransferring);
     const eggFeatures = ServerContext.useStoreState(state => state.server.data!.eggFeatures, isEqual);
     const isNodeUnderMaintenance = ServerContext.useStoreState(state => state.server.data!.isNodeUnderMaintenance);
@@ -119,22 +116,20 @@ function ServerConsoleContainer() {
                     </Can>
                 </div>
             </div>
-            {!expand && <ServerDetailsBlock className={'order-last col-span-4 lg:order-none lg:col-span-1'} />}
+            <ServerDetailsBlock className={'order-last col-span-4 lg:order-none lg:col-span-1'} />
             <div className={'mb-4 grid grid-cols-4 gap-2 sm:gap-4'}>
-                <div className={classNames('col-span-4 flex', !expand && 'lg:col-span-3')}>
+                <div className={'col-span-4 flex lg:col-span-3'}>
                     <Spinner.Suspense>
-                        <Console expand={expand} setExpand={setExpand} />
+                        <Console />
                     </Spinner.Suspense>
                 </div>
-                {!expand && (
-                    <div className={'col-span-4 lg:col-span-1 my-auto'}>
-                        <div className={'grid grid-cols-1 gap-2'}>
-                            <Spinner.Suspense>
-                                <StatGraphs />
-                            </Spinner.Suspense>
-                        </div>
+                <div className={'col-span-4 lg:col-span-1 my-auto'}>
+                    <div className={'grid grid-cols-1 gap-2'}>
+                        <Spinner.Suspense>
+                            <StatGraphs />
+                        </Spinner.Suspense>
                     </div>
-                )}
+                </div>
             </div>
             <Features enabled={eggFeatures} />
         </PageContentBlock>

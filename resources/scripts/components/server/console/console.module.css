@@ -1,0 +1,104 @@
+.root {
+    @apply flex min-h-[42rem] w-full flex-col gap-3;
+}
+
+.fullscreen {
+    @apply fixed inset-0 z-50 min-h-0 bg-neutral-900 p-6;
+}
+
+.header {
+    @apply shrink-0;
+}
+
+.title {
+    @apply text-2xl font-semibold text-neutral-100;
+}
+
+.toolbar {
+    @apply flex shrink-0 flex-col gap-2;
+}
+
+.search {
+    @apply flex items-center gap-2 rounded-xl border border-neutral-700 bg-neutral-800 px-3;
+}
+
+.searchIcon {
+    @apply h-5 w-5 shrink-0 text-neutral-400;
+}
+
+.search input {
+    @apply h-11 w-full border-0 bg-transparent text-sm text-neutral-100 outline-none ring-0 placeholder:text-neutral-500 focus:ring-0;
+}
+
+.search button {
+    @apply text-neutral-400 hover:text-neutral-100;
+}
+
+.row {
+    @apply flex flex-wrap items-center justify-between gap-2;
+}
+
+.pills {
+    @apply flex flex-wrap items-center gap-1.5;
+}
+
+.pill {
+    @apply cursor-pointer rounded-xl border border-neutral-600 bg-transparent px-3 py-1.5 text-sm font-medium text-neutral-200 transition-colors hover:bg-neutral-800;
+}
+
+.pillActive {
+    @apply border-green-500 bg-green-500/15 text-green-400;
+}
+
+.actions {
+    @apply flex items-center gap-1;
+}
+
+.action {
+    @apply inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium text-neutral-200 hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.terminal {
+    @apply flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] border border-neutral-700 bg-[#1d1f23];
+}
+
+.screen {
+    @apply relative min-h-0 flex-1 overflow-hidden pb-2 pt-1;
+}
+
+.xterm {
+    @apply h-full w-full;
+}
+
+.loading {
+    @apply pointer-events-none absolute inset-0 z-20 animate-pulse bg-neutral-800/80;
+}
+
+.jump {
+    @apply absolute bottom-4 right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-neutral-700 text-neutral-100 shadow-2xl hover:bg-neutral-600;
+}
+
+.inputRow {
+    @apply relative border-t border-neutral-700 bg-[#2a2c31] p-4;
+}
+
+.inputRow input {
+    @apply h-11 w-full rounded-xl border border-neutral-600 bg-[#1d1f23] pl-10 pr-3 text-sm text-neutral-100 outline-none placeholder:text-neutral-500 focus:border-green-500 disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+.prompt {
+    @apply pointer-events-none absolute left-7 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400;
+}
+
+:global(.xterm) {
+    height: 100% !important;
+}
+
+:global(.xterm-viewport) {
+    background-color: #1d1f23 !important;
+}
+
+:global(.xterm .xterm-screen) {
+    width: 100%;
+    margin-left: 8px;
+}
