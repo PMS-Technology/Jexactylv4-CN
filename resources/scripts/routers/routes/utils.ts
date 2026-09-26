@@ -15,6 +15,12 @@ export interface RouteDefinition {
 export interface ServerRouteDefinition extends RouteDefinition {
     category?: 'general' | 'data' | 'configuration' | null;
     permission?: string | string[];
+
+    /**
+     * Size the page to the viewport instead of letting it grow with its content. The page must
+     * itself use `PageContentBlock`'s `fullHeight` for this to have any effect.
+     */
+    fill?: boolean;
 }
 
 export interface AdminRouteDefinition extends RouteDefinition {

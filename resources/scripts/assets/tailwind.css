@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    /*
+     * Single corner radius for every card surface — the console, the server header and the stat
+     * cards — so they read as one family. Inner controls (buttons, pills, inputs) deliberately
+     * keep their own smaller radii so they stay distinguishable from the surfaces they sit on.
+     */
+    --radius-card: 20px;
+}
+
 @media print {
     body * {
         visibility: hidden;

@@ -71,6 +71,22 @@ const options: ChartOptions<'line'> = {
     },
 };
 
+/**
+ * Options applied when a chart is rendered behind a stat card rather than in its own
+ * block. The card already prints the current value, so the axis labels are dropped to
+ * keep the graph reading as a background texture instead of a competing data display.
+ */
+const backgroundChartOptions: DeepPartial<ChartOptions<'line'>> = {
+    maintainAspectRatio: false,
+    scales: {
+        y: {
+            ticks: {
+                display: false,
+            },
+        },
+    },
+};
+
 function getOptions(opts?: DeepPartial<ChartOptions<'line'>> | undefined): ChartOptions<'line'> {
     // @ts-expect-error go away
     return deepmerge(options, opts ?? {});
@@ -111,12 +127,27 @@ interface UseChartOptions {
     sets: number;
     options?: DeepPartial<ChartOptions<'line'>> | number | undefined;
     callback?: ChartDatasetCallback | undefined;
+
+    /**
+     * Render the chart as a texture behind a stat card. Hides the axis labels and lets the
+     * canvas fill whatever box it is placed in, rather than sizing itself from the data.
+     */
+    background?: boolean;
 }
 
 function useChart(label: string, opts?: UseChartOptions) {
+    const base =
+        typeof opts?.options === 'number' ? { scales: { y: { min: 0, suggestedMax: opts.options } } } : opts?.options;
+
     const options = getOptions(
-        typeof opts?.options === 'number' ? { scales: { y: { min: 0, suggestedMax: opts.options } } } : opts?.options,
+        opts?.background
+            ? (deepmerge(
+                  (base ?? {}) as DeepPartial<ChartOptions<'line'>>,
+                  backgroundChartOptions,
+              ) as DeepPartial<ChartOptions<'line'>>)
+            : base,
     );
+
     const [data, setData] = useState(getEmptyData(label, opts?.sets || 1, opts?.callback));
 
     const push = (items: number | null | (number | null)[]) =>
@@ -145,9 +176,10 @@ function useChart(label: string, opts?: UseChartOptions) {
     return { props: { data, options }, push, clear };
 }
 
-function useChartTickLabel(label: string, max: number, tickLabel: string, roundTo?: number) {
+function useChartTickLabel(label: string, max: number, tickLabel: string, roundTo?: number, background?: boolean) {
     return useChart(label, {
         sets: 1,
+        background,
         options: {
             scales: {
                 y: {

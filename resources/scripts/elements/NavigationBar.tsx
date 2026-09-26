@@ -53,7 +53,7 @@ const NavigationBar = () => {
 
     return (
         <div
-            className="w-full overflow-x-auto shadow-md mb-8 backdrop-blur-md border-b border-white/5"
+            className="w-full shrink-0 overflow-x-auto shadow-md mb-6 [@media(max-height:820px)]:mb-3 [@media(min-height:960px)]:mb-8 backdrop-blur-md border-b border-white/5"
             style={{ backgroundColor: theme.colors.sidebar }}
         >
             <div className="px-8 flex h-[3.5rem] w-full items-center">

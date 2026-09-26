@@ -7,7 +7,6 @@ import Spinner from '@/elements/Spinner';
 import Console from '@server/console/Console';
 import PowerButtons from '@server/console/PowerButtons';
 import ServerDetailsBlock from '@server/console/ServerDetailsBlock';
-import StatGraphs from '@server/console/StatGraphs';
 import Features from '@feature/Features';
 import { ServerContext, ServerStatus } from '@/state/server';
 import classNames from 'classnames';
@@ -59,14 +58,14 @@ function ServerConsoleContainer() {
         Math.abs(daysUntilRenewal) <= freeGraceDays;
 
     return (
-        <PageContentBlock title={t('consolePage.title') as string} showFlashKey={'console:share'}>
+        <PageContentBlock title={t('consolePage.title') as string} showFlashKey={'console:share'} fullHeight>
             {showRenewalWarning && (
-                <Alert type={'warning'} className={'mb-4'}>
+                <Alert type={'warning'} className={'mb-3 shrink-0'}>
                     {t('consolePage.renewalOverdue', { days: Math.abs(daysUntilRenewal!), freeGraceDays }) as string}
                 </Alert>
             )}
             {(isNodeUnderMaintenance || isInstalling || isTransferring) && (
-                <Alert type={'warning'} className={'mb-4'}>
+                <Alert type={'warning'} className={'mb-3 shrink-0'}>
                     {isNodeUnderMaintenance
                         ? (t('consolePage.nodeMaintenance') as string)
                         : isInstalling
@@ -74,10 +73,20 @@ function ServerConsoleContainer() {
                         : (t('consolePage.transferring') as string)}
                 </Alert>
             )}
-            <div className={'mb-4 flex justify-between gap-4 bg-black/50 rounded-lg p-5'}>
-                <div className={'hidden pr-4 sm:col-span-2 sm:block lg:col-span-3'}>
+            <div
+                className={
+                    'mb-3 flex shrink-0 justify-between gap-4 rounded-[var(--radius-card)] bg-black/50 p-5 [@media(max-height:820px)]:p-3 [@media(min-height:960px)]:mb-4'
+                }
+            >
+                <div className={'hidden min-w-0 pr-4 sm:block'}>
                     <div className={'flex items-center space-x-2'}>
-                        <h1 className={'font-header text-2xl leading-relaxed text-slate-50 line-clamp-1'}>{name}</h1>
+                        <h1
+                            className={
+                                'font-header text-2xl leading-relaxed text-slate-50 line-clamp-1 [@media(max-height:820px)]:text-xl [@media(max-height:820px)]:leading-snug'
+                            }
+                        >
+                            {name}
+                        </h1>
                         <Pill>
                             {isInstalling && (
                                 <>
@@ -103,32 +112,36 @@ function ServerConsoleContainer() {
                         </Pill>
                         <EditServerDialog />
                     </div>
-                    <p className={'text-sm line-clamp-2'}>
+                    <p className={'text-sm line-clamp-1'}>
                         {description ?? uuid}
                         {renewalDate && (
-                            <span className={'ml-1'}>&bull; {t('consolePage.daysUntilRenewal', { days: timeUntil(renewalDate!).days }) as string}</span>
+                            <span className={'ml-1'}>
+                                &bull;{' '}
+                                {t('consolePage.daysUntilRenewal', { days: timeUntil(renewalDate!).days }) as string}
+                            </span>
                         )}
                     </p>
                 </div>
-                <div className={'my-auto'}>
+                <div className={'my-auto shrink-0'}>
                     <Can action={['control.start', 'control.stop', 'control.restart']} matchAny>
                         <PowerButtons className={' flex space-x-2 sm:justify-center'} />
                     </Can>
                 </div>
             </div>
-            <ServerDetailsBlock className={'order-last col-span-4 lg:order-none lg:col-span-1'} />
-            <div className={'mb-4 grid grid-cols-4 gap-2 sm:gap-4'}>
-                <div className={'col-span-4 flex lg:col-span-3'}>
+            {/* On large screens the grid takes whatever height is left and both columns share it,
+                so the page never scrolls. Below `lg` the columns stack and the page scrolls normally. */}
+            <div
+                className={
+                    'grid grid-cols-4 gap-2 sm:gap-3 lg:min-h-0 lg:flex-1 lg:grid-rows-[minmax(0,1fr)] [@media(min-height:960px)]:gap-4'
+                }
+            >
+                <div className={'col-span-4 flex min-h-0 lg:col-span-3'}>
                     <Spinner.Suspense>
                         <Console />
                     </Spinner.Suspense>
                 </div>
-                <div className={'col-span-4 lg:col-span-1 my-auto'}>
-                    <div className={'grid grid-cols-1 gap-2'}>
-                        <Spinner.Suspense>
-                            <StatGraphs />
-                        </Spinner.Suspense>
-                    </div>
+                <div className={'col-span-4 min-h-0 lg:col-span-1'}>
+                    <ServerDetailsBlock />
                 </div>
             </div>
             <Features enabled={eggFeatures} />

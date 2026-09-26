@@ -43,7 +43,9 @@ export default ({
 }: Props) => {
     const { addFlash, clearFlashes } = useFlash();
     const terminalRef = useRef<BaseTerminalHandle>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchOpen, setSearchOpen] = useState(false);
     const [activeFilters, setActiveFilters] = useState<Set<FilterValue>>(() => new Set(['all']));
     const [fullscreen, setFullscreen] = useState(false);
     const [sharing, setSharing] = useState(false);
@@ -145,6 +147,22 @@ export default ({
         };
     }, [fullscreen]);
 
+    const openSearch = () => {
+        setSearchOpen(true);
+        // Focus after the expand transition has started, otherwise the input is not focusable yet.
+        window.requestAnimationFrame(() => searchInputRef.current?.focus());
+    };
+
+    const closeSearch = () => {
+        setSearchOpen(false);
+        // Collapsing the field while a term is active would leave the log filtered with no
+        // visible indication of why, so closing clears the term too.
+        if (searchQuery) {
+            setSearchQuery('');
+            rewriteFiltered('');
+        }
+    };
+
     const handleShare = async () => {
         const predicate = predicateFor(searchQuery);
         const content = (predicate ? lines.filter(predicate) : lines)
@@ -174,38 +192,63 @@ export default ({
     };
 
     return (
-        <div
-            className={fullscreen ? 'fixed inset-0 z-[15] flex min-h-0 flex-1 flex-col gap-4 bg-[var(--surface-1)] p-6 py-8' : 'flex min-h-0 flex-1 flex-col gap-4'}
-        >
-            <div className={'flex flex-col gap-2'}>
-                <label className={'mc-input mc-input--medium w-full'}>
-                    <SearchIcon aria-hidden={'true'} />
-                    <input
-                        value={searchQuery}
-                        placeholder={'Search logs'}
-                        aria-label={'Search logs'}
-                        onChange={event => {
-                            const value = event.target.value;
-                            setSearchQuery(value);
-                            if (searchTimer.current) clearTimeout(searchTimer.current);
-                            searchTimer.current = setTimeout(() => rewriteFiltered(value), 200);
-                        }}
-                    />
-                    {searchQuery && (
+        // The card is the console's own frame in both modes, so the header/terminal relationship
+        // is identical when expanded; fullscreen only changes how the card is positioned.
+        <div className={fullscreen ? 'mc-console-card mc-console-card--fullscreen' : 'mc-console-card'}>
+            <div className={'mc-console-card__header'}>
+                <div className={'mc-console-card__title-row'}>
+                    <span className={'mc-console-card__title'}>{'Console'}</span>
+                    {/* The field grows to the left of the button, so the magnifier stays put in the
+                        top-right corner while the input animates open beside it. */}
+                    <div className={`mc-console-card__search${searchOpen ? ' is-open' : ''}`}>
+                        <label className={'mc-input mc-input--small mc-console-card__search-field'}>
+                            <SearchIcon aria-hidden={'true'} />
+                            <input
+                                ref={searchInputRef}
+                                value={searchQuery}
+                                placeholder={'Search logs'}
+                                aria-label={'Search logs'}
+                                tabIndex={searchOpen ? 0 : -1}
+                                aria-hidden={!searchOpen}
+                                onChange={event => {
+                                    const value = event.target.value;
+                                    setSearchQuery(value);
+                                    if (searchTimer.current) clearTimeout(searchTimer.current);
+                                    searchTimer.current = setTimeout(() => rewriteFiltered(value), 200);
+                                }}
+                                onKeyDown={event => {
+                                    if (event.key === 'Escape') closeSearch();
+                                }}
+                            />
+                            {searchQuery && (
+                                <button
+                                    type={'button'}
+                                    aria-label={'Clear input'}
+                                    tabIndex={searchOpen ? 0 : -1}
+                                    className={'flex h-5 w-5 items-center justify-center border-0 bg-transparent p-0'}
+                                    style={{ color: 'var(--color-secondary)' }}
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        rewriteFiltered('');
+                                        searchInputRef.current?.focus();
+                                    }}
+                                >
+                                    <XIcon className={'h-5 w-5'} />
+                                </button>
+                            )}
+                        </label>
                         <button
                             type={'button'}
-                            aria-label={'Clear input'}
-                            className={'flex h-5 w-5 items-center justify-center border-0 bg-transparent p-0'}
-                            style={{ color: 'var(--color-secondary)' }}
-                            onClick={() => {
-                                setSearchQuery('');
-                                rewriteFiltered('');
-                            }}
+                            className={'mc-quiet mc-console-card__search-toggle'}
+                            aria-label={searchOpen ? 'Close log search' : 'Search logs'}
+                            aria-expanded={searchOpen}
+                            title={searchOpen ? 'Close search' : 'Search logs'}
+                            onClick={() => (searchOpen ? closeSearch() : openSearch())}
                         >
-                            <XIcon className={'h-5 w-5'} />
+                            <SearchIcon aria-hidden={'true'} />
                         </button>
-                    )}
-                </label>
+                    </div>
+                </div>
                 <div className={'flex items-center justify-between'}>
                     <ConsoleFilterPills
                         presentLevels={presentLevels}

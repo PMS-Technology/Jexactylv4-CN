@@ -26,7 +26,8 @@ export default () => {
             [SocketEvent.TRANSFER_LOGS]: line => consoleState.addLegacyLog(line),
             [SocketEvent.DAEMON_MESSAGE]: line => consoleState.addLegacyLog(prelude(line)),
             [SocketEvent.DAEMON_ERROR]: line => consoleState.addLegacyLog(`\u001b[1m\u001b[41m${line}\u001b[0m`),
-            [SocketEvent.STATUS]: state => consoleState.addLegacyLog(prelude(t('consolePage.serverMarked', { status: state }))),
+            [SocketEvent.STATUS]: state =>
+                consoleState.addLegacyLog(prelude(t('consolePage.serverMarked', { status: state }))),
             [SocketEvent.TRANSFER_STATUS]: state => {
                 if (state === 'failure') consoleState.addLegacyLog(prelude(t('consolePage.transferFailed')));
             },
@@ -39,12 +40,12 @@ export default () => {
         };
     }, [connected, consoleState, instance, isTransferring, t]);
 
+    // The heading and toolbar live inside the console card itself, so this wrapper only has to
+    // hand the card its height: the page grid supplies it on large screens, and the card's own
+    // minimum takes over once the layout stacks on smaller screens.
     return (
-        <div className={'modrinth-console relative flex w-full select-none flex-col gap-6'}>
-            <div className={'flex min-h-[700px] flex-col gap-2'}>
-                <span className={'shrink-0 text-2xl font-semibold'} style={{ color: 'var(--color-contrast)' }}>
-                    Console
-                </span>
+        <div className={'modrinth-console relative flex min-h-0 w-full select-none flex-col'}>
+            <div className={'flex min-h-0 flex-1 flex-col'}>
                 <ConsolePageLayout
                     lines={lines}
                     consoleState={consoleState}

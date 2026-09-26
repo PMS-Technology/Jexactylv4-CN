@@ -4,7 +4,7 @@ import { NavLink, Route, Routes, useParams } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import PageTransition from '@/elements/transitions/PageTransition';
 import WebsocketHandler from '@server/WebsocketHandler';
-import { ServerContext, ServerStatus } from '@/state/server';
+import { ServerContext } from '@/state/server';
 import Spinner from '@/elements/Spinner';
 import { NotFound, ServerError, Suspended } from '@/elements/ScreenBlock';
 import { httpErrorToHuman } from '@/api/http';
@@ -20,25 +20,8 @@ import { getTransitionKey } from '@/routers/routes/utils';
 import Sidebar from '@/elements/Sidebar';
 import { usePersistedState } from '@/plugins/usePersistedState';
 import { CogIcon, DesktopComputerIcon, PuzzleIcon, ReplyIcon } from '@heroicons/react/outline';
-import SidebarControls from '@server/console/SidebarControls';
-import classNames from 'classnames';
 import NavigationBar from '@/elements/NavigationBar';
 import { useTranslation } from 'react-i18next';
-
-function statusToColor(status: ServerStatus): string {
-    switch (status) {
-        case 'running':
-            return 'border-green-500';
-        case 'offline':
-            return 'border-red-500';
-        case 'starting':
-            return 'border-yellow-500';
-        case 'stopping':
-            return 'border-yellow-500';
-        default:
-            return 'border-gray-500';
-    }
-}
 
 function ServerRouter() {
     const { t } = useTranslation(['server', 'common']);
@@ -59,7 +42,6 @@ function ServerRouter() {
     const server = ServerContext.useStoreState(state => state.server.data);
     const activityEnabled = useStoreState(state => state.settings.data!.activity.enabled.server);
     const billable = server?.billingProductId;
-    const status = ServerContext.useStoreState(state => state.status.value);
 
     const categories = ['data', 'configuration'] as const;
     const routeName = (route: (typeof routes.server)[number]): string =>
@@ -125,21 +107,27 @@ function ServerRouter() {
                 <Sidebar className={'flex-none'} $collapsed={collapsed} theme={theme}>
                     <div
                         className={
-                            'h-16 w-full flex flex-col items-center justify-center mt-1 mb-3 select-none cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95'
+                            'h-[var(--sidebar-header-h)] w-full flex flex-col items-center justify-center select-none cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95 flex-shrink-0'
                         }
                         onClick={() => setCollapsed(!collapsed)}
                     >
                         {!collapsed ? (
-                            <h1 className={'text-2xl text-neutral-50 whitespace-nowrap font-medium'}>{name}</h1>
+                            <h1
+                                className={
+                                    'text-2xl text-neutral-50 whitespace-nowrap font-medium [@media(max-height:820px)]:text-xl'
+                                }
+                            >
+                                {name}
+                            </h1>
                         ) : (
                             <img
                                 src={logo?.toString() || 'https://avatars.githubusercontent.com/u/91636558'}
-                                className={'mt-4 w-12'}
+                                className={'w-12 [@media(max-height:820px)]:w-9'}
                                 alt={t('common:logo')}
                             />
                         )}
                     </div>
-                    <Sidebar.Wrapper theme={theme} className={'mb-auto'}>
+                    <Sidebar.Wrapper theme={theme} className={'flex-1'}>
                         <NavLink to={'/'} end className={'mb-[18px]'}>
                             <DesktopComputerIcon />
                             <span>{t('common:dashboard')}</span>
@@ -187,9 +175,6 @@ function ServerRouter() {
                             </NavLink>
                         )}
                     </Sidebar.Wrapper>
-                    <Sidebar.User className={classNames('border-t', statusToColor(status))}>
-                        {server && <SidebarControls />}
-                    </Sidebar.User>
                 </Sidebar>
                 {!server?.uuid || !server?.id ? (
                     error ? (
@@ -198,7 +183,7 @@ function ServerRouter() {
                         <Spinner size="large" centered />
                     )
                 ) : (
-                    <div className={'flex-1 overflow-x-hidden'}>
+                    <div className={'flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto'}>
                         <InstallListener />
                         <TransferListener />
                         <WebsocketHandler />
@@ -218,13 +203,13 @@ function ServerRouter() {
                                             location.pathname,
                                         )}
                                     >
-                                        {routes.server.map(({ route, permission, component: Component }) => (
+                                        {routes.server.map(({ route, permission, fill, component: Component }) => (
                                             <Route
                                                 key={route}
                                                 path={route}
                                                 element={
                                                     <PermissionRoute permission={permission}>
-                                                        <PageTransition>
+                                                        <PageTransition fill={fill}>
                                                             <Spinner.Suspense>
                                                                 <Component />
                                                             </Spinner.Suspense>

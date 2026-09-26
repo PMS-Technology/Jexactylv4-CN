@@ -13,9 +13,24 @@ export interface PageContentBlockProps {
     description?: string;
     className?: string;
     showFlashKey?: string;
+
+    /**
+     * Stretch the page to the height left over by the navigation bar instead of letting it grow
+     * with its content. Used by pages that size their own contents against the viewport (such as
+     * the server console), so that everything stays on screen without the page scrolling.
+     */
+    fullHeight?: boolean;
 }
 
-function PageContentBlock({ title, header, description, showFlashKey, className, children }: PageContentBlockProps) {
+function PageContentBlock({
+    title,
+    header,
+    description,
+    showFlashKey,
+    className,
+    children,
+    fullHeight,
+}: PageContentBlockProps) {
     const { t } = useTranslation('common');
 
     useEffect(() => {
@@ -26,8 +41,11 @@ function PageContentBlock({ title, header, description, showFlashKey, className,
 
     return (
         <>
-            <ContentContainer css={tw`my-4 sm:my-10`} className={className}>
-                {showFlashKey && <FlashMessageRender byKey={showFlashKey} css={tw`mb-4`} />}
+            <ContentContainer
+                css={fullHeight ? tw`flex min-h-0 flex-1 flex-col pb-2` : tw`my-4 sm:my-10`}
+                className={className}
+            >
+                {showFlashKey && <FlashMessageRender byKey={showFlashKey} css={tw`mb-4 flex-shrink-0`} />}
                 {header && (
                     <div className={'text-3xl lg:text-5xl font-bold mt-8 mb-12'}>
                         {title}
@@ -37,7 +55,7 @@ function PageContentBlock({ title, header, description, showFlashKey, className,
                 {children}
             </ContentContainer>
 
-            <ContentContainer css={tw`mb-4`}>
+            <ContentContainer css={fullHeight ? tw`flex-shrink-0 pb-2` : tw`mb-4`}>
                 <p css={tw`text-center text-neutral-500 text-xs`}>
                     {t('poweredBy') as string}&nbsp;
                     <a

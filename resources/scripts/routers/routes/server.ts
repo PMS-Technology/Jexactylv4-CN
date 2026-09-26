@@ -23,6 +23,7 @@ const server: ServerRouteDefinition[] = [
         nameKey: 'console',
         end: true,
         icon: Icon.TerminalIcon,
+        fill: true,
     }),
     route('files/*', FileManagerContainer, {
         permission: 'file.*',
