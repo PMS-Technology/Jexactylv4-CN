@@ -70,7 +70,7 @@ class NestController extends ApplicationApiController
      */
     public function store(StoreNestRequest $request): array
     {
-        $nest = $this->nestCreationService->handle($request->validated());
+        $nest = $this->nestCreationService->handle($request->validated(), $request->validated('author'));
 
         Activity::event('admin:nests:create')
             ->subject($nest)
@@ -119,7 +119,7 @@ class NestController extends ApplicationApiController
             ->description('A nest was updated')
             ->log();
 
-        return $this->transform($nest, NestTransformer::class);
+        return $this->transform($nest->refresh(), NestTransformer::class);
     }
 
     /**

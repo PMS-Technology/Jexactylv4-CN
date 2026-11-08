@@ -9,6 +9,7 @@ use Everest\Facades\Activity;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Spatie\QueryBuilder\QueryBuilder;
+use Everest\Exceptions\Service\HasActiveServersException;
 use Everest\Services\Eggs\Sharing\EggExporterService;
 use Everest\Transformers\Api\Application\EggTransformer;
 use Everest\Http\Requests\Api\Application\Eggs\GetEggRequest;
@@ -103,9 +104,15 @@ class EggController extends ApplicationApiController
      * Deletes an egg.
      *
      * @throws \Exception
+     * @throws HasActiveServersException
      */
     public function delete(DeleteEggRequest $request, Egg $egg): Response
     {
+        // servers.egg_id restricts deletes, which surfaced as a raw SQL error.
+        if ($egg->servers()->exists()) {
+            throw new HasActiveServersException(trans('exceptions.nest.egg.delete_has_servers'));
+        }
+
         $egg->delete();
 
         Activity::event('admin:eggs:delete')

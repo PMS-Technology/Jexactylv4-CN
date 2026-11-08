@@ -74,7 +74,7 @@ export default () => {
     }, [error]);
 
     return (
-        <PageContentBlock title={`Welcome to ${name}`} header description={`Signed in as ${user.email}`}>
+        <PageContentBlock title={`欢迎使用 ${name}`} header description={`当前登录账号：${user.email}`}>
             <DashboardAlert />
             {open && <ServerGroupDialog open={open} setOpen={setOpen} groups={groups} setGroups={setGroups} />}
             <FlashMessageRender className={'my-4'} byKey={'dashboard'} />
@@ -91,7 +91,7 @@ export default () => {
                                     />
                                 </div>
                             )}
-                            {showOnlyAdmin ? 'Other' : 'Your'} Servers
+                            {showOnlyAdmin ? '其他服务器' : '我的服务器'}
                         </div>
                         <Button.Text
                             size={Button.Sizes.Small}
@@ -107,18 +107,16 @@ export default () => {
                                 <div className={'grid lg:grid-cols-2 gap-6 m-4'}>
                                     <ServerSvg color={colors.primary} />
                                     <div>
-                                        <h1 className={'text-gray-200 text-2xl font-bold'}>Deploy your first server</h1>
+                                        <h1 className={'text-gray-200 text-2xl font-bold'}>部署你的第一台服务器</h1>
                                         <div className={'mt-2'}>
-                                            It looks like you have no servers deployed to your account.&nbsp;
+                                            当前账号尚未部署服务器。&nbsp;
                                             {billing ? (
                                                 <>
-                                                    With our billing portal, you can configure and purchase a new server
-                                                    plan and choose options like amount of CPU, memory and which game
-                                                    you&apos;d like to run.
+                                                    你可以在订购页面配置并购买服务器方案，包括 CPU、内存和运行环境。
                                                     <div className={'text-right'}>
                                                         <Link to={'/account/billing/order'}>
                                                             <Button className={'w-1/2 text-white font-normal'}>
-                                                                View Options{' '}
+                                                                查看方案{' '}
                                                                 <FontAwesomeIcon
                                                                     icon={faCircleArrowRight}
                                                                     className={'ml-2'}
@@ -128,7 +126,7 @@ export default () => {
                                                     </div>
                                                 </>
                                             ) : (
-                                                <>Think this is a mistake? Please contact our support team.</>
+                                                <>如果你认为数据有误，请联系技术支持。</>
                                             )}
                                         </div>
                                     </div>
@@ -156,7 +154,7 @@ export default () => {
                                                 <div css={tw`w-full sm:w-3/4 md:w-1/2 rounded-lg text-center relative`}>
                                                     <img src={NotFoundSvg} css={tw`w-2/3 h-auto select-none mx-auto`} />
                                                     <h2 css={tw`mt-10 mb-6 text-white font-medium text-xl`}>
-                                                        No servers could be found.
+                                                        未找到服务器。
                                                     </h2>
                                                 </div>
                                             </div>
@@ -168,7 +166,7 @@ export default () => {
                     )}
                 </div>
                 {activityEnabled && (
-                    <ContentBox title={'Account Activity'}>
+                    <ContentBox title={'账号活动'}>
                         <ActivityLogContainer />
                     </ContentBox>
                 )}

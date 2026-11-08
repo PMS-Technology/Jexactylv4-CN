@@ -36,7 +36,7 @@ class DetailsModificationService
                 'external_id' => Arr::get($data, 'external_id'),
                 'owner_id' => Arr::get($data, 'owner_id'),
                 'name' => Arr::get($data, 'name'),
-                'description' => Arr::get($data, 'description') ?? '',
+                'description' => array_key_exists('description', $data) ? (Arr::get($data, 'description') ?? '') : $server->description,
                 'renewal_date' => array_key_exists('renewal_date', $data) ? Arr::get($data, 'renewal_date') : $server->renewal_date,
                 'billing_product_id' => array_key_exists('billing_product_id', $data) ? Arr::get($data, 'billing_product_id') : $server->billing_product_id,
             ])->saveOrFail();

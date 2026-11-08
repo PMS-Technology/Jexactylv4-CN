@@ -71,19 +71,21 @@ class EggVariableController extends ApplicationApiController
     }
 
     /**
-     * Deletes a single egg variable.
+     * Deletes a single egg variable. The route parameter is `{variable}` so the scoped
+     * binding resolves through Egg::variables(); `{eggVariable}` looked for a missing
+     * Egg::eggVariables() relation and every delete failed with a 500.
      */
-    public function delete(DeleteEggVariableRequest $request, Egg $egg, EggVariable $eggVariable): Response
+    public function delete(DeleteEggVariableRequest $request, Egg $egg, EggVariable $variable): Response
     {
         EggVariable::query()
-            ->where('id', $eggVariable->id)
+            ->where('id', $variable->id)
             ->where('egg_id', $egg->id)
             ->delete();
 
         Activity::event('admin:eggs:variables:delete')
-            ->subject($egg, $eggVariable)
+            ->subject($egg, $variable)
             ->property('egg', $egg)
-            ->property('variable', $eggVariable)
+            ->property('variable', $variable)
             ->description('A variable was removed from an egg')
             ->log();
 

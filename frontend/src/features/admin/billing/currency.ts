@@ -1,0 +1,23 @@
+/** Currencies offered in billing settings, copied from `assets/currency.ts`; names in Chinese. */
+export const currencies: Record<string, { symbol: string; name: string }> = {
+    AED: { symbol: 'د.إ', name: '阿联酋迪拉姆' },
+    AUD: { symbol: 'A$', name: '澳大利亚元' },
+    CAD: { symbol: 'C$', name: '加拿大元' },
+    CHF: { symbol: 'CHF', name: '瑞士法郎' },
+    CNY: { symbol: '¥', name: '人民币' },
+    EUR: { symbol: '€', name: '欧元' },
+    GBP: { symbol: '£', name: '英镑' },
+    HKD: { symbol: 'HK$', name: '港元' },
+    INR: { symbol: '₹', name: '印度卢比' },
+    JPY: { symbol: '¥', name: '日元' },
+    KRW: { symbol: '₩', name: '韩元' },
+    MXN: { symbol: '$', name: '墨西哥比索' },
+    NOK: { symbol: 'kr', name: '挪威克朗' },
+    NZD: { symbol: 'NZ$', name: '新西兰元' },
+    RUB: { symbol: '₽', name: '俄罗斯卢布' },
+    SAR: { symbol: '﷼', name: '沙特里亚尔' },
+    SEK: { symbol: 'kr', name: '瑞典克朗' },
+    SGD: { symbol: 'S$', name: '新加坡元' },
+    USD: { symbol: '$', name: '美元' },
+    ZAR: { symbol: 'R', name: '南非兰特' },
+};

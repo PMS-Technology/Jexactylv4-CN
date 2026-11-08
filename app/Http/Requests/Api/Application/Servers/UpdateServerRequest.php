@@ -11,7 +11,9 @@ class UpdateServerRequest extends ApplicationApiRequest
 {
     public function rules(): array
     {
-        $rules = Server::getRules();
+        // getRulesForUpdate() makes unique rules (external_id) ignore this server, so re-saving
+        // an unchanged external ID no longer fails with "has already been taken".
+        $rules = Server::getRulesForUpdate($this->route()->parameter('server'));
 
         return [
             'external_id' => $rules['external_id'],
@@ -78,6 +80,14 @@ class UpdateServerRequest extends ApplicationApiRequest
             'add_allocations' => array_get($data, 'add_allocations'),
             'remove_allocations' => array_get($data, 'remove_allocations'),
         ];
+
+        // DetailsModificationService only touches these when the key exists. Always returning
+        // them made every save without billing fields clear the renewal date and product.
+        foreach (['description', 'renewal_date', 'billing_product_id'] as $optional) {
+            if (!array_key_exists($optional, $data)) {
+                unset($response[$optional]);
+            }
+        }
 
         return is_null($key) ? $response : Arr::get($response, $key, $default);
     }

@@ -127,29 +127,29 @@ function LoginContainer() {
             onSubmit={onSubmit}
             initialValues={{ username: '', password: '' }}
             validationSchema={object().shape({
-                username: string().required('A username or email must be provided.'),
-                password: string().required('Please enter your account password.'),
+                username: string().required('请输入用户名或邮箱。'),
+                password: string().required('请输入账号密码。'),
             })}
         >
             {({ isSubmitting, setSubmitting, submitForm }) => (
-                <LoginFormContainer title={`Welcome to ${appName}`}>
+                <LoginFormContainer title={`欢迎使用 ${appName}`}>
                     <Field
                         icon={faAt}
                         type={'text'}
-                        label={'Username or Email'}
+                        label={'用户名或邮箱'}
                         name={'username'}
                         disabled={isSubmitting}
                         placeholder={'user@jexpanel.com'}
                     />
                     <div css={tw`mt-6`}>
                         <Label>
-                            Password
+                            密码
                             <Link
                                 to={'/auth/password'}
                                 tabIndex={-1}
                                 className={'ml-1 text-green-400 hover:text-green-200 duration-300 text-xs'}
                             >
-                                Forgot Password?
+                                忘记密码？
                             </Link>
                         </Label>
                         <Field
@@ -168,7 +168,7 @@ function LoginContainer() {
                             size={Button.Sizes.Large}
                             disabled={isSubmitting}
                         >
-                            Login
+                            登录
                         </Button>
                     </div>
                     {passkeysSupported() && (
@@ -181,8 +181,7 @@ function LoginContainer() {
                                 loading={passkeyPending}
                                 className={'w-full'}
                             >
-                                <FontAwesomeIcon icon={faFingerprint} className={'mr-2 my-auto'} /> Or, Sign in with a
-                                Passkey
+                                <FontAwesomeIcon icon={faFingerprint} className={'mr-2 my-auto'} /> 使用通行密钥登录
                             </Button.Text>
                         </div>
                     )}

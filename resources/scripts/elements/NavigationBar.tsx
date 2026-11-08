@@ -101,14 +101,14 @@ const NavigationBar = () => {
                         <HeartIcon
                             className={`w-4 h-4 flex-shrink-0 ${user.useTotp ? 'text-green-400' : 'text-red-400'}`}
                         />
-                        2FA is {user.useTotp ? 'Enabled' : 'Disabled'}
+                        两步验证：{user.useTotp ? '已启用' : '未启用'}
                     </span>
                 );
             case 2:
                 return (
                     <span className={'inline-flex items-center gap-x-2'}>
                         <IdentificationIcon className={'w-4 h-4 flex-shrink-0'} />
-                        User ID: {user.uuid.slice(0, 8)}
+                        用户 ID：{user.uuid.slice(0, 8)}
                     </span>
                 );
             default:

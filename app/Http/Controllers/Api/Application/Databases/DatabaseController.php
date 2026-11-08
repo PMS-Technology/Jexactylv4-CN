@@ -48,9 +48,9 @@ class DatabaseController extends ApplicationApiController
     /**
      * Returns a single database host.
      */
-    public function view(GetDatabaseRequest $request, DatabaseHost $database): array
+    public function view(GetDatabaseRequest $request, DatabaseHost $databaseHost): array
     {
-        return $this->transform($database, DatabaseHostTransformer::class);
+        return $this->transform($databaseHost, DatabaseHostTransformer::class);
     }
 
     /**
@@ -76,9 +76,9 @@ class DatabaseController extends ApplicationApiController
      *
      * @throws \Throwable
      */
-    public function update(UpdateDatabaseRequest $request, DatabaseHost $database): array
+    public function update(UpdateDatabaseRequest $request, DatabaseHost $databaseHost): array
     {
-        $database = $this->updateService->handle($database->id, $request->validated());
+        $database = $this->updateService->handle($databaseHost->id, $request->validated());
 
         Activity::event('admin:database-hosts:update')
             ->subject($database)
@@ -95,13 +95,13 @@ class DatabaseController extends ApplicationApiController
      *
      * @throws \Exception
      */
-    public function delete(DeleteDatabaseRequest $request, DatabaseHost $database): Response
+    public function delete(DeleteDatabaseRequest $request, DatabaseHost $databaseHost): Response
     {
-        $database->delete();
+        $databaseHost->delete();
 
         Activity::event('admin:database-hosts:delete')
-            ->subject($database)
-            ->property('database-host', $database)
+            ->subject($databaseHost)
+            ->property('database-host', $databaseHost)
             ->description('A database host was deleted')
             ->log();
 

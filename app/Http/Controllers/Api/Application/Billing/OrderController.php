@@ -4,6 +4,7 @@ namespace Everest\Http\Controllers\Api\Application\Billing;
 
 use Everest\Models\Billing\Order;
 use Spatie\QueryBuilder\QueryBuilder;
+use Spatie\QueryBuilder\AllowedFilter;
 use Everest\Transformers\Api\Application\OrderTransformer;
 use Everest\Exceptions\Http\QueryValueOutOfRangeHttpException;
 use Everest\Http\Controllers\Api\Application\ApplicationApiController;
@@ -30,7 +31,9 @@ class OrderController extends ApplicationApiController
         }
 
         $orders = QueryBuilder::for(Order::query())
-            ->allowedFilters(...['id', 'name', 'description'])
+            // server_id lets the admin server page list that server's orders. Order names are
+            // random UUIDs, so the legacy filter on name (the server UUID prefix) never matched.
+            ->allowedFilters(...['id', 'name', 'description', AllowedFilter::exact('server_id')])
             ->allowedSorts(...['id', 'name', 'total', 'is_renewal', 'created_at', 'threat_index'])
             ->paginate($perPage);
 

@@ -79,11 +79,18 @@ class EggImporterService
                 if (json_last_error() !== 0) {
                     throw new BadJsonFormatException(trans('exceptions.nest.importer.json_error', ['error' => json_last_error_msg()]));
                 }
+                // A JSON string or number decodes fine but is not an egg.
+                if (!is_array($parsed)) {
+                    throw new BadJsonFormatException(trans('exceptions.nest.importer.json_error', ['error' => 'expected an object']));
+                }
 
                 return $this->handleArray($nestId, $parsed);
             case str_starts_with($contentType, 'application/yaml'):
                 try {
                     $parsed = Yaml::parse($content);
+                    if (!is_array($parsed)) {
+                        throw new BadYamlFormatException('There was an error while attempting to parse the YAML: expected a mapping.');
+                    }
 
                     return $this->handleArray($nestId, $parsed);
                 } catch (ParseException $exception) {

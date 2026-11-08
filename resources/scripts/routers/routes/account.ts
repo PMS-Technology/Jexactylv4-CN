@@ -19,8 +19,8 @@ const account: RouteDefinition[] = [
     /**
      * Account - General Routes
      */
-    route('', AccountOverviewContainer, { name: 'Account', end: true, icon: Icon.UserIcon }),
-    route('security/*', SecurityRouter, { name: 'Security', icon: Icon.ShieldCheckIcon }),
+    route('', AccountOverviewContainer, { name: '账号', end: true, icon: Icon.UserIcon }),
+    route('security/*', SecurityRouter, { name: '安全', icon: Icon.ShieldCheckIcon }),
 
     /**
      * Account - Legacy Redirects
@@ -36,7 +36,7 @@ const account: RouteDefinition[] = [
      * Account - Ticket Routes
      */
     route('tickets', TicketContainer, {
-        name: 'Tickets',
+        name: '工单',
         icon: Icon.TicketIcon,
         condition: flags => flags.tickets.enabled,
     }),
@@ -46,13 +46,13 @@ const account: RouteDefinition[] = [
      * Account - Billing Routes
      */
     route('billing/order', ProductsContainer, {
-        name: 'Billing',
+        name: '订购服务',
         icon: Icon.CashIcon,
         condition: flags => flags.billing.enabled,
     }),
     route('billing/order/:id', OrderContainer),
     route('billing/orders', OrdersContainer, {
-        name: 'Orders',
+        name: '订单',
         icon: Icon.ClipboardListIcon,
         condition: flags => flags.billing.enabled,
     }),

@@ -260,7 +260,7 @@ Route::middleware([AdminSubject::class])->group(function () {
         Route::patch('/{egg:id}/variables', [Application\Eggs\EggVariableController::class, 'update']);
 
         Route::delete('/{egg:id}', [Application\Eggs\EggController::class, 'delete']);
-        Route::delete('/{egg:id}/variables/{eggVariable:id}', [Application\Eggs\EggVariableController::class, 'delete']);
+        Route::delete('/{egg:id}/variables/{variable:id}', [Application\Eggs\EggVariableController::class, 'delete']);
     });
 
     /*

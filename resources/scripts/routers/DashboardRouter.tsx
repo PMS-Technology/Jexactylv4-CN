@@ -55,7 +55,7 @@ function DashboardRouter() {
                         />
                     ))}
                 {(user.rootAdmin || user.admin_role_id) && (
-                    <MobileSidebar.Link icon={CogIcon} text={'Admin'} linkTo={'/admin'} />
+                    <MobileSidebar.Link icon={CogIcon} text={'管理后台'} linkTo={'/admin'} />
                 )}
             </MobileSidebar>
             <Sidebar className={'flex-none'} $collapsed={collapsed} theme={theme}>
@@ -78,7 +78,7 @@ function DashboardRouter() {
                 <Sidebar.Wrapper theme={theme}>
                     <NavLink to={'/'} end className={'mb-[18px]'}>
                         <DesktopComputerIcon />
-                        <span>Dashboard</span>
+                        <span>控制台</span>
                     </NavLink>
                     {routes.account
                         .filter(route => route.name && (!route.condition || route.condition(flags)))
@@ -113,12 +113,12 @@ function DashboardRouter() {
                     {(user.rootAdmin || user.admin_role_id) && (
                         <NavLink to={'/admin'}>
                             <CogIcon />
-                            <span className={collapsed ? 'hidden' : ''}>Settings</span>
+                            <span className={collapsed ? 'hidden' : ''}>管理后台</span>
                         </NavLink>
                     )}
                     <NavLink to={'/'} onClick={onTriggerLogout}>
                         <LogoutIcon />
-                        <span className={collapsed ? 'hidden' : ''}>Logout</span>
+                        <span className={collapsed ? 'hidden' : ''}>退出登录</span>
                     </NavLink>
                 </span>
                 <Sidebar.User>
@@ -131,7 +131,7 @@ function DashboardRouter() {
                                 'font-sans font-normal text-xs text-gray-300 whitespace-nowrap leading-tight select-none'
                             }
                         >
-                            <div className={'text-gray-400 text-sm'}>Welcome back,</div>
+                            <div className={'text-gray-400 text-sm'}>欢迎回来</div>
                             {user.email}
                         </span>
                     </div>

@@ -38,28 +38,28 @@ export default () => {
     const user = useStoreState(state => state.user.data!);
 
     return (
-        <PageContentBlock title="Account" header description={'An overview of the details on your account.'}>
+        <PageContentBlock title="账号" header description={'查看当前账号的基本信息。'}>
             <Container css={tw`lg:grid lg:grid-cols-2 mb-10 mt-10`}>
-                <ContentBox title="Avatar" showFlashes="account:avatar">
+                <ContentBox title="头像" showFlashes="account:avatar">
                     <UpdateAvatarForm />
                 </ContentBox>
 
-                <ContentBox css={tw`mt-8 lg:mt-0 lg:ml-8`} title="Account Information">
-                    <Detail label={'Username'}>{user.username}</Detail>
-                    <Detail label={'Email Address'}>{user.email}</Detail>
-                    <Detail label={'Account ID'}>
+                <ContentBox css={tw`mt-8 lg:mt-0 lg:ml-8`} title="账号信息">
+                    <Detail label={'用户名'}>{user.username}</Detail>
+                    <Detail label={'邮箱地址'}>{user.email}</Detail>
+                    <Detail label={'账号 ID'}>
                         <CopyOnClick text={user.uuid}>
                             <code css={tw`font-mono text-xs`}>{user.uuid}</code>
                         </CopyOnClick>
                     </Detail>
-                    {user.roleName && <Detail label={'Role'}>{user.roleName}</Detail>}
-                    <Detail label={'Member Since'}>{format(user.createdAt, 'MMMM do, yyyy')}</Detail>
+                    {user.roleName && <Detail label={'角色'}>{user.roleName}</Detail>}
+                    <Detail label={'注册时间'}>{format(user.createdAt, 'yyyy-MM-dd')}</Detail>
                     <p css={tw`text-xs text-gray-400 mt-6`}>
-                        Your email, password, and sign-in methods are managed under{' '}
+                        邮箱、密码和登录方式可在
                         <Link to={'/account/security'} css={tw`text-green-400 hover:text-green-200 duration-300`}>
-                            Security
+                            安全设置
                         </Link>
-                        .
+                        中管理。
                     </p>
                 </ContentBox>
             </Container>

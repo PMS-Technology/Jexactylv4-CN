@@ -113,7 +113,7 @@ class AllocationController extends ApplicationApiController
      */
     public function deleteAll(DeleteAllocationRequest $request, Node $node): Response
     {
-        $allocations = Allocation::where('server_id', null)->get();
+        $allocations = Allocation::where('node_id', $node->id)->whereNull('server_id')->get();
 
         $allocations->map->delete();
 

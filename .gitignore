@@ -34,6 +34,10 @@ resources/lang/locales.js
 
 /public/build
 /public/hot
+
+# Svelte frontend build output and dev-server hot file
+/public/build-svelte
+/public/hot-svelte
 result
 
 .pnpm-store

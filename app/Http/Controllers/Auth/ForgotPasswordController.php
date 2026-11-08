@@ -5,9 +5,9 @@ namespace Everest\Http\Controllers\Auth;
 use Everest\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
 use Everest\Exceptions\DisplayException;
 use Everest\Services\Users\UserUpdateService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ForgotPasswordController extends AbstractLoginController
 {
@@ -22,11 +22,14 @@ class ForgotPasswordController extends AbstractLoginController
     /**
      * Validate the information provided for resetting a password.
      */
-    protected function verify(Request $request): JsonResponse|RedirectResponse
+    protected function verify(Request $request): JsonResponse
     {
+        // An unknown email must fail exactly like a wrong recovery code. The catch used to
+        // name DisplayException, so firstOrFail() escaped as a 404 and revealed which
+        // emails have accounts.
         try {
             $user = User::where('email', $request->input('email'))->firstOrFail();
-        } catch (DisplayException $ex) {
+        } catch (ModelNotFoundException) {
             throw new DisplayException('The information provided was incorrect.');
         }
 
@@ -44,7 +47,10 @@ class ForgotPasswordController extends AbstractLoginController
             return $this->sendLoginResponse($user, $request);
         }
 
-        return redirect()->route('auth.login');
+        // Two-factor accounts are not signed in here; they log in again through the checkpoint.
+        // A JSON answer replaces the redirect to the login page, which the XHR followed and
+        // read as an HTML body.
+        return new JsonResponse(['data' => ['complete' => false]]);
 
     }
 }

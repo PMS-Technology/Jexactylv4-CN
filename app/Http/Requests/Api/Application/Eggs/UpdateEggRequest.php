@@ -24,7 +24,7 @@ class UpdateEggRequest extends StoreEggRequest
             'startup' => 'sometimes|string',
             'script_container' => 'sometimes|string',
             'script_entry' => 'sometimes|string',
-            'script_install' => 'sometimes|string',
+            'script_install' => 'sometimes|nullable|string',
         ];
     }
 

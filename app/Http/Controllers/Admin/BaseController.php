@@ -17,6 +17,17 @@ class BaseController extends Controller
             throw new AccessDeniedHttpException('You do not have permission to access this resource.');
         }
 
-        return view('templates/base.core');
+        return view($this->template($request));
+    }
+
+    /**
+     * Picks the frontend shell for an admin page. Every admin page is ported to the Svelte
+     * frontend, so APP_FRONTEND alone decides; unknown paths get the Svelte 404 page.
+     *
+     * @see MIGRATION_PLAN.md
+     */
+    protected function template(Request $request): string
+    {
+        return config('app.frontend') === 'svelte' ? 'templates/svelte.core' : 'templates/base.core';
     }
 }

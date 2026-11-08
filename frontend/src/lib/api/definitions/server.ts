@@ -1,0 +1,166 @@
+/**
+ * Server-side models, ported from `api/definitions/server/models.d.ts`.
+ *
+ * These describe the Fractal transformer output of the existing Laravel client API.
+ * Field names and nullability follow the backend exactly; the camelCase mapping lives
+ * in `transformers.ts`.
+ */
+
+export type ServerPowerState = 'offline' | 'starting' | 'running' | 'stopping';
+
+export type ServerStatus = 'installing' | 'install_failed' | 'reinstall_failed' | 'suspended' | 'restoring_backup' | null;
+
+export interface EggVariable {
+    name: string;
+    description: string;
+    envVariable: string;
+    defaultValue: string;
+    serverValue: string | null;
+    isEditable: boolean;
+    rules: string[];
+}
+
+export interface Allocation {
+    id: number;
+    ip: string;
+    alias: string | null;
+    port: number;
+    notes: string | null;
+    isDefault: boolean;
+}
+
+export interface Server {
+    id: string;
+    internalId: number | string;
+    uuid: string;
+    groupId?: number | null;
+    name: string;
+    node: string;
+    isNodeUnderMaintenance: boolean;
+    status: ServerStatus;
+    sftpDetails: {
+        ip: string;
+        port: number;
+    };
+    invocation: string;
+    dockerImage: string;
+    description: string | null;
+    limits: {
+        memory: number;
+        swap: number;
+        disk: number;
+        io: number;
+        cpu: number;
+        threads: string;
+    };
+    eggFeatures: string[];
+    billingProductId?: number;
+    renewalDate?: Date | undefined;
+    featureLimits: {
+        databases: number;
+        allocations: number;
+        backups: number;
+        subusers: number;
+    };
+    isTransferring: boolean;
+    variables: EggVariable[];
+    allocations: Allocation[];
+}
+
+/** Live resource usage, pushed over the websocket as `stats` and also returned by the API. */
+export interface ServerStats {
+    status: ServerPowerState;
+    isSuspended: boolean;
+    memoryUsageInBytes: number;
+    cpuUsagePercent: number;
+    diskUsageInBytes: number;
+    networkRxInBytes: number;
+    networkTxInBytes: number;
+    uptime: number;
+}
+
+export interface ServerGroup {
+    id: number;
+    name: string;
+    color?: string;
+}
+
+export interface Backup {
+    uuid: string;
+    isSuccessful: boolean;
+    isLocked: boolean;
+    name: string;
+    ignoredFiles: string;
+    checksum: string;
+    bytes: number;
+    createdAt: Date;
+    completedAt: Date | null;
+}
+
+export interface Database {
+    id: string;
+    name: string;
+    username: string;
+    databaseHostId: number;
+    connectionString: string;
+    allowConnectionsFrom: string;
+    password?: string;
+}
+
+export interface Subuser {
+    uuid: string;
+    username: string;
+    email: string;
+    image: string;
+    twoFactorEnabled: boolean;
+    createdAt: Date;
+    permissions: string[];
+    can(permission: string): boolean;
+}
+
+export interface FileObject {
+    key: string;
+    name: string;
+    mode: string;
+    modeBits: string;
+    size: number;
+    isFile: boolean;
+    isSymlink: boolean;
+    mimetype: string;
+    createdAt: Date;
+    modifiedAt: Date;
+    isArchiveType(): boolean;
+    isEditable(): boolean;
+}
+
+export interface Task {
+    id: number;
+    sequenceId: number;
+    action: string;
+    payload: string;
+    timeOffset: number;
+    isQueued: boolean;
+    continueOnFailure: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface Schedule {
+    id: number;
+    name: string;
+    cron: {
+        dayOfWeek: string;
+        month: string;
+        dayOfMonth: string;
+        hour: string;
+        minute: string;
+    };
+    isActive: boolean;
+    isProcessing: boolean;
+    onlyWhenOnline: boolean;
+    lastRunAt: Date | null;
+    nextRunAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+    tasks: Task[];
+}

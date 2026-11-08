@@ -45,6 +45,8 @@ class VariableCreationService
             $this->validateRules($data['rules']);
         }
 
+        // The API sends user_viewable / user_editable as booleans; the old admin form sent an
+        // `options` list instead, which the API never had, so both flags were always false.
         $options = array_get($data, 'options') ?? [];
 
         return $this->repository->create([
@@ -53,8 +55,8 @@ class VariableCreationService
             'description' => $data['description'] ?? '',
             'env_variable' => $data['env_variable'] ?? '',
             'default_value' => $data['default_value'] ?? '',
-            'user_viewable' => in_array('user_viewable', $options),
-            'user_editable' => in_array('user_editable', $options),
+            'user_viewable' => (bool) ($data['user_viewable'] ?? in_array('user_viewable', $options)),
+            'user_editable' => (bool) ($data['user_editable'] ?? in_array('user_editable', $options)),
             'rules' => $data['rules'] ?? '',
         ]);
     }

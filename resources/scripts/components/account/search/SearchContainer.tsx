@@ -21,7 +21,7 @@ export default () => {
 
             <div className={'navigation-link'} onClick={() => setVisible(true)}>
                 <FontAwesomeIcon icon={faSearch} />
-                Search
+                搜索
             </div>
         </>
     );

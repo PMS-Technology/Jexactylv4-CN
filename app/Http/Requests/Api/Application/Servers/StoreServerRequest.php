@@ -43,6 +43,7 @@ class StoreServerRequest extends ApplicationApiRequest
             'egg_id' => $rules['egg_id'],
             'image' => $rules['image'],
             'skip_scripts' => 'present|boolean',
+            'start_on_completion' => 'sometimes|boolean',
         ];
     }
 

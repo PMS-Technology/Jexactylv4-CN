@@ -30,7 +30,8 @@ class LoginController extends AbstractLoginController
      */
     public function index(): View
     {
-        return view('templates/auth.core');
+        // Every /auth page is ported to the Svelte frontend; see MIGRATION_PLAN.md.
+        return view(config('app.frontend') === 'svelte' ? 'templates/svelte.core' : 'templates/auth.core');
     }
 
     /**

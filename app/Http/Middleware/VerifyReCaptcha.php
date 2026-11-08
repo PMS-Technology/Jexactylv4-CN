@@ -52,7 +52,9 @@ class VerifyReCaptcha
         }
 
         try {
-            $client = new Client();
+            // Without a timeout an unreachable Google held the login request open until the
+            // browser gave up, and blocked the PHP worker meanwhile.
+            $client = new Client(['connect_timeout' => 5, 'timeout' => 10]);
             $res = $client->post($this->config->get('recaptcha.domain'), [
                 'form_params' => [
                     'secret' => $this->config->get('recaptcha.secret_key'),
