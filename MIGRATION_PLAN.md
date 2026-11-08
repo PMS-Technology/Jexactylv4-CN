@@ -28,8 +28,8 @@ APP_FRONTEND=svelte           白名单路由 → templates/svelte.core → publ
 | 四、用户端迁移 | **完成** |
 | 五、管理端迁移 | **完成** |
 | 六、实时功能（WebSocket / 终端 / 文件） | **完成** |
-| 七、功能验证 | **进行中**（迁移期逐模块浏览器验证已完成；阶段七针对真实环境整体走查） |
-| 八、清理旧前端 | 未开始 |
+| 七、功能验证 | **进行中**（迁移期逐模块浏览器验证已完成；阶段七针对真实环境整体走查；2026-11-08 阶段八先执行，回滚窗口为提交 2ff330c8b） |
+| 八、清理旧前端 | **完成**（2026-11-08） |
 
 ## 已迁移页面
 
@@ -143,6 +143,8 @@ WebSocket 基础设施与控制台已完成；其余依赖它：
 9. **数据库密码字段读 `relationships.password.attributes.password`**。后端 include 返回 `{ object: null, attributes: { password } }`，旧前端 transformer 读 `.object`，所以旧面板从未显示过数据库密码与带密码的 JDBC 串。新前端按实际响应读取，旧前端未改动。
 
 10. **对话框不叠放**。bits-ui 两层 Dialog 叠放时内层无法点击，备份操作菜单在打开确认框前先关闭自身（旧前端也是下拉菜单 → 模态框的单层流程）。确认框统一用 `ConfirmDialog`，回调抛错时对话框保持打开并显示错误。
+
+12. **旧前端已删除**。`resources/scripts`（551 个文件）、根级前端工程文件（`vite.config.ts`、`tailwind.config.js`、`postcss.config.cjs`、`tsconfig.json`、eslint/prettier 配置、根 `package.json`/`pnpm-lock.yaml`）、`public/build` 产物、`templates/{base,auth}/core.blade.php` 与 `wrapper.blade.php`、`public/assets/svgs`（只有旧前端引用）、`tsc`/`ui` 两个 CI 工作流都已删除；`AssetComposer`/`ThemeComposer`/`EverestComposer` 收窄为只作用于 `templates/svelte.core`；三个外壳控制器直接返回 `templates/svelte.core`，不再读 `APP_FRONTEND`；`config('app.frontend')` 保留（默认改为 `svelte`）仅作为回滚开关（回滚到提交 2ff330c8b 可恢复整套旧前端）；`Dockerfile`/`Containerfile`/`release.yaml` 改为构建 `frontend/`；`node_modules` 与 `public/build` 已从磁盘删除。发票 PDF 视图不依赖任何 JS 全局，composer 收窄后不受影响。
 
 11. **不再按路径白名单选外壳**。所有页面迁移完成后，`Base\IndexController`、`Admin\BaseController` 和 `Auth\LoginController` 只看 `APP_FRONTEND`：`svelte` 时所有路径都用 Svelte 外壳，未知路径显示 Svelte 的 404 页；改成 `legacy` 即整体回退到旧前端。`AdminArea` 里处理 `legacy: true` 路由的逻辑保留但已没有路由使用。
 
