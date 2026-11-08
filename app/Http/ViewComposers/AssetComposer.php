@@ -3,6 +3,8 @@
 namespace Everest\Http\ViewComposers;
 
 use Illuminate\View\View;
+use Everest\Models\Setting;
+use Illuminate\Database\QueryException;
 
 class AssetComposer
 {
@@ -15,7 +17,7 @@ class AssetComposer
             'name' => config('app.name') ?? 'Everest',
             'logo' => config('app.logo') ?? null,
             'mode' => config('app.mode') ?? 'standard',
-            'setup' => config('app.setup') ?? false,
+            'setup' => $this->isSetup(),
             'debug' => config('app.debug') ?? false,
             'locale' => config('app.locale') ?? 'en',
             'auto_update' => boolval(config('app.auto_update', false)),
@@ -33,5 +35,27 @@ class AssetComposer
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Whether the setup wizard has been completed.
+     *
+     * The wizard records completion in the settings table, but with
+     * APP_ENVIRONMENT_ONLY=true the SettingsServiceProvider never copies that row into
+     * config, so config('app.setup') only reflects APP_SETUP and the wizard came back
+     * on every page load. Check the stored row directly as well.
+     */
+    protected function isSetup(): bool
+    {
+        if (filter_var(config('app.setup'), FILTER_VALIDATE_BOOLEAN)) {
+            return true;
+        }
+
+        try {
+            return filter_var(Setting::get('settings::app:setup', false), FILTER_VALIDATE_BOOLEAN);
+        } catch (QueryException) {
+            // No database yet (e.g. before migrations); treat the panel as not set up.
+            return false;
+        }
     }
 }
