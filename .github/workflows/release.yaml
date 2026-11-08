@@ -25,7 +25,10 @@ jobs:
         run: pnpm install
 
       - name: Build
-        run: pnpm run build
+        run: |
+          cd frontend
+          pnpm install --frozen-lockfile
+          pnpm build
 
       - name: create release branch and bump version
         env:
@@ -42,8 +45,8 @@ jobs:
           git push
       - name: create release archive
         run: |
-          rm -rf node_modules tests CONTRIBUTING.md flake.lock flake.nix phpunit.xml shell.nix
-          tar -czf panel.tar.gz * .env.example .eslintignore .eslintrc.js .gitignore .prettierrc.json
+          rm -rf node_modules frontend/node_modules tests CONTRIBUTING.md flake.lock flake.nix phpunit.xml shell.nix
+          tar -czf panel.tar.gz * .env.example .gitignore
       - uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

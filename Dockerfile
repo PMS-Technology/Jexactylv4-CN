@@ -1,12 +1,12 @@
 # Stage 0:
-# Build the assets that are needed for the frontend. This build stage is then discarded
-# since we won't need NodeJS anymore in the future. This Docker image ships a final production
-# level distribution of Pterodactyl.
+# Build the Svelte frontend (frontend/ -> public/build-svelte). This build stage is then
+# discarded since we won't need NodeJS anymore in the future.
 FROM --platform=$TARGETOS/$TARGETARCH node:22-alpine
 WORKDIR /app
-COPY . ./
+COPY frontend ./frontend
 RUN corepack enable && corepack prepare --activate \
-    && pnpm i \
+    && cd frontend \
+    && pnpm install --frozen-lockfile \
     && pnpm build
 
 # Stage 1:
@@ -14,7 +14,7 @@ RUN corepack enable && corepack prepare --activate \
 FROM --platform=$TARGETOS/$TARGETARCH php:8.4-fpm-alpine
 WORKDIR /app
 COPY . ./
-COPY --from=0 /app/public/build ./public/build
+COPY --from=0 /app/public/build-svelte ./public/build-svelte
 RUN apk add --no-cache --update ca-certificates dcron curl git supervisor tar unzip nginx libpng-dev libxml2-dev libzip-dev certbot certbot-nginx mysql-client \
     && docker-php-ext-configure zip \
     && docker-php-ext-install bcmath gd pdo_mysql zip \

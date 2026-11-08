@@ -15,12 +15,11 @@ class ViewComposerServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->app->make('view')->composer('*', AssetComposer::class);
-        $this->app->make('view')->composer('*', ThemeComposer::class);
-        $this->app->make('view')->composer('*', EverestComposer::class);
-
-        // Scoped to the Svelte shell so the extra Vite instance is only built when that
-        // template is actually rendered.
+        // All three composers only feed the Svelte shell (the only remaining view with
+        // JS globals), so scoping them to it keeps invoice PDF renders free of them.
+        $this->app->make('view')->composer('templates/svelte.core', AssetComposer::class);
+        $this->app->make('view')->composer('templates/svelte.core', ThemeComposer::class);
+        $this->app->make('view')->composer('templates/svelte.core', EverestComposer::class);
         $this->app->make('view')->composer('templates/svelte.core', SvelteAssetComposer::class);
     }
 }

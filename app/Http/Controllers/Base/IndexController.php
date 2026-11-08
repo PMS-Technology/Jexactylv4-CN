@@ -23,18 +23,6 @@ class IndexController extends Controller
      */
     public function index(): View
     {
-        return view($this->template());
-    }
-
-    /**
-     * Picks the frontend shell to render. Every dashboard, account and server page is
-     * ported to the Svelte frontend, so APP_FRONTEND alone decides; unknown paths get the
-     * Svelte 404 page. Set APP_FRONTEND=legacy to fall back to the Preact bundle.
-     *
-     * @see MIGRATION_PLAN.md
-     */
-    protected function template(): string
-    {
-        return config('app.frontend') === 'svelte' ? 'templates/svelte.core' : 'templates/base.core';
+        return view('templates/svelte.core');
     }
 }

@@ -66,16 +66,12 @@ return [
     |--------------------------------------------------------------------------
     | Frontend
     |--------------------------------------------------------------------------
-    | Selects which frontend bundle is served. The migration to Svelte 5 is
-    | progressive, so both exist side by side:
-    |
-    | - 'legacy': the Preact bundle from resources/scripts (public/build)
-    | - 'svelte': the Svelte 5 bundle from frontend/ (public/build-svelte)
-    |
-    | Routes that the Svelte bundle has not taken over yet always fall back to
-    | the legacy bundle regardless of this setting. See MIGRATION_PLAN.md.
+    | 'svelte' serves the Svelte 5 bundle from frontend/ (public/build-svelte).
+    | The legacy Preact bundle was removed when the migration completed; the
+    | switch only remains as a kill switch back to the pre-migration bundle
+    | via the v2ff330c8b commit. See MIGRATION_PLAN.md.
     */
-    'frontend' => env('APP_FRONTEND', 'legacy'),
+    'frontend' => env('APP_FRONTEND', 'svelte'),
 
     /*
     |--------------------------------------------------------------------------

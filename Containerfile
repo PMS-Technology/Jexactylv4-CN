@@ -6,13 +6,14 @@ RUN         npm install -g pnpm
 
 WORKDIR     /var/www/pterodactyl
 
-COPY        --chown=1001:0 public ./public
-COPY        --chown=1001:0 resources/scripts ./resources/scripts
-COPY        --chown=1001:0 .eslintignore .eslintrc.js .npmrc .prettierrc.json package.json pnpm-lock.yaml tailwind.config.js tsconfig.json vite.config.ts .
+COPY        --chown=1001:0 frontend ./frontend
 
-RUN         /opt/app-root/src/.npm-global/bin/pnpm install \
-                && /opt/app-root/src/.npm-global/bin/pnpm build \
-                && rm -rf resources/scripts .eslintignore .eslintrc.yml .npmrc package.json pnpm-lock.yaml tailwind.config.js tsconfig.json vite.config.ts node_modules
+WORKDIR     /var/www/pterodactyl/frontend
+
+RUN         /opt/app-root/src/.npm-global/bin/pnpm install --frozen-lockfile \
+                && pnpm build
+
+WORKDIR     /var/www/pterodactyl
 
 USER        1001
 

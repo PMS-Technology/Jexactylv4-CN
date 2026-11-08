@@ -3,13 +3,13 @@
 namespace Everest\Http\Controllers\Auth;
 
 use Everest\Models\User;
+use Illuminate\View\View;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Everest\Facades\Activity;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Contracts\View\View;
 use Everest\Exceptions\DisplayException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -25,13 +25,11 @@ class LoginController extends AbstractLoginController
 
     /**
      * Handle all incoming requests for the authentication routes and render the
-     * base authentication view component. React will take over at this point and
-     * turn the login area into an SPA.
+     * authentication shell. The Svelte bundle takes over and turns the area into an SPA.
      */
     public function index(): View
     {
-        // Every /auth page is ported to the Svelte frontend; see MIGRATION_PLAN.md.
-        return view(config('app.frontend') === 'svelte' ? 'templates/svelte.core' : 'templates/auth.core');
+        return view('templates/svelte.core');
     }
 
     /**
