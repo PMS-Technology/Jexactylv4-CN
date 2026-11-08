@@ -27,7 +27,22 @@ class MakeUserCommand extends Command
      */
     public function handle()
     {
-        $root_admin = $this->option('admin') ?? $this->confirm(trans('command/messages.user.ask_admin'));
+        // The option arrives as a raw string; passing it straight to the model let anything
+        // other than "1" (e.g. --admin=true) be stored as root_admin = 0, silently creating
+        // a regular user. Parse it as a boolean and refuse values we cannot interpret.
+        $root_admin = $this->option('admin');
+        if (is_null($root_admin)) {
+            $root_admin = $this->confirm(trans('command/messages.user.ask_admin'));
+        } else {
+            $parsed = filter_var($root_admin, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if (is_null($parsed)) {
+                $this->error("Invalid value for --admin: \"$root_admin\". Use true/false, 1/0, yes/no or on/off.");
+
+                return self::FAILURE;
+            }
+            $root_admin = $parsed;
+        }
+
         $email = $this->option('email') ?? $this->ask(trans('command/messages.user.ask_email'));
         $username = $this->option('username') ?? $this->ask(trans('command/messages.user.ask_username'));
 
