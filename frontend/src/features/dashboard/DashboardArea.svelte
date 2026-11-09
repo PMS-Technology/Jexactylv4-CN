@@ -32,7 +32,7 @@
 <div class="flex min-h-screen">
     <Sidebar links={linksQuery.data ?? []} />
 
-    <main class="min-w-0 flex-1 pb-16 md:pb-0">
+    <main class="min-w-0 flex-1">
         <DashboardAlert />
         {#if isIndex}
             <ServersPage />
@@ -50,7 +50,7 @@
         {/if}
     </main>
 
-    <MobileSidebar />
+    <MobileSidebar links={linksQuery.data ?? []} />
 
     {#if app.isAdmin && app.settings?.speed_dial}
         <SpeedDial />

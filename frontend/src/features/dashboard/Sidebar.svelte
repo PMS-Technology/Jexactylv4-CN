@@ -20,7 +20,7 @@
 </script>
 
 <aside
-    class="hidden w-60 flex-none flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex"
+    class="sticky top-0 hidden h-screen supports-[height:100dvh]:h-dvh w-60 flex-none flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex"
 >
     <div class="flex h-14 items-center gap-2 border-b border-sidebar-border px-5">
         <span class="truncate font-header text-base font-semibold">

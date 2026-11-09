@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { CircleStop, ExternalLink, LayoutDashboard, Puzzle } from '@lucide/svelte';
+    import { ExternalLink, Power, LayoutDashboard, Puzzle } from '@lucide/svelte';
     import { app } from '$lib/stores/app.svelte';
     import { resolveRoute, router } from '$lib/router/router.svelte';
     import RouteView from '$lib/router/RouteView.svelte';
@@ -12,6 +12,10 @@
     import ConflictState from './ConflictState.svelte';
     import ServerSuspended from './billing/ServerSuspended.svelte';
     import StatusControls from './console/StatusControls.svelte';
+    import MobileNav from '$lib/components/mobile-nav/MobileNav.svelte';
+    import MobileNavItem from '$lib/components/mobile-nav/MobileNavItem.svelte';
+    import MobileNavDivider from '$lib/components/mobile-nav/MobileNavDivider.svelte';
+    import MobileNavAction from '$lib/components/mobile-nav/MobileNavAction.svelte';
     import serverRoutes, { categoryLabels, serverRouteCategories } from './routes';
 
     let { id }: { id: string } = $props();
@@ -136,7 +140,7 @@
 
 <div class="flex min-h-screen">
     <aside
-        class="hidden w-60 flex-none flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex"
+        class="sticky top-0 hidden h-screen supports-[height:100dvh]:h-dvh w-60 flex-none flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex"
     >
         <div class="flex h-14 items-center gap-2 border-b border-sidebar-border px-5">
             <Link
@@ -170,7 +174,7 @@
         </div>
     </aside>
 
-    <main class="min-w-0 flex-1 pb-16 md:pb-0">
+    <main class="min-w-0 flex-1">
         {#if store.loadError}
             <div class="p-6">
                 <Alert variant="destructive" title="无法加载服务器">{store.loadError}</Alert>
@@ -215,43 +219,33 @@
         {/if}
     </main>
 
-    <!-- Mobile: same list as the desktop sidebar. -->
-    <nav
-        aria-label="Server"
-        class="fixed inset-x-0 bottom-0 z-40 h-16 rounded-t-2xl border-t border-sidebar-border
-               bg-sidebar/90 shadow-[0_-8px_24px_rgba(0,0,0,0.12)] backdrop-blur-md md:hidden"
-    >
-        <div class="flex h-full items-center gap-4 overflow-x-auto px-4 scrollbar-thin">
-            <Link
-                href="/"
-                end
-                class="flex shrink-0 items-center gap-2 text-sm font-medium text-sidebar-foreground/80 transition-transform duration-200 hover:text-sidebar-foreground active:scale-90"
-            >
-                <LayoutDashboard class="size-5 shrink-0" />
-                <span class="sr-only">控制台</span>
-            </Link>
-            <span aria-hidden="true" class="shrink-0 text-muted-foreground/50">&bull;</span>
-            {#each visible.filter(r => r.name) as item (item.route)}
-                {@const Icon = item.icon ?? Puzzle}
-                <Link
+    <!-- Phone menu: the sidebar's groups, separated by hairlines as on Vercel. -->
+    <MobileNav area="server" scope={store.server?.name ?? id}>
+        {#snippet primary()}
+            {#each topRoutes as item (item.route)}
+                <MobileNavItem
                     href={item.path ? `/server/${id}/${item.path}` : `/server/${id}`}
                     end={item.end}
-                    class="flex shrink-0 items-center gap-2 text-sm font-medium text-sidebar-foreground/80 transition-transform duration-200 hover:text-sidebar-foreground active:scale-90"
-                    activeClass="text-primary scale-105"
-                >
-                    <Icon class="size-4 shrink-0" />
-                    <span class="whitespace-nowrap">{item.name}</span>
-                </Link>
+                    label={item.name ?? ''}
+                    icon={item.icon ?? Puzzle}
+                />
             {/each}
+            {#each serverRouteCategories.filter(c => byCategory[c].length) as category (category)}
+                <MobileNavDivider />
+                {#each byCategory[category] as item (item.route)}
+                    <MobileNavItem href={`/server/${id}/${item.path}`} label={item.name ?? ''} icon={item.icon ?? Puzzle} />
+                {/each}
+            {/each}
+        {/snippet}
+
+        {#snippet actions()}
             {#if app.user?.rootAdmin && store.server}
-                <a
-                    href="/admin/servers/{store.server.internalId}"
-                    class="flex shrink-0 items-center gap-2 text-sm font-medium text-sidebar-foreground/80 hover:text-sidebar-foreground"
-                >
-                    <CircleStop class="size-4 shrink-0" />
-                    <span class="whitespace-nowrap">管理员</span>
-                </a>
+                <MobileNavAction label="管理员视角" icon={ExternalLink} href="/admin/servers/{store.server.internalId}" document />
             {/if}
-        </div>
-    </nav>
+            <div class="flex h-9 items-center justify-between px-2 text-sm">
+                <span class="flex items-center gap-2"><Power class="size-4 text-(color:--mn-muted)" strokeWidth={1.5} aria-hidden="true" />电源</span>
+                <StatusControls {store} />
+            </div>
+        {/snippet}
+    </MobileNav>
 </div>

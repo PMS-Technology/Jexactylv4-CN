@@ -9,6 +9,9 @@
     import NotFound from '$lib/components/NotFound.svelte';
     import ThemeToggle from '$lib/components/ThemeToggle.svelte';
     import Tooltip from '$lib/ui/tooltip/Tooltip.svelte';
+    import MobileNav from '$lib/components/mobile-nav/MobileNav.svelte';
+    import MobileNavItem from '$lib/components/mobile-nav/MobileNavItem.svelte';
+    import MobileNavDivider from '$lib/components/mobile-nav/MobileNavDivider.svelte';
     import adminRoutes, { adminCategoryLabels, adminRouteCategories } from './routes';
 
     /**
@@ -62,7 +65,7 @@
 
 <div class="flex min-h-screen">
     <aside
-        class="hidden w-60 flex-none flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex"
+        class="sticky top-0 hidden h-screen supports-[height:100dvh]:h-dvh w-60 flex-none flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex"
     >
         <div class="flex h-14 items-center gap-2 border-b border-sidebar-border px-5">
             <span class="truncate font-header text-base font-semibold">{app.settings?.name ?? 'Panel'}</span>
@@ -125,7 +128,7 @@
         </div>
     </aside>
 
-    <main class="min-w-0 flex-1 pb-16 md:pb-0">
+    <main class="min-w-0 flex-1">
         {#if servedLegacyPath}
             <div class="p-6">
                 <Alert variant="warning" title="此页面尚未迁移">
@@ -148,29 +151,21 @@
         {/if}
     </main>
 
-    <!-- Mobile: the same list as the sidebar. -->
-    <nav
-        aria-label="Admin"
-        class="fixed inset-x-0 bottom-0 z-40 h-16 rounded-t-2xl border-t border-sidebar-border bg-sidebar/90 shadow-[0_-8px_24px_rgba(0,0,0,0.12)] backdrop-blur-md md:hidden"
-    >
-        <div class="flex h-full items-center gap-4 overflow-x-auto px-4 scrollbar-thin">
-            <Link href="/" class="flex shrink-0 items-center text-sidebar-foreground/80" aria-label="返回">
-                <CornerUpLeft class="size-5" />
-            </Link>
-            <span aria-hidden="true" class="shrink-0 text-muted-foreground/50">&bull;</span>
-            {#each navigable as item (item.route)}
-                {@const Icon = item.icon ?? Puzzle}
-                <Link
-                    href={item.path ? `/admin/${item.path}` : '/admin'}
-                    end={item.end}
-                    class="flex shrink-0 items-center gap-2 text-sm font-medium whitespace-nowrap text-sidebar-foreground/80"
-                    activeClass="text-primary"
-                >
-                    <Icon class="size-4 shrink-0" />
-                    {item.name}
-                </Link>
+    <!-- Phone menu: the sidebar's categories, separated by hairlines as on Vercel. -->
+    <MobileNav area="admin">
+        {#snippet primary()}
+            {#each adminRouteCategories.map(c => navigable.filter(r => r.category === c)).filter(g => g.length) as group, i (i)}
+                {#if i > 0}<MobileNavDivider />{/if}
+                {#each group as item (item.route)}
+                    <MobileNavItem
+                        href={item.path ? `/admin/${item.path}` : '/admin'}
+                        end={item.end}
+                        label={item.name ?? ''}
+                        icon={item.icon ?? Puzzle}
+                    />
+                {/each}
             {/each}
-        </div>
-    </nav>
+        {/snippet}
+    </MobileNav>
 
 </div>
