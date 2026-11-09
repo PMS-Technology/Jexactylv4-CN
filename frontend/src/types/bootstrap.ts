@@ -98,7 +98,17 @@ export interface EverestSettings {
         content: string;
         uuid: string;
     };
-    ai: { enabled: boolean; key: boolean | string; user_access: boolean };
+    ai: {
+        enabled: boolean;
+        key: boolean | string;
+        user_access: boolean;
+        provider: string;
+        model: string;
+        base_url: string;
+        headers: boolean;
+        max_tokens: number;
+        temperature: number;
+    };
     webhooks: { enabled: boolean; url: boolean };
 }
 

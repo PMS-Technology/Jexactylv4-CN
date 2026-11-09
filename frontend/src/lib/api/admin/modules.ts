@@ -155,15 +155,64 @@ export interface AISettingsUpdate {
     user_access?: boolean;
     /** Only send a real key. An empty string reaches the backend as null and wipes it. */
     key?: string;
+    provider?: string;
+    model?: string;
+    base_url?: string;
+    headers?: Record<string, string>;
+    max_tokens?: number;
+    temperature?: number;
+    system_prompt?: string;
 }
 
 export async function updateAISettings(settings: AISettingsUpdate): Promise<void> {
     await http.put('/api/application/ai/settings', settings);
 }
 
-/** Sends a prompt to Gemini through the panel and returns the text answer. */
+/** Sends a prompt through the configured provider and returns the text answer. */
 export async function queryAI(query: string): Promise<string> {
     const { data } = await http.post('/api/application/ai/query', { query });
 
     return String(data);
+}
+
+export interface AIProviderSummary {
+    id: string;
+    label: string;
+    driver: string;
+    base_url: string;
+    default_model: string | null;
+    requires_key: boolean;
+    configured: boolean;
+    model_sync: boolean;
+    supports_stream: boolean;
+    selected: boolean;
+}
+
+export interface AIModel {
+    id: string;
+    name: string;
+    context?: number;
+}
+
+export interface AIModelList {
+    provider: string;
+    base_url: string;
+    source: 'live' | 'cache' | 'fallback';
+    models: AIModel[];
+}
+
+export async function getAIProviders(): Promise<AIProviderSummary[]> {
+    const { data } = await http.get('/api/application/ai/providers');
+
+    return (data as { data: AIProviderSummary[] }).data;
+}
+
+/**
+ * Resolves the provider's live model list. `refresh` bypasses the server cache;
+ * upstream errors are returned verbatim by the API, so callers show them as-is.
+ */
+export async function getAIModels(provider: string, refresh = false): Promise<AIModelList> {
+    const { data } = await http.get('/api/application/ai/models', { params: { provider, refresh: refresh ? 1 : 0 } });
+
+    return data as AIModelList;
 }

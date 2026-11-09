@@ -76,6 +76,12 @@ class EverestComposer
                 'enabled' => boolval(config('modules.ai.enabled', false)),
                 'key' => !empty(config('modules.ai.key')),
                 'user_access' => boolval(config('modules.ai.user_access', false)),
+                'provider' => config('modules.ai.provider', 'google_ai_studio'),
+                'model' => config('modules.ai.model', ''),
+                'base_url' => config('modules.ai.base_url', ''),
+                'headers' => !empty(config('modules.ai.headers')),
+                'max_tokens' => (int) config('modules.ai.max_tokens', 1024),
+                'temperature' => (float) config('modules.ai.temperature', 0.7),
             ],
             'webhooks' => [
                 'enabled' => boolval(config('modules.webhooks.enabled', false)),
