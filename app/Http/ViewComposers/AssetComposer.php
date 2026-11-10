@@ -5,9 +5,14 @@ namespace Everest\Http\ViewComposers;
 use Illuminate\View\View;
 use Everest\Models\Setting;
 use Illuminate\Database\QueryException;
+use Everest\Services\Captcha\CaptchaSettings;
 
 class AssetComposer
 {
+    public function __construct(private CaptchaSettings $captcha)
+    {
+    }
+
     /**
      * Provide access to the asset service in the views.
      */
@@ -23,10 +28,7 @@ class AssetComposer
             'auto_update' => boolval(config('app.auto_update', false)),
             'speed_dial' => boolval(config('app.speed_dial', false)),
             'indicators' => boolval(config('app.indicators', false)),
-            'recaptcha' => [
-                'enabled' => config('recaptcha.enabled', false),
-                'siteKey' => config('recaptcha.website_key') ?? '',
-            ],
+            'captcha' => $this->captcha->clientConfiguration(),
             'activity' => [
                 'enabled' => [
                     'account' => config('activity.enabled.account', true),

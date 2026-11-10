@@ -1,5 +1,6 @@
 import { startAuthentication } from '@simplewebauthn/browser';
 import http from '$lib/api/http';
+import type { CaptchaPayload } from '$lib/utils/recaptcha';
 
 /**
  * Session endpoints under `/auth`, ported from `api/routes/auth/{login,passkey,register,password-reset}.ts`.
@@ -23,9 +24,9 @@ const toAuthResponse = (data: { data?: Record<string, any> }): AuthResponse => (
 /** Refreshes the XSRF cookie before a state-changing auth request, as the legacy client did. */
 const csrf = () => http.get('/sanctum/csrf-cookie');
 
-export async function login(user: string, password: string, recaptcha?: string): Promise<AuthResponse> {
+export async function login(user: string, password: string, captcha?: CaptchaPayload): Promise<AuthResponse> {
     await csrf();
-    const { data } = await http.post('/auth/login', { user, password, 'g-recaptcha-response': recaptcha });
+    const { data } = await http.post('/auth/login', { user, password, ...(captcha ?? {}) });
 
     return toAuthResponse(data);
 }
@@ -60,9 +61,9 @@ export const passkeysSupported = () => typeof window.PublicKeyCredential !== 'un
 export const isPasskeyCancellation = (error: unknown) => error instanceof Error && ['NotAllowedError', 'AbortError'].includes(error.name);
 
 /** Returns the provider's authorisation URL to send the browser to. */
-export async function externalLogin(provider: 'discord' | 'google', recaptcha?: string): Promise<string> {
+export async function externalLogin(provider: 'discord' | 'google', captcha?: CaptchaPayload): Promise<string> {
     await csrf();
-    const { data } = await http.post(`/auth/modules/${provider}`, { 'g-recaptcha-response': recaptcha });
+    const { data } = await http.post(`/auth/modules/${provider}`, { ...(captcha ?? {}) });
 
     return data;
 }
@@ -74,9 +75,9 @@ export interface RegisterValues {
     confirm_password: string;
 }
 
-export async function register(values: RegisterValues, recaptcha?: string): Promise<void> {
+export async function register(values: RegisterValues, captcha?: CaptchaPayload): Promise<void> {
     await csrf();
-    await http.post('/auth/register', { ...values, 'g-recaptcha-response': recaptcha });
+    await http.post('/auth/register', { ...values, ...(captcha ?? {}) });
 }
 
 /**
@@ -85,10 +86,10 @@ export async function register(values: RegisterValues, recaptcha?: string): Prom
  */
 export async function resetWithRecoveryCode(
     values: { email: string; code: string; password: string; password_confirm: string },
-    recaptcha?: string,
+    captcha?: CaptchaPayload,
 ): Promise<AuthResponse> {
     await csrf();
-    const { data } = await http.post('/auth/password', { ...values, 'g-recaptcha-response': recaptcha });
+    const { data } = await http.post('/auth/password', { ...values, ...(captcha ?? {}) });
 
     return toAuthResponse(data);
 }

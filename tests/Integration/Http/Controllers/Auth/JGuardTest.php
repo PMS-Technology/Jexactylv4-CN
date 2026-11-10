@@ -12,9 +12,9 @@ class JGuardTest extends HttpTestCase
     {
         parent::setUp();
 
-        // Recaptcha is not the concern of these tests, and jGuard's own throttling is
+        // Captcha is not the concern of these tests, and jGuard's own throttling is
         // what we actually want to exercise.
-        config()->set('recaptcha.enabled', false);
+        config()->set('captcha.enabled', false);
         config()->set('modules.auth.registration.enabled', true);
     }
 

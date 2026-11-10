@@ -6,6 +6,8 @@
  * without changing the corresponding Blade/PHP side.
  */
 
+import type { CaptchaProvider } from '$lib/utils/recaptcha';
+
 /** Raw shape of `window.PterodactylUser`, snake_cased as PHP emits it. */
 export interface RawUser {
     uuid: string;
@@ -54,9 +56,16 @@ export interface SiteSettings {
     indicators: boolean;
     speed_dial: boolean;
     setup: boolean;
-    recaptcha: {
+    captcha: {
         enabled: boolean;
+        provider: CaptchaProvider;
         siteKey: string;
+        scriptUrl: string;
+        apiBase: string;
+        /** Public site keys for every provider, so the admin form can edit them. */
+        siteKeys: Record<CaptchaProvider, string>;
+        /** Server-side keys stay on the server; the form only shows whether one exists. */
+        hasSecret: Record<CaptchaProvider, boolean>;
     };
     activity: {
         enabled: {

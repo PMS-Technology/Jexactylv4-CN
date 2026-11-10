@@ -9,6 +9,7 @@ import http, {
 import type { ActivityLog } from '$lib/api/definitions/account';
 import { toActivityLog } from '$lib/api/transformers/account';
 import type { PanelMode } from '$types/bootstrap';
+import type { CaptchaProvider } from '$lib/utils/recaptcha';
 
 /**
  * Admin "general" endpoints under `/api/application`, ported from
@@ -109,6 +110,34 @@ export async function updateGeneralSettings(settings: GeneralSettings): Promise<
         'activity:enabled:server': settings.activity.enabled.server,
         'activity:enabled:admin': settings.activity.enabled.admin,
     });
+}
+
+export const CAPTCHA_PROVIDERS: CaptchaProvider[] = ['recaptcha', 'hcaptcha', 'turnstile', 'geetest', 'corptcha'];
+
+export interface CaptchaSettingsInput {
+    enabled: boolean;
+    provider: CaptchaProvider;
+    siteKeys: Record<CaptchaProvider, string>;
+    /** Empty values are omitted so an existing server-side key is preserved. */
+    secretKeys: Record<CaptchaProvider, string>;
+    apiBase: string;
+}
+
+export async function updateCaptchaSettings(settings: CaptchaSettingsInput): Promise<void> {
+    const payload: Record<string, unknown> = {
+        'captcha:enabled': settings.enabled,
+        'captcha:provider': settings.provider,
+        'captcha:corptcha:api_base': settings.apiBase || null,
+    };
+
+    for (const provider of CAPTCHA_PROVIDERS) {
+        payload[`captcha:${provider}:site_key`] = settings.siteKeys[provider] ?? '';
+
+        const secret = settings.secretKeys[provider]?.trim();
+        if (secret) payload[`captcha:${provider}:secret_key`] = secret;
+    }
+
+    await http.patch('/api/application/settings', payload);
 }
 
 /**

@@ -7,7 +7,7 @@
     import Alert from '$lib/components/Alert.svelte';
     import Link from '$lib/components/Link.svelte';
     import AuthLayout from './AuthLayout.svelte';
-    import { captchaToken } from './captcha';
+    import { captchaPayload } from './captcha';
     import { authState } from './state.svelte';
 
     /**
@@ -26,7 +26,7 @@
             .refine(v => v.password === v.password_confirm, { path: ['password_confirm'], message: '两次输入的密码不一致。' }),
         initial: { email: '', code: '', password: '', password_confirm: '' },
         onSubmit: async values => {
-            const response = await resetWithRecoveryCode(values, await captchaToken());
+            const response = await resetWithRecoveryCode(values, await captchaPayload('password'));
             if (response.complete) {
                 window.location.assign(response.intended || '/');
                 return;

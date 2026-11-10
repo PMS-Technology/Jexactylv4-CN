@@ -9,13 +9,13 @@
     import Alert from '$lib/components/Alert.svelte';
     import Link from '$lib/components/Link.svelte';
     import AuthLayout from './AuthLayout.svelte';
-    import { captchaToken } from './captcha';
+    import { captchaPayload } from './captcha';
     import { authState } from './state.svelte';
 
     /**
      * Sign up, ported from RegisterContainer.tsx. The new account is signed in straight
      * away, as before. Differences: when that sign-in is refused (a jGuard delay on new
-     * accounts, or reCAPTCHA) the page now goes to the login screen with the reason; the
+     * accounts, or captcha) the page now goes to the login screen with the reason; the
      * legacy page stayed on its spinner.
      */
     const form = new Form({
@@ -29,9 +29,9 @@
             .refine(v => v.password === v.confirm_password, { path: ['confirm_password'], message: '两次输入的密码不一致。' }),
         initial: { username: '', email: '', password: '', confirm_password: '' },
         onSubmit: async values => {
-            await register(values, await captchaToken());
+            await register(values, await captchaPayload('register'));
             try {
-                const response = await login(values.username, values.password, await captchaToken());
+                const response = await login(values.username, values.password, await captchaPayload('login'));
                 window.location.assign(response.intended || '/');
             } catch (e) {
                 authState.notice = `账号已创建，但暂时无法登录：${httpErrorToHuman(e)}`;

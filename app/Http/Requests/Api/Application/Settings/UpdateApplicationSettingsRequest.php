@@ -19,6 +19,20 @@ class UpdateApplicationSettingsRequest extends ApplicationApiRequest
             'activity:enabled:account' => 'nullable|bool',
             'activity:enabled:server' => 'nullable|bool',
             'activity:enabled:admin' => 'nullable|bool',
+
+            'captcha:enabled' => 'nullable|bool',
+            'captcha:provider' => 'nullable|in:recaptcha,hcaptcha,turnstile,geetest,corptcha',
+            'captcha:recaptcha:site_key' => 'nullable|string|max:255',
+            'captcha:recaptcha:secret_key' => 'nullable|string|max:255',
+            'captcha:hcaptcha:site_key' => 'nullable|string|max:255',
+            'captcha:hcaptcha:secret_key' => 'nullable|string|max:255',
+            'captcha:turnstile:site_key' => 'nullable|string|max:255',
+            'captcha:turnstile:secret_key' => 'nullable|string|max:255',
+            'captcha:geetest:site_key' => 'nullable|string|max:255',
+            'captcha:geetest:secret_key' => 'nullable|string|max:255',
+            'captcha:corptcha:site_key' => 'nullable|string|max:255',
+            'captcha:corptcha:secret_key' => 'nullable|string|max:255',
+            'captcha:corptcha:api_base' => 'nullable|url|max:255',
         ];
     }
 

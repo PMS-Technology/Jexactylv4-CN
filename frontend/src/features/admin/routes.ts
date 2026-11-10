@@ -41,7 +41,7 @@ const admin: AdminRouteDefinition[] = [
         permission: 'activity.read',
         condition: flags => flags.activityEnabled,
     }),
-    // Core, mode, webhooks and debug are tabs matched inside SettingsArea.
+    // Core, mode, captcha, webhooks and debug are tabs matched inside SettingsArea.
     route<AdminRouteDefinition>('settings/*', () => import('./settings/SettingsArea.svelte'), {
         name: '设置',
         icon: Cog,

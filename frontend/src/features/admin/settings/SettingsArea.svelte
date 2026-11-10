@@ -1,12 +1,13 @@
 <script lang="ts">
     import type { Component } from 'svelte';
-    import { Bug, Cpu, Link as LinkIcon, SlidersHorizontal } from '@lucide/svelte';
+    import { Bug, Cpu, Link as LinkIcon, ShieldCheck, SlidersHorizontal } from '@lucide/svelte';
     import { app } from '$lib/stores/app.svelte';
     import { router } from '$lib/router/router.svelte';
     import Link from '$lib/components/Link.svelte';
     import NotFound from '$lib/components/NotFound.svelte';
     import PageHeader from '$lib/components/PageHeader.svelte';
     import GeneralSettings from './GeneralSettings.svelte';
+    import CaptchaSettings from './CaptchaSettings.svelte';
     import ModeSettings from './ModeSettings.svelte';
     import WebhookSettings from './WebhookSettings.svelte';
     import DebugSettings from './DebugSettings.svelte';
@@ -15,6 +16,7 @@
     const tabs: { path: string; name: string; icon: Component<any>; page: Component<any>; permission: string }[] = [
         { path: '', name: '核心', icon: Cpu, page: GeneralSettings, permission: 'settings.read' },
         { path: 'mode', name: '模式', icon: SlidersHorizontal, page: ModeSettings, permission: 'settings.read' },
+        { path: 'captcha', name: '验证码', icon: ShieldCheck, page: CaptchaSettings, permission: 'settings.read' },
         { path: 'webhooks', name: 'Webhooks', icon: LinkIcon, page: WebhookSettings, permission: 'webhooks.read' },
         { path: 'debug', name: '调试', icon: Bug, page: DebugSettings, permission: 'settings.read' },
     ];

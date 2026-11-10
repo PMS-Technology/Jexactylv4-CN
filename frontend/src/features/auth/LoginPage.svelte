@@ -10,13 +10,13 @@
     import Alert from '$lib/components/Alert.svelte';
     import Link from '$lib/components/Link.svelte';
     import AuthLayout from './AuthLayout.svelte';
-    import { captchaToken } from './captcha';
+    import { captchaPayload } from './captcha';
     import { afterLogin, authState } from './state.svelte';
 
     /**
      * Sign in, ported from LoginContainer.tsx. Differences: a failed SSO request shows its
      * error on this page (the legacy page flashed it under a key nothing rendered); a
-     * reCAPTCHA failure on an SSO button is reported instead of logged.
+     * captcha failure on an SSO button is reported instead of logged.
      */
     const notice = authState.notice;
     authState.notice = '';
@@ -32,7 +32,7 @@
         }),
         initial: { user: '', password: '' },
         onSubmit: async ({ user, password }) => {
-            const response = await login(user, password, await captchaToken());
+            const response = await login(user, password, await captchaPayload('login'));
             if (response.complete) {
                 window.location.assign(afterLogin(response.intended));
                 return;
@@ -61,7 +61,7 @@
         other = provider;
         otherError = '';
         try {
-            window.location.assign(await externalLogin(provider, await captchaToken()));
+            window.location.assign(await externalLogin(provider, await captchaPayload('login')));
         } catch (e) {
             otherError = httpErrorToHuman(e);
             other = null;
