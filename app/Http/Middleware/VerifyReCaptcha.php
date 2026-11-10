@@ -185,6 +185,19 @@ class VerifyReCaptcha
         $siteKey = $this->settings->siteKey('corptcha');
         $secret = $this->settings->secretKey('corptcha');
 
+        // Temporary diagnostics: the 401 UNAUTHORIZED from Corptcha means the secret it
+        // receives is not the one it expects. Log fingerprints only, never the secret.
+        $this->log->warning('Corptcha verify attempt', [
+            'siteKey' => $siteKey,
+            'secretLen' => strlen($secret),
+            'secretSha256' => substr(hash('sha256', $secret), 0, 12),
+            'secretHasWhitespace' => trim($secret) !== $secret,
+            'tokenLen' => strlen($token),
+            'tokenHead' => substr($token, 0, 8),
+            'purpose' => $this->purpose($request),
+            'apiBase' => $this->settings->apiBase(),
+        ]);
+
         if ($token === '' || $siteKey === '' || $secret === '') {
             return false;
         }
