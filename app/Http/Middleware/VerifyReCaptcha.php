@@ -210,14 +210,18 @@ class VerifyReCaptcha
             return false;
         }
 
+        $status = $response->getStatusCode();
         $body = $response->getBody()->getContents();
         $result = $this->json($body);
 
-        if ($response->getStatusCode() !== 200 || !is_array($result) || ($result['success'] ?? false) !== true) {
+        // Corptcha answers a successful verification with any 2xx status (201 in
+        // production), so the `success` flag in the body is what decides.
+        if ($status < 200 || $status > 299 || !is_array($result) || ($result['success'] ?? false) !== true) {
             $this->log->warning('Corptcha verify failed', [
-                'status' => $response->getStatusCode(),
+                'status' => $status,
                 'errorCode' => $result['errorCode'] ?? null,
                 'message' => $result['message'] ?? null,
+                'body' => mb_substr($body, 0, 500),
             ]);
 
             return false;

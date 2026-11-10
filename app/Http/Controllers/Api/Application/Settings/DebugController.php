@@ -4,6 +4,7 @@ namespace Everest\Http\Controllers\Api\Application\Settings;
 
 use Carbon\Carbon;
 use Everest\Facades\Activity;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -57,9 +58,10 @@ class DebugController extends ApplicationApiController
      *
      * @throws NotFoundHttpException
      */
-    public function download(string $file): BinaryFileResponse
+    public function download(Request $request): BinaryFileResponse
     {
-        $path = $this->resolvePath($file);
+        $file = $request->query('file');
+        $path = $this->resolvePath(is_string($file) ? $file : '');
 
         Activity::event('admin:settings:debug.download')
             ->property('file', basename($path))

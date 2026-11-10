@@ -32,7 +32,9 @@ Route::middleware([AdminSubject::class])->group(function () {
         Route::group(['prefix' => '/debug'], function () {
             Route::get('/', [Application\Settings\DebugController::class, 'index']);
             Route::get('/archive', [Application\Settings\DebugController::class, 'archive']);
-            Route::get('/{file}', [Application\Settings\DebugController::class, 'download']);
+            // The filename travels as a query parameter: a `.log` path segment is
+            // rejected by some reverse proxies before it ever reaches PHP.
+            Route::get('/download', [Application\Settings\DebugController::class, 'download']);
         });
     });
 

@@ -182,7 +182,7 @@ async function downloadBlob(url: string, filename: string) {
 }
 
 export function downloadLogFile(name: string): Promise<void> {
-    return downloadBlob(`/api/application/settings/debug/${encodeURIComponent(name)}`, name);
+    return downloadBlob(`/api/application/settings/debug/download?file=${encodeURIComponent(name)}`, name);
 }
 
 export function downloadLogArchive(): Promise<void> {
