@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Everest\Events\Auth\FailedCaptcha;
 use Illuminate\Contracts\Events\Dispatcher;
 use Everest\Services\Captcha\CaptchaSettings;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class VerifyReCaptcha
@@ -15,6 +16,7 @@ class VerifyReCaptcha
     public function __construct(
         private Dispatcher $dispatcher,
         private CaptchaSettings $settings,
+        private LoggerInterface $log,
     ) {
     }
 
@@ -189,6 +191,7 @@ class VerifyReCaptcha
 
         try {
             $response = $this->client()->post($this->settings->apiBase() . '/v1/verify', [
+                'http_errors' => false,
                 'headers' => [
                     'Authorization' => 'Bearer ' . $secret,
                     'Accept' => 'application/json',
@@ -199,17 +202,28 @@ class VerifyReCaptcha
                     'siteKey' => $siteKey,
                 ],
             ]);
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            $this->log->warning('Corptcha verify request failed (network error)', [
+                'error' => $e->getMessage(),
+            ]);
+
             return false;
         }
 
-        if ($response->getStatusCode() !== 200) {
+        $body = $response->getBody()->getContents();
+        $result = $this->json($body);
+
+        if ($response->getStatusCode() !== 200 || !is_array($result) || ($result['success'] ?? false) !== true) {
+            $this->log->warning('Corptcha verify failed', [
+                'status' => $response->getStatusCode(),
+                'errorCode' => $result['errorCode'] ?? null,
+                'message' => $result['message'] ?? null,
+            ]);
+
             return false;
         }
 
-        $result = $this->json($response->getBody()->getContents());
-
-        return is_array($result) && ($result['success'] ?? false) === true;
+        return true;
     }
 
     private function purpose(Request $request): string
