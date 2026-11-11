@@ -7,9 +7,7 @@
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
     import { cn } from '$lib/utils/cn';
-    import { Button, Card, CardContent, CardHeader, CardTitle, Spinner } from '$lib/ui';
-    import Input from '$lib/ui/Input.svelte';
-    import Label from '$lib/ui/Label.svelte';
+    import { Button, Card, CardContent, CardHeader, CardTitle, DateField, SegmentedRadio, Select, Spinner } from '$lib/ui';
     import Alert from '$lib/components/Alert.svelte';
     import { formatMoney } from '$features/dashboard/billing/money';
     import OrdersTab from '../billing/OrdersTab.svelte';
@@ -45,7 +43,14 @@
         enabled: canUpdate,
     }));
 
-    let billable = $state(server.billingProductId !== null);
+    /** The radio group works in strings; `billable` is what the rest of the page reads. */
+    let billableChoice = $state(server.billingProductId !== null ? 'true' : 'false');
+    const billable = $derived(billableChoice === 'true');
+
+    const BILLABLE_OPTIONS = [
+        { value: 'true', label: '计费' },
+        { value: 'false', label: '不计费' },
+    ];
     let categoryId = $state<number | null>(null);
     let productId = $state<number | null>(server.billingProductId);
     let renewal = $state(format(server.renewalDate ?? new Date(Date.now() + (app.flags!.billing.renewal.days ?? 30) * 86400000), "yyyy-MM-dd'T'HH:mm"));
@@ -97,8 +102,15 @@
         }
     }
 
-    const select =
-        'h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50';
+    const categoryOptions = $derived([
+        ...(categories.data && !categories.data.length ? [{ value: '', label: '还没有商品分类' }] : []),
+        ...(categories.data ?? []).map(c => ({ value: String(c.id), label: c.name })),
+    ]);
+
+    const productOptions = $derived([
+        ...(products.data && !products.data.length ? [{ value: '', label: '这个分类没有套餐' }] : []),
+        ...(products.data ?? []).map(p => ({ value: String(p.id), label: `${p.name} · ${formatMoney(p.price)}` })),
+    ]);
 </script>
 
 {#if !billing.enabled}<Alert variant="warning" class="mb-4">计费模块未启用，这里的设置要等模块启用后才会生效。</Alert>{/if}
@@ -135,38 +147,41 @@
                 <CardContent>
                     <form class="space-y-4 text-sm" onsubmit={save}>
                         {#if notice}<Alert variant={notice.variant}>{notice.text}</Alert>{/if}
-                        <div class="grid grid-cols-2 overflow-hidden rounded-md border border-input" role="radiogroup" aria-label="计费状态">
-                            {#each [{ v: true, l: '计费' }, { v: false, l: '不计费' }] as o (o.l)}
-                                <button
-                                    type="button"
-                                    role="radio"
-                                    aria-checked={billable === o.v}
-                                    disabled={saving}
-                                    onclick={() => (billable = o.v)}
-                                    class={cn('px-3 py-2 font-medium transition-colors', billable === o.v ? 'bg-primary text-primary-foreground' : 'hover:bg-accent')}
-                                >
-                                    {o.l}
-                                </button>
-                            {/each}
-                        </div>
+                        <SegmentedRadio
+                            items={BILLABLE_OPTIONS}
+                            bind:value={billableChoice}
+                            disabled={saving}
+                            aria-label="计费状态"
+                        />
                         {#if billable}
                             <div class="space-y-1.5">
-                                <Label for="bill-category">分类</Label>
-                                <select id="bill-category" class={select} disabled={saving || !categories.data} value={categoryId === null ? '' : String(categoryId)} onchange={e => (categoryId = Number(e.currentTarget.value))}>
-                                    {#if categories.data && !categories.data.length}<option value="">还没有商品分类</option>{/if}
-                                    {#each categories.data ?? [] as c (c.id)}<option value={String(c.id)}>{c.name}</option>{/each}
-                                </select>
+                                <Select
+                                    id="bill-category"
+                                    items={categoryOptions}
+                                    disabled={saving || !categories.data}
+                                    value={categoryId === null ? '' : String(categoryId)}
+                                    onValueChange={v => (categoryId = Number(v))}
+                                    label="分类"
+                                />
                             </div>
                             <div class="space-y-1.5">
-                                <Label for="bill-product">套餐</Label>
-                                <select id="bill-product" class={select} disabled={saving || !products.data?.length} value={productId === null ? '' : String(productId)} onchange={e => (productId = Number(e.currentTarget.value))}>
-                                    {#if products.data && !products.data.length}<option value="">这个分类没有套餐</option>{/if}
-                                    {#each products.data ?? [] as p (p.id)}<option value={String(p.id)}>{p.name} · {formatMoney(p.price)}</option>{/each}
-                                </select>
+                                <Select
+                                    id="bill-product"
+                                    items={productOptions}
+                                    disabled={saving || !products.data?.length}
+                                    value={productId === null ? '' : String(productId)}
+                                    onValueChange={v => (productId = Number(v))}
+                                    label="套餐"
+                                />
                             </div>
                             <div class="space-y-1.5">
-                                <Label for="bill-renewal">续期时间</Label>
-                                <Input id="bill-renewal" type="datetime-local" bind:value={renewal} disabled={saving} />
+                                <DateField
+                                    id="bill-renewal"
+                                    withTime
+                                    bind:value={renewal}
+                                    disabled={saving}
+                                    label="续期时间"
+                                />
                                 <p class="text-xs text-muted-foreground">按你的本地时间。到期未续费会进入宽限期，之后被自动删除。</p>
                             </div>
                         {/if}

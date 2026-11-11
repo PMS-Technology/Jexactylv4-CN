@@ -2,7 +2,7 @@
     import { createQuery } from '@tanstack/svelte-query';
     import { getEggs, getNests, type PresetValues, type ServerPreset } from '$lib/api/admin/servers';
     import { httpErrorToHuman } from '$lib/api/http';
-    import { Button } from '$lib/ui';
+    import { Button, Select } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Dialog from '$lib/ui/dialog/Dialog.svelte';
@@ -78,8 +78,15 @@
         }
     }
 
-    const select =
-        'h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50';
+    const nestOptions = $derived([
+        { value: '', label: '不指定' },
+        ...(nests.data ?? []).map(n => ({ value: String(n.id), label: n.name })),
+    ]);
+
+    const eggOptions = $derived([
+        { value: '', label: '不指定' },
+        ...(eggs.data ?? []).map(e => ({ value: String(e.id), label: e.name })),
+    ]);
 </script>
 
 <Dialog bind:open title={preset ? '编辑预设' : '新建预设'} preventClose={saving} class="sm:max-w-xl">
@@ -110,18 +117,22 @@
         </div>
         <div class="grid gap-3 sm:grid-cols-2">
             <div class="space-y-1.5">
-                <Label for="preset-nest">Nest</Label>
-                <select id="preset-nest" class={select} bind:value={nestId} disabled={saving || !nests.data}>
-                    <option value="">不指定</option>
-                    {#each nests.data ?? [] as n (n.id)}<option value={String(n.id)}>{n.name}</option>{/each}
-                </select>
+                <Select
+                    id="preset-nest"
+                    items={nestOptions}
+                    bind:value={nestId}
+                    disabled={saving || !nests.data}
+                    label="Nest"
+                />
             </div>
             <div class="space-y-1.5">
-                <Label for="preset-egg">Egg</Label>
-                <select id="preset-egg" class={select} bind:value={eggId} disabled={saving || !nestId || !eggs.data}>
-                    <option value="">不指定</option>
-                    {#each eggs.data ?? [] as e (e.id)}<option value={String(e.id)}>{e.name}</option>{/each}
-                </select>
+                <Select
+                    id="preset-egg"
+                    items={eggOptions}
+                    bind:value={eggId}
+                    disabled={saving || !nestId || !eggs.data}
+                    label="Egg"
+                />
             </div>
         </div>
         <p class="text-xs text-muted-foreground">不指定 Egg 时，用预设创建的服务器会使用 ID 为 1 的 Egg。</p>

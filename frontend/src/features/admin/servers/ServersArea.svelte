@@ -5,8 +5,7 @@
     import { adminServerKeys, createServerFromPreset, getPresets } from '$lib/api/admin/servers';
     import { app } from '$lib/stores/app.svelte';
     import { navigate, router } from '$lib/router/router.svelte';
-    import { Button } from '$lib/ui';
-    import Label from '$lib/ui/Label.svelte';
+    import { Button, Select } from '$lib/ui';
     import Dialog from '$lib/ui/dialog/Dialog.svelte';
     import Alert from '$lib/components/Alert.svelte';
     import Link from '$lib/components/Link.svelte';
@@ -64,8 +63,15 @@
         }
     }
 
-    const select =
-        'h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50';
+    const presetOptions = $derived([
+        { value: '', label: '选择预设…' },
+        ...(presets.data ?? []).map(p => ({ value: String(p.id), label: p.name })),
+    ]);
+
+    const nodeOptions = $derived([
+        { value: '', label: '选择节点…' },
+        ...(nodes.data ?? []).map(n => ({ value: String(n.id), label: n.name })),
+    ]);
 </script>
 
 <svelte:head>
@@ -77,18 +83,22 @@
         {#if presetError}<Alert variant="destructive">{presetError}</Alert>{/if}
         <div class="grid gap-3 sm:grid-cols-2">
             <div class="space-y-1.5">
-                <Label for="from-preset">预设</Label>
-                <select id="from-preset" class={select} bind:value={presetId} disabled={creating || !presets.data}>
-                    <option value="">选择预设…</option>
-                    {#each presets.data ?? [] as p (p.id)}<option value={String(p.id)}>{p.name}</option>{/each}
-                </select>
+                <Select
+                    id="from-preset"
+                    items={presetOptions}
+                    bind:value={presetId}
+                    disabled={creating || !presets.data}
+                    label="预设"
+                />
             </div>
             <div class="space-y-1.5">
-                <Label for="from-node">节点</Label>
-                <select id="from-node" class={select} bind:value={nodeId} disabled={creating || !nodes.data}>
-                    <option value="">选择节点…</option>
-                    {#each nodes.data ?? [] as n (n.id)}<option value={String(n.id)}>{n.name}</option>{/each}
-                </select>
+                <Select
+                    id="from-node"
+                    items={nodeOptions}
+                    bind:value={nodeId}
+                    disabled={creating || !nodes.data}
+                    label="节点"
+                />
             </div>
         </div>
         {#if chosen}

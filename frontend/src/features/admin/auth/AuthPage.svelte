@@ -4,7 +4,7 @@
     import { setAuthModule, updateAuthSetting, type AuthModuleName, type AuthSettingGroup } from '$lib/api/admin/auth';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle, Spinner } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Select, Spinner } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Switch from '$lib/ui/Switch.svelte';
@@ -131,8 +131,11 @@
         patchAuth(a => (a.modules[name].enabled = false));
     }
 
-    const selectClass =
-        'h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50';
+    const SENSITIVITY_OPTIONS = [
+        { value: 'low', label: '低' },
+        { value: 'medium', label: '中' },
+        { value: 'high', label: '高' },
+    ] as const;
 </script>
 
 {#snippet status(card: string)}
@@ -372,21 +375,21 @@
                         <p class="text-xs text-muted-foreground">新注册的用户要等待这么久才能进入面板，用于防止机器人批量注册。0 表示不延迟。</p>
                     </form>
                     <div class="space-y-1.5">
-                        <Label for="jguard-sensitivity">小号识别灵敏度</Label>
-                        <select
+                        <Select
                             id="jguard-sensitivity"
-                            class={selectClass}
+                            items={SENSITIVITY_OPTIONS}
                             value={auth.modules.jguard.sensitivity ?? 'medium'}
                             disabled={!canUpdate || saving !== null}
-                            onchange={e => {
-                                const v = e.currentTarget.value as 'low' | 'medium' | 'high';
-                                void save('jguard', 'jguard', { sensitivity: v }, a => (a.modules.jguard.sensitivity = v));
+                            onValueChange={v => {
+                                void save(
+                                    'jguard',
+                                    'jguard',
+                                    { sensitivity: v as 'low' | 'medium' | 'high' },
+                                    a => (a.modules.jguard.sensitivity = v as 'low' | 'medium' | 'high'),
+                                );
                             }}
-                        >
-                            <option value="low">低</option>
-                            <option value="medium">中</option>
-                            <option value="high">高</option>
-                        </select>
+                            label="小号识别灵敏度"
+                        />
                         <p class="text-xs text-muted-foreground">
                             控制 jGuard 多快拦截近期注册过或多次登录失败的 IP。灵敏度越高拦截越积极，但也可能影响共用 IP 的正常用户（如学校、公司网络）。
                         </p>

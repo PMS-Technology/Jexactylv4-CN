@@ -6,7 +6,7 @@
     import { adminServerKeys, allocationText, createServer, getFreeAllocations, type EggOption } from '$lib/api/admin/servers';
     import { httpErrorToHuman } from '$lib/api/http';
     import { navigate } from '$lib/router/router.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Select } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Switch from '$lib/ui/Switch.svelte';
@@ -109,8 +109,18 @@
         }
     }
 
-    const select =
-        'h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50';
+    const nodeOptions = $derived([
+        { value: '', label: '选择节点…' },
+        ...(nodes.data ?? []).map(n => ({
+            value: String(n.id),
+            label: `${n.name}（${n.fqdn}）${n.maintenanceMode ? ' · 维护中' : ''}`,
+        })),
+    ]);
+
+    const allocationOptions = $derived([
+        ...(allocations.data && !allocations.data.length ? [{ value: '', label: '这个节点没有空闲分配' }] : []),
+        ...(allocations.data ?? []).map(a => ({ value: String(a.id), label: allocationText(a) })),
+    ]);
 </script>
 
 <PageHeader title="新建服务器" description="在一个节点上创建新服务器。" />
@@ -154,24 +164,27 @@
                 <CardHeader><CardTitle class="flex items-center gap-2"><Network class="size-4" />节点与网络</CardTitle></CardHeader>
                 <CardContent class="space-y-4 text-sm">
                     <div class="space-y-1.5">
-                        <Label for="srv-node">节点</Label>
-                        <select id="srv-node" class={select} disabled={saving || !nodes.data} value={nodeId === null ? '' : String(nodeId)} onchange={e => (nodeId = e.currentTarget.value ? Number(e.currentTarget.value) : null)}>
-                            <option value="">选择节点…</option>
-                            {#each nodes.data ?? [] as n (n.id)}
-                                <option value={String(n.id)}>{n.name}（{n.fqdn}）{n.maintenanceMode ? ' · 维护中' : ''}</option>
-                            {/each}
-                        </select>
+                        <Select
+                            id="srv-node"
+                            items={nodeOptions}
+                            disabled={saving || !nodes.data}
+                            value={nodeId === null ? '' : String(nodeId)}
+                            onValueChange={v => (nodeId = v ? Number(v) : null)}
+                            label="节点"
+                        />
                     </div>
                     <div class="space-y-1.5">
-                        <Label for="srv-allocation">主分配</Label>
                         {#if nodeId === null}
                             <p class="text-xs text-muted-foreground">先选择节点。</p>
                         {:else}
                             <Input bind:value={allocationSearch} placeholder="搜索 IP 或端口" aria-label="搜索分配" class="mb-2" disabled={saving} />
-                            <select id="srv-allocation" class={select} bind:value={allocationId} disabled={saving || !allocations.data?.length}>
-                                {#if allocations.data && !allocations.data.length}<option value="">这个节点没有空闲分配</option>{/if}
-                                {#each allocations.data ?? [] as a (a.id)}<option value={String(a.id)}>{allocationText(a)}</option>{/each}
-                            </select>
+                            <Select
+                                id="srv-allocation"
+                                items={allocationOptions}
+                                bind:value={allocationId}
+                                disabled={saving || !allocations.data?.length}
+                                label="主分配"
+                            />
                             {#if allocations.data?.length === 100}<p class="text-xs text-muted-foreground">只显示前 100 个，可以用搜索缩小范围。</p>{/if}
                         {/if}
                     </div>

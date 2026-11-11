@@ -7,7 +7,7 @@
     import { httpErrorToHuman } from '$lib/api/http';
     import { getFileContents, saveFileContents } from '$lib/api/files';
     import { encodePathSegments } from '$lib/utils/files';
-    import { Button } from '$lib/ui';
+    import { Button, Select } from '$lib/ui';
     import Alert from '$lib/components/Alert.svelte';
     import Spinner from '$lib/ui/Spinner.svelte';
     import Dialog from '$lib/ui/dialog/Dialog.svelte';
@@ -105,6 +105,10 @@
     }
 
     const languageOptions = $derived(languages.filter(l => l.name).sort((a, b) => a.name.localeCompare(b.name)));
+    const languageList = $derived([
+        { value: '', label: '纯文本' },
+        ...languageOptions.map(option => ({ value: option.name, label: option.name })),
+    ]);
     const isPteroIgnore = $derived(filename === '.pteroignore');
 </script>
 
@@ -183,19 +187,14 @@
 
             <div class="w-full sm:w-52">
                 <!-- Legacy shows every known language; the editor falls back to plain text. -->
-                <select
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                <Select
+                    items={languageList}
                     value={language?.name ?? ''}
-                    onchange={e => {
-                        language = languages.find(l => l.name === e.currentTarget.value);
+                    onValueChange={name => {
+                        language = languages.find(l => l.name === name);
                     }}
                     aria-label="语法高亮语言"
-                >
-                    <option value="">纯文本</option>
-                    {#each languageOptions as option (option.name)}
-                        <option value={option.name}>{option.name}</option>
-                    {/each}
-                </select>
+                />
             </div>
 
             {#if action === 'edit'}

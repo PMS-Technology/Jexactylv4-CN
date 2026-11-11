@@ -6,7 +6,7 @@
     import { getServerStartup, setDockerImage, type ServerStartup } from '$lib/api/startup';
     import type { EggVariable } from '$lib/api/definitions/server';
     import { httpErrorToHuman } from '$lib/api/http';
-    import { Button, Card, CardContent, CardHeader, CardTitle } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Select } from '$lib/ui';
     import Spinner from '$lib/ui/Spinner.svelte';
     import Alert from '$lib/components/Alert.svelte';
     import CopyButton from '$lib/components/CopyButton.svelte';
@@ -51,11 +51,14 @@
             .includes((store.server?.dockerImage ?? '').toLowerCase()),
     );
 
+    const imageOptions = $derived(
+        Object.entries(images).map(([label, image]) => ({ value: image, label })),
+    );
+
     let imageLoading = $state(false);
     let imageError = $state('');
 
-    async function onImageChange(event: Event & { currentTarget: HTMLSelectElement }) {
-        const image = event.currentTarget.value;
+    async function onImageChange(image: string) {
         imageLoading = true;
         imageError = '';
         try {
@@ -121,17 +124,13 @@
                 <CardContent>
                     {#if Object.keys(images).length > 1 && !isCustomImage}
                         <div class="relative">
-                            <select
+                            <Select
                                 aria-label="Docker 镜像"
+                                items={imageOptions}
                                 disabled={imageLoading || !store.can('startup.docker-image')}
-                                value={store.server?.dockerImage}
-                                onchange={onImageChange}
-                                class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                {#each Object.entries(images) as [label, image] (image)}
-                                    <option value={image}>{label}</option>
-                                {/each}
-                            </select>
+                                value={store.server?.dockerImage ?? ''}
+                                onValueChange={onImageChange}
+                            />
                             {#if imageLoading}
                                 <div class="absolute inset-y-0 right-8 flex items-center"><Spinner size="sm" /></div>
                             {/if}

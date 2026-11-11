@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { EggVariableValues } from '$lib/api/admin/nests';
+    import Checkbox from '$lib/ui/checkbox/Checkbox.svelte';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Textarea from '$lib/ui/Textarea.svelte';
@@ -29,8 +30,8 @@
         </div>
     </div>
     <div class="flex flex-wrap gap-4">
-        <label class="flex items-center gap-2"><input type="checkbox" class="size-4 accent-primary" bind:checked={values.user_viewable} {disabled} />用户可见</label>
-        <label class="flex items-center gap-2"><input type="checkbox" class="size-4 accent-primary" bind:checked={values.user_editable} {disabled} />用户可修改</label>
+        <Checkbox bind:checked={values.user_viewable} {disabled} label="用户可见" />
+        <Checkbox bind:checked={values.user_editable} {disabled} label="用户可修改" />
     </div>
     <div class="space-y-1.5">
         <Label for="{prefix}-rules">验证规则</Label>

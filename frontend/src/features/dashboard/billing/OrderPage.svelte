@@ -14,7 +14,8 @@
     import type { DiscountCode } from '$lib/api/definitions/billing';
     import { app } from '$lib/stores/app.svelte';
     import { navigate } from '$lib/router/router.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle, Spinner } from '$lib/ui';
+    import { RadioGroup } from 'bits-ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Checkbox, Spinner } from '$lib/ui';
     import Alert from '$lib/components/Alert.svelte';
     import NotFound from '$lib/components/NotFound.svelte';
     import ChoiceCard from './components/ChoiceCard.svelte';
@@ -172,16 +173,15 @@
                             {:else if !nodesQuery.data.length}
                                 <Alert variant="destructive">目前没有可部署的节点，请联系管理员。</Alert>
                             {:else}
-                                <div class="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="部署位置">
+                                <RadioGroup.Root
+                                    value={nodeChoice === null ? '' : String(nodeChoice)}
+                                    onValueChange={value => (nodeChoice = Number(value))}
+                                    aria-label="部署位置"
+                                    class="grid gap-3 sm:grid-cols-2"
+                                >
                                     {#each nodesQuery.data as n (n.id)}
                                         {@const allowed = nodeAllowed(n)}
-                                        <ChoiceCard
-                                            name="node"
-                                            value={n.id}
-                                            group={nodeId}
-                                            disabled={!allowed}
-                                            onSelect={v => (nodeChoice = v)}
-                                        >
+                                        <ChoiceCard value={String(n.id)} disabled={!allowed}>
                                             <p class="flex items-center gap-2 font-medium">
                                                 <ServerIcon class="size-4 shrink-0 text-muted-foreground" />
                                                 <span class="truncate">{n.name}</span>
@@ -196,7 +196,7 @@
                                             {/if}
                                         </ChoiceCard>
                                     {/each}
-                                </div>
+                                </RadioGroup.Root>
                             {/if}
                         </CardContent>
                     </Card>
@@ -212,21 +212,21 @@
                                 {:else if !eggsQuery.data.length}
                                     <Alert variant="destructive">这个套餐没有可用的服务器类型，请联系管理员。</Alert>
                                 {:else}
-                                    <div class="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="服务器类型">
+                                    <RadioGroup.Root
+                                        value={eggChoice === null ? '' : String(eggChoice)}
+                                        onValueChange={value => (eggChoice = Number(value))}
+                                        aria-label="服务器类型"
+                                        class="grid gap-3 sm:grid-cols-2"
+                                    >
                                         {#each eggsQuery.data as egg (egg.id)}
-                                            <ChoiceCard
-                                                name="egg"
-                                                value={egg.id}
-                                                group={eggChoice}
-                                                onSelect={v => (eggChoice = v)}
-                                            >
+                                            <ChoiceCard value={String(egg.id)}>
                                                 <p class="flex items-center gap-2 font-medium">
                                                     <Box class="size-4 shrink-0 text-muted-foreground" />
                                                     <span class="truncate">{egg.name}</span>
                                                 </p>
                                             </ChoiceCard>
                                         {/each}
-                                    </div>
+                                    </RadioGroup.Root>
                                 {/if}
                             </CardContent>
                         </Card>
@@ -258,38 +258,36 @@
                     <Card>
                         <CardHeader><CardTitle>法律文件</CardTitle></CardHeader>
                         <CardContent class="space-y-3 text-sm">
-                            <label class="flex items-start gap-3">
-                                <input type="checkbox" class="mt-0.5 size-4 accent-primary" bind:checked={termsAgreed} />
-                                <span>
-                                    我已阅读并同意
-                                    <a
-                                        href={links?.terms}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        class="inline-flex items-center gap-1 font-medium underline underline-offset-4"
-                                    >
-                                        服务条款<ExternalLink class="size-3" />
-                                    </a>
-                                </span>
-                            </label>
-                            <label class="flex items-start gap-3">
-                                <input
-                                    type="checkbox"
-                                    class="mt-0.5 size-4 accent-primary"
-                                    bind:checked={privacyAgreed}
-                                />
-                                <span>
-                                    我已阅读并同意
-                                    <a
-                                        href={links?.privacy}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        class="inline-flex items-center gap-1 font-medium underline underline-offset-4"
-                                    >
-                                        隐私政策<ExternalLink class="size-3" />
-                                    </a>
-                                </span>
-                            </label>
+                            <Checkbox bind:checked={termsAgreed} wrapperClass="items-start gap-3">
+                                {#snippet children({ id })}
+                                    <span id={id}>
+                                        我已阅读并同意
+                                        <a
+                                            href={links?.terms}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            class="inline-flex items-center gap-1 font-medium underline underline-offset-4"
+                                        >
+                                            服务条款<ExternalLink class="size-3" />
+                                        </a>
+                                    </span>
+                                {/snippet}
+                            </Checkbox>
+                            <Checkbox bind:checked={privacyAgreed} wrapperClass="items-start gap-3">
+                                {#snippet children({ id })}
+                                    <span id={id}>
+                                        我已阅读并同意
+                                        <a
+                                            href={links?.privacy}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            class="inline-flex items-center gap-1 font-medium underline underline-offset-4"
+                                        >
+                                            隐私政策<ExternalLink class="size-3" />
+                                        </a>
+                                    </span>
+                                {/snippet}
+                            </Checkbox>
                         </CardContent>
                     </Card>
                 </div>

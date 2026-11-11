@@ -4,7 +4,7 @@
     import { API_KEY_RESOURCES, createApiKey, type ApiKeyPermissions } from '$lib/api/admin/general';
     import { httpErrorToHuman } from '$lib/api/http';
     import { navigate } from '$lib/router/router.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, RadioGroup } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Dialog from '$lib/ui/dialog/Dialog.svelte';
@@ -30,6 +30,8 @@
         { value: 1, label: '只读' },
         { value: 2, label: '读写' },
     ] as const;
+
+    const levelOptions = levels.map(level => ({ value: String(level.value), label: level.label }));
 
     let memo = $state('');
     let permissions = $state(
@@ -94,22 +96,16 @@
                     <fieldset class="rounded-md bg-muted/50 p-3">
                         <legend class="sr-only">{labels[resource]}</legend>
                         <p class="mb-2 text-sm font-medium">{labels[resource]}</p>
-                        <div class="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-                            {#each levels as level (level.value)}
-                                <label class="inline-flex items-center gap-2">
-                                    <input
-                                        type="radio"
-                                        name={key}
-                                        value={level.value}
-                                        checked={permissions[key] === level.value}
-                                        onchange={() => (permissions[key] = level.value)}
-                                        disabled={saving}
-                                        class="accent-primary"
-                                    />
-                                    {level.label}
-                                </label>
-                            {/each}
-                        </div>
+                        <RadioGroup
+                            items={levelOptions}
+                            value={String(permissions[key])}
+                            onValueChange={value => (permissions[key] = Number(value) as ApiKeyPermissions[typeof key])}
+                            disabled={saving}
+                            aria-label={labels[resource]}
+                            orientation="horizontal"
+                            layout="none"
+                            class="flex flex-wrap gap-x-6 gap-y-1 text-sm"
+                        />
                     </fieldset>
                 {/each}
             </CardContent>

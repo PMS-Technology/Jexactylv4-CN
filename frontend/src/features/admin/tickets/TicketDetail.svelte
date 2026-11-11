@@ -15,8 +15,7 @@
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
     import { navigate } from '$lib/router/router.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle, Spinner } from '$lib/ui';
-    import Label from '$lib/ui/Label.svelte';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Select, Spinner } from '$lib/ui';
     import Textarea from '$lib/ui/Textarea.svelte';
     import ConfirmDialog from '$lib/ui/dialog/ConfirmDialog.svelte';
     import Alert from '$lib/components/Alert.svelte';
@@ -166,17 +165,13 @@
                          fit the picker's email and pushed the fields out of the card on mobile. -->
                     <div class="grid grid-cols-1 gap-5 lg:grid-cols-3">
                         <div class="space-y-1.5">
-                            <Label for="detail-status">状态</Label>
-                            <select
+                            <Select
                                 id="detail-status"
+                                items={STATUS_OPTIONS}
                                 bind:value={status}
                                 disabled={!canUpdate || saving}
-                                class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50"
-                            >
-                                {#each STATUS_OPTIONS as option (option.value)}
-                                    <option value={option.value}>{option.label}</option>
-                                {/each}
-                            </select>
+                                label="状态"
+                            />
                             <p class="text-xs text-muted-foreground">修改用户看到的工单状态。</p>
                         </div>
                         <div>

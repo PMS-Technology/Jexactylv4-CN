@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Snippet } from 'svelte';
-    import { DropdownMenu } from 'bits-ui';
+    import { DropdownMenu, RadioGroup } from 'bits-ui';
     import { ArrowUpRight, Check, ChevronsUpDown, House, LogOut, Monitor, Moon, Search, Settings, Sun } from '@lucide/svelte';
     import { app } from '$lib/stores/app.svelte';
     import { theme, type ColorScheme } from '$lib/stores/theme.svelte';
@@ -310,31 +310,27 @@
 
                     <div class="-mr-1 flex h-9 items-center justify-between px-2 text-sm">
                         <span id="{panelId}-theme">主题</span>
-                        <fieldset
-                            class="m-0 flex h-6 rounded-full border-0 p-0 shadow-[0_0_0_1px_var(--mn-seg-ring)]"
+                        <RadioGroup.Root
+                            value={theme.preference}
+                            onValueChange={value => theme.set(value as ColorScheme)}
                             aria-labelledby="{panelId}-theme"
+                            orientation="horizontal"
+                            class="m-0 flex h-6 w-auto items-center rounded-full border-0 p-0 shadow-[0_0_0_1px_var(--mn-seg-ring)]"
                         >
                             {#each themeOptions as option (option.value)}
                                 {@const Icon = option.icon}
-                                <label
+                                <RadioGroup.Item
+                                    value={option.value}
+                                    aria-label={option.label}
                                     class="relative grid size-6 cursor-pointer place-content-center rounded-full text-(color:--mn-seg-muted)
-                                           has-checked:bg-(color:--mn-seg-active-bg) has-checked:text-(color:--mn-fg)
-                                           has-checked:shadow-(--mn-seg-active-shadow) has-focus-visible:outline-2
-                                           has-focus-visible:outline-(color:--mn-focus)"
+                                           data-[state=checked]:bg-(color:--mn-seg-active-bg) data-[state=checked]:text-(color:--mn-fg)
+                                           data-[state=checked]:shadow-(--mn-seg-active-shadow) focus-visible:outline-2
+                                           focus-visible:outline-(color:--mn-focus)"
                                 >
-                                    <input
-                                        type="radio"
-                                        name="{panelId}-theme"
-                                        value={option.value}
-                                        checked={theme.preference === option.value}
-                                        onchange={() => theme.set(option.value)}
-                                        class="sr-only"
-                                    />
                                     <Icon class="size-3.5" strokeWidth={1.5} aria-hidden="true" />
-                                    <span class="sr-only">{option.label}</span>
-                                </label>
+                                </RadioGroup.Item>
                             {/each}
-                        </fieldset>
+                        </RadioGroup.Root>
                     </div>
 
                     {#each links as link (link.id)}

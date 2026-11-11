@@ -15,8 +15,7 @@
     } from '$lib/api/admin/servers';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle } from '$lib/ui';
-    import Label from '$lib/ui/Label.svelte';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Select } from '$lib/ui';
     import ConfirmDialog from '$lib/ui/dialog/ConfirmDialog.svelte';
     import Dialog from '$lib/ui/dialog/Dialog.svelte';
     import Alert from '$lib/components/Alert.svelte';
@@ -91,8 +90,15 @@
         }
     }
 
-    const select =
-        'h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50';
+    const nodeOptions = $derived([
+        { value: '', label: '选择节点…' },
+        ...targets.map(n => ({ value: String(n.id), label: `${n.name}（${n.fqdn}）` })),
+    ]);
+
+    const allocationOptions = $derived([
+        ...(free.data && !free.data.length ? [{ value: '', label: '这个节点没有空闲分配' }] : []),
+        ...(free.data ?? []).map(a => ({ value: String(a.id), label: allocationText(a) })),
+    ]);
 </script>
 
 <ConfirmDialog bind:open={reinstallOpen} title="重装服务器" confirmLabel="重装" onConfirm={action(() => reinstallServer(server.id), '服务器开始重装。')}>
@@ -120,20 +126,24 @@
         {#if transferError}<Alert variant="destructive">{transferError}</Alert>{/if}
         <Alert variant="warning">迁移会停止服务器，并把所有文件复制到新节点，期间服务器不可用。</Alert>
         <div class="space-y-1.5">
-            <Label for="transfer-node">目标节点</Label>
-            <select id="transfer-node" class={select} bind:value={targetNode} disabled={transferring || !nodes.data}>
-                <option value="">选择节点…</option>
-                {#each targets as n (n.id)}<option value={String(n.id)}>{n.name}（{n.fqdn}）</option>{/each}
-            </select>
+            <Select
+                id="transfer-node"
+                items={nodeOptions}
+                bind:value={targetNode}
+                disabled={transferring || !nodes.data}
+                label="目标节点"
+            />
             {#if nodes.data && !targets.length}<p class="text-xs text-muted-foreground">没有其他节点可以迁移。</p>{/if}
         </div>
         {#if targetNode}
             <div class="space-y-1.5">
-                <Label for="transfer-allocation">新节点上的主分配</Label>
-                <select id="transfer-allocation" class={select} bind:value={targetAllocation} disabled={transferring || !free.data?.length}>
-                    {#if free.data && !free.data.length}<option value="">这个节点没有空闲分配</option>{/if}
-                    {#each free.data ?? [] as a (a.id)}<option value={String(a.id)}>{allocationText(a)}</option>{/each}
-                </select>
+                <Select
+                    id="transfer-allocation"
+                    items={allocationOptions}
+                    bind:value={targetAllocation}
+                    disabled={transferring || !free.data?.length}
+                    label="新节点上的主分配"
+                />
             </div>
         {/if}
     </div>

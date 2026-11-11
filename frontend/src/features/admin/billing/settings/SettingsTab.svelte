@@ -4,7 +4,7 @@
     import { adminBillingKeys, deleteStripeKeys, exportBillingConfig, updateBillingSetting } from '$lib/api/admin/billing';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Select } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import ConfirmDialog from '$lib/ui/dialog/ConfirmDialog.svelte';
@@ -41,6 +41,12 @@
 
     // --- Currency. Code and symbol are separate settings, saved one after the other.
     let currency = $state(app.flags!.billing.currency.code.toUpperCase());
+
+    /** The currency in use stays in the list even when it is not a known one. */
+    const currencyOptions = $derived([
+        ...(!currencies[currency] ? [{ value: currency, label: currency }] : []),
+        ...Object.entries(currencies).map(([code, c]) => ({ value: code, label: `${code} - ${c.name}` })),
+    ]);
 
     const changeCurrency = (code: string) =>
         run(
@@ -118,19 +124,14 @@
         <CardHeader><CardTitle class="flex items-center gap-2"><CircleDollarSign class="size-4" />主要货币</CardTitle></CardHeader>
         <CardContent class="space-y-1.5 text-sm">
             <p class="text-muted-foreground">选择向用户收费时使用的货币。</p>
-            <Label for="billing-currency">货币代码 / 名称</Label>
-            <select
+            <Select
                 id="billing-currency"
+                items={currencyOptions}
                 value={currency}
                 disabled={!app.can('billing.update') || busy === 'currency'}
-                onchange={e => changeCurrency(e.currentTarget.value)}
-                class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50"
-            >
-                {#if !currencies[currency]}<option value={currency}>{currency}</option>{/if}
-                {#each Object.entries(currencies) as [code, c] (code)}
-                    <option value={code}>{code} - {c.name}</option>
-                {/each}
-            </select>
+                onValueChange={code => changeCurrency(code)}
+                label="货币代码 / 名称"
+            />
         </CardContent>
     </Card>
 

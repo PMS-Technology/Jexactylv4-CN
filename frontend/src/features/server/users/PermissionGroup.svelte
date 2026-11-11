@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { PanelPermissions } from '$lib/api/subusers';
+    import Checkbox from '$lib/ui/checkbox/Checkbox.svelte';
     import Label from '$lib/ui/Label.svelte';
 
 
@@ -54,17 +55,11 @@
                         {/if}
                     </div>
                     {#if disabled || editable.length === 0}
-                        <input
-                            type="checkbox"
-                            class="size-4 cursor-not-allowed rounded border-border opacity-50"
-                            disabled
-                        />
+                        <Checkbox disabled />
                     {:else}
-                        <input
-                            type="checkbox"
+                        <Checkbox
                             checked={isChecked}
-                            class="size-4 cursor-pointer rounded border-border"
-                            onchange={(e) => toggleGroup(editable, (e.target as HTMLInputElement).checked)}
+                            onCheckedChange={checked => toggleGroup(editable, checked)}
                         />
                     {/if}
                 </div>
@@ -75,29 +70,25 @@
                         {@const isEditable = editablePermissions.includes(perm)}
                         {@const checked = selectedPermissions.includes(perm)}
 
-                        <label
-                            class={`flex items-start gap-3 rounded border border-transparent p-2 transition-colors ${
-                                isEditable && !disabled
-                                    ? 'cursor-pointer hover:border-border hover:bg-accent/5'
-                                    : 'cursor-not-allowed opacity-50'
-                            }`}
+                        <Checkbox
+                            checked={checked}
+                            disabled={!isEditable || disabled}
+                            onCheckedChange={() => {
+                                if (isEditable && !disabled) togglePermission(perm);
+                            }}
+                            wrapperClass={isEditable && !disabled
+                                ? 'flex items-start gap-3 rounded border border-transparent p-2 transition-colors cursor-pointer hover:border-border hover:bg-accent/5'
+                                : 'flex items-start gap-3 rounded border border-transparent p-2 transition-colors cursor-not-allowed opacity-50'}
                         >
-                            <input
-                                type="checkbox"
-                                {checked}
-                                disabled={!isEditable || disabled}
-                                onchange={() => {
-                                    if (isEditable && !disabled) togglePermission(perm);
-                                }}
-                                class="mt-0.5 size-4 rounded border-border"
-                            />
-                            <div class="min-w-0 flex-1">
-                                <p class="text-sm font-medium">{pkey}</p>
-                                {#if desc}
-                                    <p class="mt-0.5 text-xs text-muted-foreground">{desc}</p>
-                                {/if}
-                            </div>
-                        </label>
+                            {#snippet children({ id })}
+                                <div id={id} class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium">{pkey}</p>
+                                    {#if desc}
+                                        <p class="mt-0.5 text-xs text-muted-foreground">{desc}</p>
+                                    {/if}
+                                </div>
+                            {/snippet}
+                        </Checkbox>
                     {/each}
                 </div>
             </div>

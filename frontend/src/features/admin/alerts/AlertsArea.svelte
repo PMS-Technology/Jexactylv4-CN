@@ -1,11 +1,12 @@
 <script lang="ts">
     import { Eye, List, Paintbrush, ShieldAlert } from '@lucide/svelte';
+    import { RadioGroup } from 'bits-ui';
     import { updateAlert } from '$lib/api/admin/appearance';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
     import { router } from '$lib/router/router.svelte';
     import type { AlertPosition, AlertType } from '$types/bootstrap';
-    import { Button, Card, CardContent, CardHeader, CardTitle, Spinner } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Select, Spinner } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Switch from '$lib/ui/Switch.svelte';
     import Alert from '$lib/components/Alert.svelte';
@@ -31,6 +32,13 @@
 
     let notice = $state<{ variant: 'success' | 'destructive'; text: string } | null>(null);
     let saving = $state<string | null>(null);
+
+    const ALERT_TYPES = [
+        { value: 'success', label: '成功（绿色）' },
+        { value: 'info', label: '信息（蓝色）' },
+        { value: 'warning', label: '警告（黄色）' },
+        { value: 'danger', label: '危险（红色）' },
+    ];
 
     async function save(key: string, patch: Partial<typeof alert>, success?: string) {
         saving = key;
@@ -116,17 +124,12 @@
                 <Card>
                     <CardHeader><CardTitle class="flex items-center gap-2"><List class="size-4" />告警类型</CardTitle></CardHeader>
                     <CardContent class="space-y-1.5">
-                        <select
+                        <Select
+                            items={ALERT_TYPES}
                             bind:value={type}
                             aria-label="告警类型"
                             disabled={!canUpdate}
-                            class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50"
-                        >
-                            <option value="success">成功（绿色）</option>
-                            <option value="info">信息（蓝色）</option>
-                            <option value="warning">警告（黄色）</option>
-                            <option value="danger">危险（红色）</option>
-                        </select>
+                        />
                         <p class="text-xs text-muted-foreground">设置告警的严重程度和颜色。</p>
                     </CardContent>
                 </Card>
@@ -173,29 +176,40 @@
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div class="grid gap-6 md:grid-cols-4" role="radiogroup" aria-label="告警位置">
+                    <RadioGroup.Root
+                        value={alert.position}
+                        disabled={!canUpdate || saving !== null}
+                        aria-label="告警位置"
+                        onValueChange={position =>
+                            save(
+                                `position-${position}`,
+                                { position: position as AlertPosition },
+                                `告警位置已改为${positionNames[position as AlertPosition]}。`,
+                            )}
+                        class="grid gap-6 md:grid-cols-4"
+                    >
                         {#each positions as p (p.value)}
-                            {@const selected = alert.position === p.value}
-                            <button
-                                type="button"
-                                role="radio"
-                                aria-checked={selected}
+                            <RadioGroup.Item
+                                value={p.value}
                                 aria-label={positionNames[p.value]}
-                                disabled={!canUpdate || saving !== null}
-                                onclick={() => save(`position-${p.value}`, { position: p.value }, `告警位置已改为${positionNames[p.value]}。`)}
                                 class="text-left disabled:cursor-not-allowed"
                             >
-                                <div
-                                    class="relative h-40 w-full rounded-lg border-2 bg-muted/50 transition-colors hover:bg-muted {selected
-                                        ? 'border-primary'
-                                        : 'border-transparent'}"
-                                >
-                                    <div class="{p.mock} bg-primary"></div>
-                                </div>
-                                <p class="mt-1 text-xs text-muted-foreground">{p.label}</p>
-                            </button>
+                                {#snippet child({ props })}
+                                    <button type="button" {...props}>
+                                        <div
+                                            class="relative h-40 w-full rounded-lg border-2 bg-muted/50 transition-colors hover:bg-muted {alert.position ===
+                                            p.value
+                                                ? 'border-primary'
+                                                : 'border-transparent'}"
+                                        >
+                                            <div class="{p.mock} bg-primary"></div>
+                                        </div>
+                                        <p class="mt-1 text-xs text-muted-foreground">{p.label}</p>
+                                    </button>
+                                {/snippet}
+                            </RadioGroup.Item>
                         {/each}
-                    </div>
+                    </RadioGroup.Root>
                 </CardContent>
             </Card>
         </div>

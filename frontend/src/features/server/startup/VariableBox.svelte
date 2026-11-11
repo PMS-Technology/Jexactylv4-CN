@@ -3,6 +3,7 @@
     import type { ServerStore } from '$lib/stores/server.svelte';
     import { updateStartupVariable } from '$lib/api/startup';
     import { httpErrorToHuman } from '$lib/api/http';
+    import Select from '$lib/ui/select/Select.svelte';
     import Spinner from '$lib/ui/Spinner.svelte';
     import Alert from '$lib/components/Alert.svelte';
     import { cn } from '$lib/utils/cn';
@@ -38,6 +39,7 @@
     const selectValues = $derived(
         (variable.rules.find(v => v.startsWith('in:'))?.split(',') ?? []).map(v => v.replace('in:', '')),
     );
+    const selectOptions = $derived(selectValues.map(option => ({ value: option, label: option })));
 
     // Read once: later saves must not overwrite what the user is still typing.
     const initialText = untrack(() => variable.serverValue ?? '');
@@ -114,17 +116,13 @@
             ></span>
         </button>
     {:else if selectValues.length > 0}
-        <select
+        <Select
             aria-label={variable.name}
+            items={selectOptions}
             disabled={!canEdit}
-            value={variable.serverValue ?? variable.defaultValue}
-            onchange={e => save(e.currentTarget.value)}
-            class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-        >
-            {#each selectValues as option (option)}
-                <option value={option}>{option}</option>
-            {/each}
-        </select>
+            value={variable.serverValue ?? variable.defaultValue ?? ''}
+            onValueChange={save}
+        />
     {:else}
         <!-- Uncontrolled like the legacy defaultValue input, so a save never resets the caret. Listens
              to `input` (legacy used keyup), which also catches paste from the context menu. -->

@@ -3,7 +3,7 @@
     import { Layers } from '@lucide/svelte';
     import { getEggs, getNests, type EggOption } from '$lib/api/admin/servers';
     import { httpErrorToHuman } from '$lib/api/http';
-    import { Card, CardContent, CardHeader, CardTitle } from '$lib/ui';
+    import { Card, CardContent, CardHeader, CardTitle, Select } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import { variableErrors } from './limits';
@@ -82,8 +82,17 @@
     const imageIsListed = $derived(images.some(([, v]) => v === image));
     let customImage = $state(false);
 
-    const select =
-        'h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50';
+    const nestOptions = $derived([
+        ...(nests.data ? [] : [{ value: '', label: '加载中…' }]),
+        ...(nests.data ?? []).map(n => ({ value: String(n.id), label: n.name })),
+    ]);
+
+    const eggOptions = $derived([
+        ...(eggs.data ? [] : [{ value: '', label: '加载中…' }]),
+        ...(eggs.data ?? []).map(e => ({ value: String(e.id), label: e.name })),
+    ]);
+
+    const imageOptions = $derived(images.map(([label, value]) => ({ value, label: `${label}（${value}）` })));
 
     const varErrors = $derived(variableErrors(egg, environment));
 </script>
@@ -93,29 +102,33 @@
     <CardContent class="space-y-4 text-sm">
         <div class="grid gap-4 sm:grid-cols-2">
             <div class="space-y-1.5">
-                <Label for="svc-nest">Nest</Label>
-                <select id="svc-nest" class={select} disabled={disabled || !nests.data} value={nestId === null ? '' : String(nestId)} onchange={e => (nestId = Number(e.currentTarget.value))}>
-                    {#if !nests.data}<option value="">加载中…</option>{/if}
-                    {#each nests.data ?? [] as n (n.id)}<option value={String(n.id)}>{n.name}</option>{/each}
-                </select>
+                <Select
+                    id="svc-nest"
+                    items={nestOptions}
+                    disabled={disabled || !nests.data}
+                    value={nestId === null ? '' : String(nestId)}
+                    onValueChange={v => (nestId = Number(v))}
+                    label="Nest"
+                />
             </div>
             <div class="space-y-1.5">
-                <Label for="svc-egg">Egg</Label>
-                <select id="svc-egg" class={select} disabled={disabled || !eggs.data} value={eggId === null ? '' : String(eggId)} onchange={e => (eggId = Number(e.currentTarget.value))}>
-                    {#if !eggs.data}<option value="">加载中…</option>{/if}
-                    {#each eggs.data ?? [] as e (e.id)}<option value={String(e.id)}>{e.name}</option>{/each}
-                </select>
+                <Select
+                    id="svc-egg"
+                    items={eggOptions}
+                    disabled={disabled || !eggs.data}
+                    value={eggId === null ? '' : String(eggId)}
+                    onValueChange={v => (eggId = Number(v))}
+                    label="Egg"
+                />
                 {#if eggs.error}<p class="text-xs text-destructive">{httpErrorToHuman(eggs.error)}</p>{/if}
             </div>
         </div>
 
         <div class="space-y-1.5">
-            <Label for="svc-image">Docker 镜像</Label>
             {#if !customImage && (imageIsListed || !image) && images.length}
-                <select id="svc-image" class={select} {disabled} bind:value={image}>
-                    {#each images as [label, value] (value)}<option {value}>{label}（{value}）</option>{/each}
-                </select>
+                <Select id="svc-image" items={imageOptions} {disabled} bind:value={image} label="Docker 镜像" />
             {:else}
+                <Label for="svc-image">Docker 镜像</Label>
                 <Input id="svc-image" bind:value={image} class="font-mono" {disabled} error={!image.trim() ? '请填写镜像。' : undefined} />
             {/if}
             <button type="button" class="text-xs text-primary hover:underline disabled:opacity-50" {disabled} onclick={() => (customImage = !customImage || !imageIsListed)}>

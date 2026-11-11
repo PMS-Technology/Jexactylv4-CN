@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { EggVariable } from '$lib/api/definitions/server';
-    import { Input, Label } from '$lib/ui';
+    import { Checkbox, Input, Label, Select } from '$lib/ui';
 
     /**
      * One editable egg variable, ported from `billing/order/VariableBox.tsx`. Values only
@@ -24,34 +24,30 @@
 
     const initial = $derived(variable.serverValue ?? variable.defaultValue ?? '');
     const truthy = $derived(initial === '1' || initial === 'true');
+
+    const optionList = $derived(options.map(option => ({ value: option, label: option })));
 </script>
 
 <div class="rounded-md border border-border p-4">
     {#if isToggle}
-        <label class="flex items-center justify-between gap-4">
+        <div class="flex items-center justify-between gap-4">
             <span class="text-sm font-medium">{variable.name}</span>
-            <input
-                type="checkbox"
-                class="size-4 accent-primary"
+            <Checkbox
                 checked={truthy}
-                onchange={e => {
-                    const on = e.currentTarget.checked;
+                onCheckedChange={on => {
                     onChange(usesWords ? String(on) : on ? '1' : '0');
                 }}
+                aria-label={variable.name}
             />
-        </label>
+        </div>
     {:else if options.length}
-        <Label for={id}>{variable.name}</Label>
-        <select
+        <Select
             {id}
-            class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            items={optionList}
             value={initial}
-            onchange={e => onChange(e.currentTarget.value)}
-        >
-            {#each options as option (option)}
-                <option value={option}>{option}</option>
-            {/each}
-        </select>
+            onValueChange={value => onChange(value)}
+            label={variable.name}
+        />
     {:else}
         <Label for={id}>{variable.name}</Label>
         <Input

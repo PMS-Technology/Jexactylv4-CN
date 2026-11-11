@@ -12,7 +12,7 @@
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
     import { navigate } from '$lib/router/router.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle, Spinner } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Checkbox, Spinner } from '$lib/ui';
     import ConfirmDialog from '$lib/ui/dialog/ConfirmDialog.svelte';
     import Alert from '$lib/components/Alert.svelte';
     import NotFound from '$lib/components/NotFound.svelte';
@@ -151,35 +151,33 @@
                 {@const count = keys.filter(k => selected!.includes(k)).length}
                 <Card>
                     <CardHeader class="pb-2">
-                        <label class="flex items-center justify-between gap-2">
+                        <div class="flex items-center justify-between gap-2">
                             <CardTitle class="capitalize">{group}</CardTitle>
-                            <input
-                                type="checkbox"
-                                class="size-4 accent-primary"
+                            <Checkbox
                                 aria-label="全选 {group}"
                                 checked={count === keys.length && keys.length > 0}
                                 indeterminate={count > 0 && count < keys.length}
                                 disabled={!canUpdate}
-                                onchange={() => toggleGroup(group)}
+                                onCheckedChange={() => toggleGroup(group)}
                             />
-                        </label>
+                        </div>
                         <p class="text-xs text-muted-foreground">{meta.description}</p>
                     </CardHeader>
                     <CardContent class="space-y-1.5 text-sm">
                         {#each keys as key (key)}
-                            <label class="flex items-start gap-2" title={meta.keys[key.split('.')[1]!]}>
-                                <input
-                                    type="checkbox"
-                                    class="mt-0.5 size-4 shrink-0 accent-primary"
-                                    checked={selected.includes(key)}
-                                    disabled={!canUpdate}
-                                    onchange={() => toggle(key)}
-                                />
-                                <span>
-                                    <span class="font-mono text-xs">{key}</span>
-                                    <span class="block text-xs text-muted-foreground">{meta.keys[key.split('.')[1]!]}</span>
-                                </span>
-                            </label>
+                            <Checkbox
+                                checked={selected.includes(key)}
+                                disabled={!canUpdate}
+                                onCheckedChange={() => toggle(key)}
+                                wrapperClass="flex items-start gap-2"
+                            >
+                                {#snippet children({ id })}
+                                    <span id={id} title={meta.keys[key.split('.')[1]!]}>
+                                        <span class="font-mono text-xs">{key}</span>
+                                        <span class="block text-xs text-muted-foreground">{meta.keys[key.split('.')[1]!]}</span>
+                                    </span>
+                                {/snippet}
+                            </Checkbox>
                         {/each}
                     </CardContent>
                 </Card>

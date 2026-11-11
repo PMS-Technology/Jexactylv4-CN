@@ -19,7 +19,7 @@
         type BackupResponse,
     } from '$lib/api/backups';
     import { httpErrorToHuman } from '$lib/api/http';
-    import { Button, Spinner } from '$lib/ui';
+    import { Button, Checkbox, Spinner } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Textarea from '$lib/ui/Textarea.svelte';
@@ -362,20 +362,21 @@
 
         {#if canDelete}
             <div class="rounded-lg bg-muted p-4">
-                <label class="flex cursor-pointer items-center gap-3">
-                    <input
-                        type="checkbox"
-                        bind:checked={createForm.values.isLocked}
-                        disabled={createForm.submitting}
-                        class="size-5 rounded border border-input bg-background"
-                    />
-                    <div>
-                        <p class="font-medium">锁定</p>
-                        <p class="text-sm text-muted-foreground">
-                            防止此备份被自动或意外删除，直到显式解锁。
-                        </p>
-                    </div>
-                </label>
+                <Checkbox
+                    bind:checked={createForm.values.isLocked}
+                    disabled={createForm.submitting}
+                    class="size-5"
+                    wrapperClass="items-start gap-3"
+                >
+                    {#snippet children({ id })}
+                        <div id={id}>
+                            <p class="font-medium">锁定</p>
+                            <p class="text-sm text-muted-foreground">
+                                防止此备份被自动或意外删除，直到显式解锁。
+                            </p>
+                        </div>
+                    {/snippet}
+                </Checkbox>
             </div>
         {/if}
 
@@ -487,15 +488,7 @@
         <p>你的服务器将被停止。在恢复完成之前，你无法控制电源状态、访问文件管理器或创建其他备份。</p>
 
         <div class="rounded-lg bg-muted p-4">
-            <label class="flex cursor-pointer items-center gap-3">
-                <input
-                    type="checkbox"
-                    bind:checked={truncateRestore}
-                    disabled={loadingAction}
-                    class="size-5 rounded border border-input bg-background"
-                />
-                <span class="text-sm">在恢复备份前删除所有文件。</span>
-            </label>
+            <Checkbox bind:checked={truncateRestore} disabled={loadingAction} class="size-5" label="在恢复备份前删除所有文件。" />
         </div>
     </div>
 </ConfirmDialog>

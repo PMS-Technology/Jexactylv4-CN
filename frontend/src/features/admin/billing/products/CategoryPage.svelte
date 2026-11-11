@@ -14,7 +14,7 @@
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
     import { navigate } from '$lib/router/router.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle, Spinner } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Select, Spinner } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Switch from '$lib/ui/Switch.svelte';
@@ -74,6 +74,16 @@
         enabled: nestId !== null,
     }));
 
+    const nestOptions = $derived([
+        ...(nests.data ? [] : [{ value: '', label: '加载中…' }]),
+        ...(nests.data ?? []).map(nest => ({ value: String(nest.id), label: nest.name })),
+    ]);
+
+    const eggOptions = $derived([
+        { value: '', label: '此 Nest 中的任意 Egg（由用户选择）' },
+        ...(eggs.data ?? []).map(egg => ({ value: String(egg.id), label: egg.name })),
+    ]);
+
     // Category::$validationRules: name 3–191; icon and description are nullable strings.
     const errors = $derived({
         name: name.trim().length < 3 || name.trim().length > 191 ? '名称需要 3–191 个字符。' : undefined,
@@ -127,9 +137,6 @@
         await queryClient.invalidateQueries({ queryKey: adminBillingKeys.categories });
         navigate('/admin/billing/categories');
     };
-
-    const select =
-        'h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50';
 </script>
 
 {#if id !== null && category.error}
@@ -198,39 +205,29 @@
                 <CardHeader><CardTitle class="flex items-center gap-2"><Layers class="size-4" />服务配置</CardTitle></CardHeader>
                 <CardContent class="space-y-4 text-sm">
                     <div class="space-y-1.5">
-                        <Label for="category-nest">Nest</Label>
-                        <select
+                        <Select
                             id="category-nest"
-                            class={select}
+                            items={nestOptions}
                             value={nestId === null ? '' : String(nestId)}
                             disabled={!canSave || saving || !nests.data}
-                            onchange={e => {
-                                nestId = Number(e.currentTarget.value);
+                            onValueChange={v => {
+                                nestId = Number(v);
                                 eggId = null;
                             }}
-                        >
-                            {#if !nests.data}<option value="">加载中…</option>{/if}
-                            {#each nests.data ?? [] as nest (nest.id)}
-                                <option value={String(nest.id)}>{nest.name}</option>
-                            {/each}
-                        </select>
+                            label="Nest"
+                        />
                         {#if nests.error}<p class="text-xs text-destructive">{httpErrorToHuman(nests.error)}</p>{/if}
                         <p class="text-xs text-muted-foreground">此分类下的商品从这个 Nest 部署服务器。</p>
                     </div>
                     <div class="space-y-1.5">
-                        <Label for="category-egg">Egg</Label>
-                        <select
+                        <Select
                             id="category-egg"
-                            class={select}
+                            items={eggOptions}
                             value={eggId === null ? '' : String(eggId)}
                             disabled={!canSave || saving || nestId === null}
-                            onchange={e => (eggId = e.currentTarget.value ? Number(e.currentTarget.value) : null)}
-                        >
-                            <option value="">此 Nest 中的任意 Egg（由用户选择）</option>
-                            {#each eggs.data ?? [] as egg (egg.id)}
-                                <option value={String(egg.id)}>{egg.name}</option>
-                            {/each}
-                        </select>
+                            onValueChange={v => (eggId = v ? Number(v) : null)}
+                            label="Egg"
+                        />
                         <p class="text-xs text-muted-foreground">不指定时，用户结账时可以自己选择要部署的 Egg。</p>
                     </div>
                 </CardContent>

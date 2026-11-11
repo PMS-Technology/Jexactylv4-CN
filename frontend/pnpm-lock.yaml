@@ -32,6 +32,9 @@ importers:
       '@codemirror/view':
         specifier: 6.43.15
         version: 6.43.15
+      '@internationalized/date':
+        specifier: 3.12.4
+        version: 3.12.4
       '@lezer/highlight':
         specifier: 1.2.5
         version: 1.2.5

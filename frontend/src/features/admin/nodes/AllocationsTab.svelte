@@ -12,7 +12,7 @@
     } from '$lib/api/admin/nodes';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle, Spinner } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Checkbox, Spinner } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Textarea from '$lib/ui/Textarea.svelte';
@@ -159,10 +159,11 @@
         <Card class="p-0">
             <div class="flex flex-wrap items-center gap-3 border-b border-border p-4">
                 <SearchBox bind:value={table.search} placeholder="搜索 IP、端口或别名" />
-                <label class="flex items-center gap-2 text-sm">
-                    <input type="checkbox" class="size-4 accent-primary" bind:checked={onlyFree} onchange={() => (table.page = 1)} />
-                    只看未分配
-                </label>
+                <Checkbox
+                    bind:checked={onlyFree}
+                    onCheckedChange={() => (table.page = 1)}
+                    label="只看未分配"
+                />
             </div>
 
             {#if allocations.error}

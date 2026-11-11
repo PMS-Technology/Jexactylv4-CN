@@ -4,7 +4,7 @@
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
     import type { CaptchaProvider } from '$lib/utils/recaptcha';
-    import { Button, Card, CardContent, CardHeader, CardTitle, Input } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Input, Select } from '$lib/ui';
     import Switch from '$lib/ui/Switch.svelte';
     import Alert from '$lib/components/Alert.svelte';
 
@@ -80,6 +80,9 @@
     let error = $state('');
 
     const selected = $derived(providerMeta[provider]);
+    const providerOptions = $derived(
+        CAPTCHA_PROVIDERS.map(id => ({ value: id, label: providerMeta[id].label })),
+    );
     const selectedReady = $derived(
         Boolean(siteKeys[provider]?.trim()) && (hasSecret[provider] || Boolean(secretKeys[provider]?.trim())),
     );
@@ -149,17 +152,13 @@
             </label>
 
             <div class="space-y-1.5">
-                <label for="captcha-provider" class="text-sm font-medium">提供商</label>
-                <select
+                <Select
                     id="captcha-provider"
+                    items={providerOptions}
                     bind:value={provider}
                     disabled={!canUpdate}
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50"
-                >
-                    {#each CAPTCHA_PROVIDERS as id (id)}
-                        <option value={id}>{providerMeta[id].label}</option>
-                    {/each}
-                </select>
+                    label="提供商"
+                />
                 <p class="text-xs text-muted-foreground">
                     当前选择：{selected.label} · <a href={selected.console} target="_blank" rel="noreferrer" class="text-primary hover:underline">打开控制台 <ExternalLink class="inline size-3" /></a>
                 </p>

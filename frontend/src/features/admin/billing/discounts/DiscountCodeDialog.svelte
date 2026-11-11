@@ -2,8 +2,7 @@
     import { createDiscountCode, updateDiscountCode, type AdminDiscountCode, type DiscountCodeType } from '$lib/api/admin/billing';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
-    import { cn } from '$lib/utils/cn';
-    import { Button } from '$lib/ui';
+    import { Button, DateField, SegmentedRadio } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Switch from '$lib/ui/Switch.svelte';
@@ -44,6 +43,11 @@
     });
 
     const symbol = $derived(app.flags?.billing.currency.symbol ?? '$');
+
+    const TYPE_OPTIONS = $derived([
+        { value: 'percentage', label: '按百分比 (%)' },
+        { value: 'numeric', label: `固定金额 (${symbol})` },
+    ]);
     const isInt = (v: string) => /^\d+$/.test(v.trim());
 
     // DiscountCode::$validationRules: code 4–16, description ≥ 3, value int ≥ 0, uses int.
@@ -98,8 +102,12 @@
                 <p class="text-xs text-muted-foreground">用户结账时输入的代码。</p>
             </div>
             <div class="space-y-1.5">
-                <Label for="discount-expires">到期日期</Label>
-                <Input id="discount-expires" type="date" bind:value={expiresAt} disabled={saving} />
+                <DateField
+                    id="discount-expires"
+                    bind:value={expiresAt}
+                    disabled={saving}
+                    label="到期日期"
+                />
                 <p class="text-xs text-muted-foreground">可选。到达该日期后优惠码失效。</p>
             </div>
         </div>
@@ -110,20 +118,12 @@
 
         <div class="space-y-1.5">
             <span class="text-sm font-medium">折扣类型</span>
-            <div class="grid grid-cols-2 overflow-hidden rounded-md border border-input" role="radiogroup" aria-label="折扣类型">
-                {#each [{ value: 'percentage', label: '按百分比 (%)' }, { value: 'numeric', label: `固定金额 (${symbol})` }] as option (option.value)}
-                    <button
-                        type="button"
-                        role="radio"
-                        aria-checked={type === option.value}
-                        disabled={saving}
-                        onclick={() => (type = option.value as DiscountCodeType)}
-                        class={cn('px-3 py-2 font-medium transition-colors', type === option.value ? 'bg-primary text-primary-foreground' : 'hover:bg-accent')}
-                    >
-                        {option.label}
-                    </button>
-                {/each}
-            </div>
+            <SegmentedRadio
+                items={TYPE_OPTIONS}
+                bind:value={type}
+                disabled={saving}
+                aria-label="折扣类型"
+            />
             <p class="text-xs text-muted-foreground">按原价打折，或从原价中减去固定金额。</p>
         </div>
 

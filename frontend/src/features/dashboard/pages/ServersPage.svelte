@@ -8,7 +8,7 @@
     import PageHeader from '$lib/components/PageHeader.svelte';
     import ServerCard from '../components/ServerCard.svelte';
     import ServerGroupDialog from '../components/ServerGroupDialog.svelte';
-    import { Spinner } from '$lib/ui';
+    import { Checkbox, Spinner } from '$lib/ui';
     import Alert from '$lib/components/Alert.svelte';
     import { stagger } from '$lib/motion/stagger';
 
@@ -70,14 +70,7 @@
             </div>
 
             {#if app.isAdmin}
-                <label class="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
-                    <input
-                        type="checkbox"
-                        bind:checked={showAll}
-                        class="size-4 rounded border-input accent-foreground"
-                    />
-                    显示全部
-                </label>
+                <Checkbox bind:checked={showAll} label="显示全部" wrapperClass="text-sm text-muted-foreground" />
             {/if}
 
             <button

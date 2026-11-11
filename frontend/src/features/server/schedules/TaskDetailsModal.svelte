@@ -7,6 +7,8 @@
     import { Form } from '$lib/forms/form.svelte';
     import Dialog from '$lib/ui/dialog/Dialog.svelte';
     import Button from '$lib/ui/button/Button.svelte';
+    import Checkbox from '$lib/ui/checkbox/Checkbox.svelte';
+    import Select from '$lib/ui/select/Select.svelte';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Textarea from '$lib/ui/Textarea.svelte';
@@ -45,6 +47,19 @@
     });
 
     type FormValues = z.infer<typeof schema>;
+
+    const ACTION_OPTIONS = [
+        { value: 'command', label: '发送命令' },
+        { value: 'power', label: '发送电源命令' },
+        { value: 'backup', label: '创建备份' },
+    ];
+
+    const POWER_OPTIONS = [
+        { value: 'start', label: '启动服务器' },
+        { value: 'restart', label: '重启服务器' },
+        { value: 'stop', label: '关闭服务器' },
+        { value: 'kill', label: '终止服务器' },
+    ];
 
     const form = new Form({
         schema,
@@ -103,19 +118,15 @@
             <!-- Action and time offset -->
             <div class="grid gap-4 sm:grid-cols-3">
                 <div class="sm:col-span-2 space-y-2">
-                    <Label for="action">操作</Label>
-                    <select
+                    <Select
                         id="action"
+                        items={ACTION_OPTIONS}
                         value={form.values.action}
-                        onchange={(e) => {
-                            form.values.action = e.currentTarget.value as 'command' | 'power' | 'backup';
+                        onValueChange={value => {
+                            form.values.action = value as 'command' | 'power' | 'backup';
                         }}
-                        class="rounded border border-input bg-background px-3 py-2 text-sm"
-                    >
-                        <option value="command">发送命令</option>
-                        <option value="power">发送电源命令</option>
-                        <option value="backup">创建备份</option>
-                    </select>
+                        label="操作"
+                    />
                     {#if form.errors.action}
                         <p class="text-sm text-destructive">{form.errors.action}</p>
                     {/if}
@@ -147,53 +158,47 @@
 
             <!-- Payload field -->
             <div class="space-y-2">
-                <Label for="payload">
-                    {form.values.action === 'command'
-                        ? '命令'
-                        : form.values.action === 'power'
-                          ? '电源命令'
-                          : '忽略的文件'}
-                </Label>
-
-                {#if form.values.action === 'command'}
-                    <Textarea
+                {#if form.values.action === 'power'}
+                    <Select
                         id="payload"
-                        placeholder="输入要执行的命令"
+                        items={POWER_OPTIONS}
                         value={form.values.payload}
-                        onchange={(e) => {
-                            form.values.payload = e.currentTarget.value;
-                            form.clearError('payload');
+                        onValueChange={value => {
+                            form.values.payload = value;
                         }}
-                        rows={6}
+                        label="电源命令"
                     />
-                {:else if form.values.action === 'power'}
-                    <select
-                        id="payload"
-                        value={form.values.payload}
-                        onchange={(e) => {
-                            form.values.payload = e.currentTarget.value;
-                        }}
-                        class="rounded border border-input bg-background px-3 py-2 text-sm"
-                    >
-                        <option value="start">启动服务器</option>
-                        <option value="restart">重启服务器</option>
-                        <option value="stop">关闭服务器</option>
-                        <option value="kill">终止服务器</option>
-                    </select>
                 {:else}
-                    <Textarea
-                        id="payload"
-                        placeholder="可选。要排除的文件和文件夹，每行一个。默认使用 .pteroignore 文件。"
-                        value={form.values.payload}
-                        onchange={(e) => {
-                            form.values.payload = e.currentTarget.value;
-                            form.clearError('payload');
-                        }}
-                        rows={6}
-                    />
-                    <p class="text-xs text-muted-foreground">
-                        可选。如果已达到备份限制，最旧的备份将被轮换。
-                    </p>
+                    <Label for="payload">
+                        {form.values.action === 'command' ? '命令' : '忽略的文件'}
+                    </Label>
+
+                    {#if form.values.action === 'command'}
+                        <Textarea
+                            id="payload"
+                            placeholder="输入要执行的命令"
+                            value={form.values.payload}
+                            onchange={(e) => {
+                                form.values.payload = e.currentTarget.value;
+                                form.clearError('payload');
+                            }}
+                            rows={6}
+                        />
+                    {:else}
+                        <Textarea
+                            id="payload"
+                            placeholder="可选。要排除的文件和文件夹，每行一个。默认使用 .pteroignore 文件。"
+                            value={form.values.payload}
+                            onchange={(e) => {
+                                form.values.payload = e.currentTarget.value;
+                                form.clearError('payload');
+                            }}
+                            rows={6}
+                        />
+                        <p class="text-xs text-muted-foreground">
+                            可选。如果已达到备份限制，最旧的备份将被轮换。
+                        </p>
+                    {/if}
                 {/if}
 
                 {#if form.errors.payload}
@@ -203,17 +208,13 @@
 
             <!-- Continue on failure -->
             <div class="rounded-lg border border-border bg-muted/50 p-4">
-                <label class="flex items-center gap-3">
-                    <input
-                        type="checkbox"
-                        checked={form.values.continueOnFailure}
-                        onchange={(e) => {
-                            form.values.continueOnFailure = e.currentTarget.checked;
-                        }}
-                        class="rounded border-input"
-                    />
-                    <span class="text-sm font-medium">失败时继续</span>
-                </label>
+                <Checkbox
+                    checked={form.values.continueOnFailure}
+                    onCheckedChange={checked => {
+                        form.values.continueOnFailure = checked;
+                    }}
+                    label="失败时继续"
+                />
                 <p class="ml-7 mt-1 text-xs text-muted-foreground">
                     当此任务失败时，后续任务仍会执行。
                 </p>

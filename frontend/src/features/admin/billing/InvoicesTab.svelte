@@ -4,7 +4,7 @@
     import { adminBillingKeys, downloadInvoice, getInvoices, type InvoiceQuery } from '$lib/api/admin/billing';
     import { httpErrorToHuman } from '$lib/api/http';
     import { cn } from '$lib/utils/cn';
-    import { Button, Card, Spinner } from '$lib/ui';
+    import { Button, Card, Select, Spinner } from '$lib/ui';
     import Alert from '$lib/components/Alert.svelte';
     import Link from '$lib/components/Link.svelte';
     import Pagination from '$lib/components/Pagination.svelte';
@@ -23,6 +23,11 @@
     let userSearch = $state('');
     let user = $state('');
     let status = $state('');
+
+    const statusOptions = [
+        { value: '', label: '全部状态' },
+        ...Object.entries(orderStatus).map(([value, meta]) => ({ value, label: meta.label })),
+    ];
 
     $effect(() => {
         const value = userSearch.trim();
@@ -70,17 +75,13 @@
     <div class="flex flex-wrap items-center gap-3 border-b border-border p-4">
         <SearchBox bind:value={table.search} placeholder="按发票号搜索" />
         <SearchBox bind:value={userSearch} placeholder="按用户名或邮箱筛选" />
-        <select
+        <Select
+            items={statusOptions}
             bind:value={status}
-            onchange={() => (table.page = 1)}
+            onValueChange={() => (table.page = 1)}
             aria-label="按订单状态筛选"
-            class="h-9 rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-        >
-            <option value="">全部状态</option>
-            {#each Object.entries(orderStatus) as [value, meta] (value)}
-                <option {value}>{meta.label}</option>
-            {/each}
-        </select>
+            class="w-auto"
+        />
     </div>
 
     {#if downloadError}<div class="p-4 pb-0"><Alert variant="destructive">{downloadError}</Alert></div>{/if}

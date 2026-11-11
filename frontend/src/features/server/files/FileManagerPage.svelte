@@ -35,7 +35,7 @@
     } from '$lib/api/files';
     import { bytesToString, formatDateTime, formatIp } from '$lib/utils/format';
     import { cleanDirectoryPath, encodePathSegments, hashToPath, pathJoin } from '$lib/utils/files';
-    import { Button } from '$lib/ui';
+    import { Button, Checkbox } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Spinner from '$lib/ui/Spinner.svelte';
@@ -84,10 +84,8 @@
         filesQuery.data ? filesQuery.data.length > 0 && selectedLength === filesQuery.data.length : false,
     );
 
-    function onSelectAll(event: Event) {
-        files.setSelectedFiles((event.currentTarget as HTMLInputElement).checked
-            ? (filesQuery.data?.map(file => file.name) ?? [])
-            : []);
+    function onSelectAll(checked: boolean) {
+        files.setSelectedFiles(checked ? (filesQuery.data?.map(file => file.name) ?? []) : []);
     }
 
     // --- filter / sort -----------------------------------------------------
@@ -566,15 +564,7 @@
 
     <!-- Breadcrumbs + actions -->
     <div class="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
-        <label class="flex items-center">
-            <input
-                type="checkbox"
-                class="size-4 accent-primary"
-                checked={allSelected}
-                onchange={onSelectAll}
-                aria-label="全选"
-            />
-        </label>
+        <Checkbox checked={allSelected} onCheckedChange={onSelectAll} aria-label="全选" />
 
         <nav class="flex min-w-0 flex-1 items-center overflow-x-hidden text-sm text-muted-foreground" aria-label="目录">
             <span class="px-0.5">/</span>
@@ -721,18 +711,16 @@
                     <div class="overflow-hidden rounded-md border border-border">
                         {#each displayFiles as file (file.key)}
                             <div class="group relative flex items-center border-b border-border bg-card text-sm transition-colors last:border-b-0 hover:bg-accent">
-                                <label class="z-10 flex-none pl-3">
-                                    <input
-                                        type="checkbox"
-                                        class="size-4 accent-primary"
+                                <div class="z-10 flex-none pl-3">
+                                    <Checkbox
                                         checked={files.selectedFiles.includes(file.name)}
-                                        onchange={e =>
-                                            e.currentTarget.checked
+                                        onCheckedChange={checked =>
+                                            checked
                                                 ? files.appendSelectedFile(file.name)
                                                 : files.removeSelectedFile(file.name)}
                                         aria-label="选择 {file.name}"
                                     />
-                                </label>
+                                </div>
 
                                 {#if isClickable(file)}
                                     <button

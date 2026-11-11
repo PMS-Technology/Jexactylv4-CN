@@ -4,7 +4,7 @@
     import { SocketEvent, SocketRequest } from '$lib/api/definitions/events';
     import { getServerStartup, setDockerImage } from '$lib/api/startup';
     import { httpErrorToHuman } from '$lib/api/http';
-    import { Button, Spinner } from '$lib/ui';
+    import { Button, Select, Spinner } from '$lib/ui';
     import Dialog from '$lib/ui/dialog/Dialog.svelte';
     import Alert from '$lib/components/Alert.svelte';
     import { lineMatches } from './index';
@@ -28,6 +28,10 @@
     let loadingImages = $state(false);
     let saving = $state(false);
     let error = $state('');
+
+    const imageOptions = $derived(
+        Object.entries(images ?? {}).map(([label, image]) => ({ value: image, label })),
+    );
 
     websocketEvent(store, SocketEvent.CONSOLE_OUTPUT, (line: string) => {
         if (store.status === 'running' || open) return;
@@ -86,16 +90,12 @@
         </p>
         {#if canChange}
             <div class="relative">
-                <select
+                <Select
                     aria-label="Docker 镜像"
+                    items={imageOptions}
                     bind:value={selected}
                     disabled={!images || saving}
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50"
-                >
-                    {#each Object.entries(images ?? {}) as [label, image] (image)}
-                        <option value={image}>{label}</option>
-                    {/each}
-                </select>
+                />
                 {#if loadingImages}
                     <div class="absolute inset-y-0 right-8 flex items-center"><Spinner size="sm" /></div>
                 {/if}

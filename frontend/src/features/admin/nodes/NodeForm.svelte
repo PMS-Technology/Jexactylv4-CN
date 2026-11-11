@@ -6,8 +6,7 @@
     import type { AdminNode, NodeValues } from '$lib/api/admin/nodes';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
-    import { cn } from '$lib/utils/cn';
-    import { Button, Card, CardContent, CardHeader, CardTitle } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, SegmentedRadio, Select } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Switch from '$lib/ui/Switch.svelte';
@@ -35,7 +34,13 @@
     let name = $state(node?.name ?? '');
     let fqdn = $state(node?.fqdn ?? '');
     let sftpAlias = $state(node?.sftpAlias ?? '');
-    let scheme = $state<'http' | 'https'>(node?.scheme ?? 'https');
+    let schemeChoice = $state(node?.scheme ?? 'https');
+    const scheme = $derived(schemeChoice as 'http' | 'https');
+
+    const SCHEME_OPTIONS = [
+        { value: 'https', label: '启用（https）' },
+        { value: 'http', label: '关闭（http）' },
+    ];
     let behindProxy = $state(node?.behindProxy ?? false);
     let isPublic = $state(node?.public ?? true);
     let daemonBase = $state(node?.daemonBase ?? '/var/lib/pterodactyl/volumes');
@@ -118,8 +123,11 @@
     }
 
     const off = $derived(disabled || saving);
-    const select =
-        'h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50';
+
+    const hostOptions = $derived([
+        { value: '', label: '不指定' },
+        ...(hosts.data ?? []).map(h => ({ value: String(h.id), label: `${h.name}（${h.host}:${h.port}）` })),
+    ]);
 </script>
 
 {#snippet toggle(label: string, hint: string, checked: boolean, set: (v: boolean) => void)}
@@ -174,20 +182,12 @@
                     </div>
                     <div class="space-y-1.5">
                         <span class="text-sm font-medium">SSL</span>
-                        <div class="grid grid-cols-2 overflow-hidden rounded-md border border-input" role="radiogroup" aria-label="SSL">
-                            {#each [{ v: 'https', l: '启用（https）' }, { v: 'http', l: '关闭（http）' }] as o (o.v)}
-                                <button
-                                    type="button"
-                                    role="radio"
-                                    aria-checked={scheme === o.v}
-                                    disabled={off}
-                                    onclick={() => (scheme = o.v as 'http' | 'https')}
-                                    class={cn('px-3 py-2 text-sm font-medium transition-colors', scheme === o.v ? 'bg-primary text-primary-foreground' : 'hover:bg-accent')}
-                                >
-                                    {o.l}
-                                </button>
-                            {/each}
-                        </div>
+                        <SegmentedRadio
+                            items={SCHEME_OPTIONS}
+                            bind:value={schemeChoice}
+                            disabled={off}
+                            aria-label="SSL"
+                        />
                         {#if scheme === 'http' && location.protocol === 'https:'}
                             <p class="text-xs text-warning">面板本身走 https，浏览器会拦截到 http 节点的 websocket 连接，控制台将无法使用。</p>
                         {/if}
@@ -205,12 +205,13 @@
                         </div>
                         <div class="space-y-1.5">
                             <Label for="node-database-host">数据库主机</Label>
-                            <select id="node-database-host" class={select} bind:value={databaseHostId} disabled={off || !hosts.data}>
-                                <option value="">不指定</option>
-                                {#each hosts.data ?? [] as h (h.id)}
-                                    <option value={String(h.id)}>{h.name}（{h.host}:{h.port}）</option>
-                                {/each}
-                            </select>
+                            <Select
+                                id="node-database-host"
+                                items={hostOptions}
+                                bind:value={databaseHostId}
+                                disabled={off || !hosts.data}
+                                label="数据库主机"
+                            />
                             <p class="text-xs text-muted-foreground">这个节点上的服务器默认在哪个主机上创建数据库。</p>
                         </div>
                         {@render toggle('位于代理之后', '节点前面有 Cloudflare 等反向代理时开启，Wings 不再自己申请证书。', behindProxy, v => (behindProxy = v))}

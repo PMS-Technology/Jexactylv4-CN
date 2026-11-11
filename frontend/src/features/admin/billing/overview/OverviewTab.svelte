@@ -6,7 +6,7 @@
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
     import { cn } from '$lib/utils/cn';
-    import { Button, Card, CardContent, CardHeader, CardTitle, Spinner } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Select, Spinner } from '$lib/ui';
     import Alert from '$lib/components/Alert.svelte';
     import Link from '$lib/components/Link.svelte';
     import { formatMoney } from '$features/dashboard/billing/money';
@@ -31,7 +31,11 @@
         { days: 180, label: '最近 6 个月' },
         { days: 360, label: '最近 1 年' },
     ];
-    let history = $state(14);
+    const rangeOptions = ranges.map(range => ({ value: String(range.days), label: range.label }));
+
+    /** The select works in strings; the chart maths want a number of days. */
+    let history = $state('14');
+    const historyDays = $derived(Number(history));
     let stripeOpen = $state(false);
 
     const stats = $derived.by(() => {
@@ -39,7 +43,7 @@
         if (!orders) return null;
 
         const now = new Date();
-        const inRange = orders.filter(o => differenceInCalendarDays(now, o.createdAt) <= history);
+        const inRange = orders.filter(o => differenceInCalendarDays(now, o.createdAt) <= historyDays);
         const processed = inRange.filter(o => o.status === 'processed');
         const revenue = processed.reduce((sum, o) => sum + o.total, 0);
 
@@ -48,7 +52,7 @@
             const key = format(o.createdAt, 'yyyy-MM-dd');
             byDay.set(key, (byDay.get(key) ?? 0) + o.total);
         }
-        const days = eachDayOfInterval({ start: startOfDay(subDays(now, history)), end: now }).map(d => {
+        const days = eachDayOfInterval({ start: startOfDay(subDays(now, historyDays)), end: now }).map(d => {
             const date = format(d, 'yyyy-MM-dd');
             return { date, total: Math.round((byDay.get(date) ?? 0) * 100) / 100 };
         });
@@ -107,15 +111,11 @@
 {:else}
     <div class="grid gap-4 lg:grid-cols-4">
         <div class="space-y-4">
-            <select
+            <Select
+                items={rangeOptions}
                 bind:value={history}
                 aria-label="统计范围"
-                class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-            >
-                {#each ranges as range (range.days)}
-                    <option value={range.days}>{range.label}</option>
-                {/each}
-            </select>
+            />
             <Card>
                 <CardHeader><CardTitle>建议操作</CardTitle></CardHeader>
                 <CardContent>
@@ -157,7 +157,7 @@
                 <Card class="p-4">
                     <p class="text-sm text-muted-foreground">订单数</p>
                     <p class="mt-1 text-2xl font-semibold">{stats.total}</p>
-                    <p class="mt-1 text-xs text-muted-foreground">{ranges.find(r => r.days === history)?.label}</p>
+                    <p class="mt-1 text-xs text-muted-foreground">{ranges.find(r => r.days === historyDays)?.label}</p>
                 </Card>
             </div>
 

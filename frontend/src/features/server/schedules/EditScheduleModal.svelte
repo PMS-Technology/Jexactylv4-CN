@@ -7,6 +7,7 @@
     import { Form } from '$lib/forms/form.svelte';
     import Dialog from '$lib/ui/dialog/Dialog.svelte';
     import Button from '$lib/ui/button/Button.svelte';
+    import Checkbox from '$lib/ui/checkbox/Checkbox.svelte';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Alert from '$lib/components/Alert.svelte';
@@ -221,17 +222,13 @@
 
             <!-- Only when online toggle -->
             <div class="rounded-lg border border-border bg-muted/50 p-4">
-                <label class="flex items-center gap-3">
-                    <input
-                        type="checkbox"
-                        checked={form.values.onlyWhenOnline}
-                        onchange={(e) => {
-                            form.values.onlyWhenOnline = e.currentTarget.checked;
-                        }}
-                        class="rounded border-input"
-                    />
-                    <span class="text-sm font-medium">仅在服务器在线时执行</span>
-                </label>
+                <Checkbox
+                    checked={form.values.onlyWhenOnline}
+                    onCheckedChange={checked => {
+                        form.values.onlyWhenOnline = checked;
+                    }}
+                    label="仅在服务器在线时执行"
+                />
                 <p class="ml-7 mt-1 text-xs text-muted-foreground">
                     仅在服务器处于运行状态时执行此计划任务。
                 </p>
@@ -239,17 +236,13 @@
 
             <!-- Active toggle -->
             <div class="rounded-lg border border-border bg-muted/50 p-4">
-                <label class="flex items-center gap-3">
-                    <input
-                        type="checkbox"
-                        checked={form.values.isActive}
-                        onchange={(e) => {
-                            form.values.isActive = e.currentTarget.checked;
-                        }}
-                        class="rounded border-input"
-                    />
-                    <span class="text-sm font-medium">启用计划任务</span>
-                </label>
+                <Checkbox
+                    checked={form.values.isActive}
+                    onCheckedChange={checked => {
+                        form.values.isActive = checked;
+                    }}
+                    label="启用计划任务"
+                />
                 <p class="ml-7 mt-1 text-xs text-muted-foreground">
                     启用后，此计划任务将自动执行。
                 </p>

@@ -5,7 +5,7 @@
     import { createAdminTicket, type UserSummary } from '$lib/api/admin/modules';
     import { httpErrorToHuman } from '$lib/api/http';
     import { navigate } from '$lib/router/router.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Select } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Alert from '$lib/components/Alert.svelte';
@@ -59,17 +59,13 @@
                 <p class="text-xs text-muted-foreground">工单的简短标题或说明，3–191 个字符。</p>
             </div>
             <div class="space-y-1.5">
-                <Label for="ticket-status">状态</Label>
-                <select
+                <Select
                     id="ticket-status"
+                    items={STATUS_OPTIONS}
                     bind:value={status}
                     disabled={saving}
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                >
-                    {#each STATUS_OPTIONS as option (option.value)}
-                        <option value={option.value}>{option.label}</option>
-                    {/each}
-                </select>
+                    label="状态"
+                />
                 <p class="text-xs text-muted-foreground">创建前可以先设置工单状态。</p>
             </div>
             <div>

@@ -4,7 +4,7 @@
     import { adminUserKeys, getAllRoles, type AdminUser, type UserValues } from '$lib/api/admin/users';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Select } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
     import Switch from '$lib/ui/Switch.svelte';
@@ -42,6 +42,18 @@
 
     const isSelf = $derived(user !== null && user.uuid === app.user?.uuid);
     const canGrant = $derived(Boolean(app.user?.rootAdmin));
+
+    /**
+     * The role the user already has is kept in the list even when the roles query does
+     * not return it, so the select still shows the current assignment.
+     */
+    const roleOptions = $derived([
+        { value: '', label: '无（普通用户）' },
+        ...(roles.data ?? []).map(role => ({ value: String(role.id), label: role.name })),
+        ...(user?.roleId && !roles.data?.some(r => r.id === user!.roleId)
+            ? [{ value: String(user.roleId), label: user.roleName ?? `#${user.roleId}` }]
+            : []),
+    ]);
     const canSave = $derived(app.can(user ? 'users.update' : 'users.create'));
 
     // User::$validationRules: username 1–191, email valid and ≤ 191, external id ≤ 191.
@@ -138,21 +150,13 @@
                 {#if isSelf && user?.rootAdmin}<p class="text-xs text-muted-foreground">不能在这里取消自己的 Root 权限。</p>{/if}
             </div>
             <div class="space-y-1.5">
-                <Label for="user-role">管理员角色</Label>
-                <select
+                <Select
                     id="user-role"
+                    items={roleOptions}
                     bind:value={roleId}
                     disabled={disabled || !canGrant || (canGrant && !roles.data)}
-                    class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50"
-                >
-                    <option value="">无（普通用户）</option>
-                    {#each roles.data ?? [] as role (role.id)}
-                        <option value={String(role.id)}>{role.name}</option>
-                    {/each}
-                    {#if user?.roleId && !roles.data?.some(r => r.id === user!.roleId)}
-                        <option value={String(user.roleId)}>{user.roleName ?? `#${user.roleId}`}</option>
-                    {/if}
-                </select>
+                    label="管理员角色"
+                />
                 {#if roles.error}
                     <p class="text-xs text-destructive">{httpErrorToHuman(roles.error)}</p>
                 {:else}

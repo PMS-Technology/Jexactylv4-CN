@@ -11,7 +11,7 @@
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
     import { router } from '$lib/router/router.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle, Spinner } from '$lib/ui';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Select, Spinner } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Switch from '$lib/ui/Switch.svelte';
     import Alert from '$lib/components/Alert.svelte';
@@ -64,6 +64,7 @@
     let modelsLoading = $state(false);
     let modelsError = $state('');
 
+    const providerOptions = $derived(providers.map(p => ({ value: p.id, label: p.label })));
     const currentProvider = $derived(providers.find(p => p.id === providerId) ?? null);
     const requiresKey = $derived(currentProvider?.requires_key ?? true);
     const configured = $derived(currentProvider?.configured ?? Boolean(ai.key));
@@ -104,8 +105,8 @@
         }
     }
 
-    async function selectProvider(event: Event) {
-        providerId = (event.currentTarget as HTMLSelectElement).value;
+    async function selectProvider(next: string) {
+        providerId = next;
         const provider = providers.find(p => p.id === providerId);
         selectedModel = provider?.default_model ?? '';
         baseUrl = '';
@@ -245,18 +246,14 @@
             <CardContent>
                 <form class="space-y-4 text-sm" onsubmit={saveKey}>
                     <div class="space-y-1.5">
-                        <label for="ai-provider-setup" class="text-sm font-medium">接口格式</label>
-                        <select
+                        <Select
                             id="ai-provider-setup"
+                            items={providerOptions}
                             bind:value={providerId}
-                            onchange={selectProvider}
+                            onValueChange={selectProvider}
                             disabled={!canUpdate || providersLoading}
-                            class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50"
-                        >
-                            {#each providers as provider (provider.id)}
-                                <option value={provider.id}>{provider.label}</option>
-                            {/each}
-                        </select>
+                            label="接口格式"
+                        />
                         <p class="text-xs text-muted-foreground">
                             驱动：{currentProvider?.driver ?? '—'} · 默认模型：{currentProvider?.default_model ?? '—'}
                         </p>
@@ -350,17 +347,13 @@
                     <Card>
                         <CardHeader><CardTitle class="flex items-center gap-2"><WandSparkles class="size-4" />接口格式</CardTitle></CardHeader>
                         <CardContent class="space-y-1.5">
-                            <select
+                            <Select
                                 aria-label="接口格式"
+                                items={providerOptions}
                                 bind:value={providerId}
-                                onchange={selectProvider}
+                                onValueChange={selectProvider}
                                 disabled={!canUpdate || providersLoading}
-                                class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-50"
-                            >
-                                {#each providers as provider (provider.id)}
-                                    <option value={provider.id}>{provider.label}</option>
-                                {/each}
-                            </select>
+                            />
                             <p class="text-xs text-muted-foreground">
                                 驱动：{currentProvider?.driver ?? '—'} · 路径：{currentProvider?.base_url || '默认'}
                             </p>

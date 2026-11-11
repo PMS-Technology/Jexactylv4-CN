@@ -4,7 +4,7 @@
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
     import { cn } from '$lib/utils/cn';
-    import { Button, Card, Spinner } from '$lib/ui';
+    import { Button, Card, Checkbox, Spinner } from '$lib/ui';
     import Alert from '$lib/components/Alert.svelte';
     import Link from '$lib/components/Link.svelte';
     import Pagination from '$lib/components/Pagination.svelte';
@@ -97,13 +97,11 @@
                 <thead class="border-b border-border text-left text-xs text-muted-foreground">
                     <tr>
                         <th scope="col" class="w-10 px-4 py-2">
-                            <input
-                                type="checkbox"
-                                class="size-4 accent-primary"
+                            <Checkbox
                                 aria-label="全选本页"
                                 checked={all}
                                 indeterminate={selected.length > 0 && !all}
-                                onchange={() => (selected = all ? [] : [...ids])}
+                                onCheckedChange={() => (selected = all ? [] : [...ids])}
                             />
                         </th>
                         <SortHeader {table} key="uuidShort" label="标识" />
@@ -118,12 +116,10 @@
                         {@const st = serverStatus(s.status)}
                         <tr>
                             <td class="px-4 py-3">
-                                <input
-                                    type="checkbox"
-                                    class="size-4 accent-primary"
+                                <Checkbox
                                     aria-label="选择 {s.name}"
                                     checked={selected.includes(s.id)}
-                                    onchange={() => (selected = selected.includes(s.id) ? selected.filter(i => i !== s.id) : [...selected, s.id])}
+                                    onCheckedChange={() => (selected = selected.includes(s.id) ? selected.filter(i => i !== s.id) : [...selected, s.id])}
                                 />
                             </td>
                             <td class="px-4 py-3 font-mono text-xs">{s.identifier}</td>
