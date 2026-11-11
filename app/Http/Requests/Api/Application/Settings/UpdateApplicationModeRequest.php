@@ -10,7 +10,10 @@ class UpdateApplicationModeRequest extends ApplicationApiRequest
     public function rules(): array
     {
         return [
-            'mode' => 'nullable|string|in:standard,personal',
+            // A missing mode used to be accepted and stored as an empty value, which
+            // left the panel without an active mode at all. Only a real mode is
+            // accepted now.
+            'mode' => 'required|string|in:standard,personal',
         ];
     }
 

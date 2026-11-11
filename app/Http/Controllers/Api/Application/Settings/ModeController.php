@@ -25,10 +25,16 @@ class ModeController extends ApplicationApiController
      */
     public function update(UpdateApplicationModeRequest $request): Response
     {
-        Setting::set('settings::app:mode', $request['mode']);
+        $mode = $request['mode'];
+
+        Setting::set('settings::app:mode', $mode);
+
+        // Keep the config in sync so the rest of this request already sees the new
+        // mode, even when the settings provider is disabled by the environment.
+        config(['app.mode' => $mode]);
 
         Activity::event('admin:settings:mode')
-            ->property('mode', $request['mode'])
+            ->property('mode', $mode)
             ->description('The panel mode was changed')
             ->log();
 
