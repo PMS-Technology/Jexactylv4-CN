@@ -16,6 +16,7 @@
     import MobileNavItem from '$lib/components/mobile-nav/MobileNavItem.svelte';
     import MobileNavDivider from '$lib/components/mobile-nav/MobileNavDivider.svelte';
     import MobileNavAction from '$lib/components/mobile-nav/MobileNavAction.svelte';
+    import { animateRouteChange } from '$lib/motion';
     import serverRoutes, { categoryLabels, serverRouteCategories } from './routes';
 
     let { id }: { id: string } = $props();
@@ -36,6 +37,14 @@
 
     const isIndex = $derived(router.pathname.replace(/\/+$/, '') === `/server/${id}`);
     const match = $derived(resolveRoute(visible, router.pathname, `/server/${id}`));
+
+    // The content area settles in whenever the route changes.
+    let main = $state<HTMLElement>();
+
+    $effect(() => {
+        const path = router.pathname;
+        if (main) animateRouteChange(main, path);
+    });
 
     const topRoutes = $derived(visible.filter(r => !r.category && r.name));
     const byCategory = $derived.by(() => {
@@ -174,7 +183,7 @@
         </div>
     </aside>
 
-    <main class="min-w-0 flex-1">
+    <main bind:this={main} class="min-w-0 flex-1">
         {#if store.loadError}
             <div class="p-6">
                 <Alert variant="destructive" title="无法加载服务器">{store.loadError}</Alert>

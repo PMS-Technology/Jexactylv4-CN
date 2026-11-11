@@ -73,6 +73,7 @@ export default defineConfig(({ command }) => ({
                     if (id.includes('bits-ui')) return 'vendor-bits';
                     if (id.includes('zod')) return 'vendor-zod';
                     if (id.includes('axios')) return 'vendor-http';
+                    if (id.includes('gsap')) return 'vendor-gsap';
 
                     return undefined;
                 },

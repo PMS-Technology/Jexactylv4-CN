@@ -8,6 +8,7 @@
     import Alert from '$lib/components/Alert.svelte';
     import Link from '$lib/components/Link.svelte';
     import Pagination from '$lib/components/Pagination.svelte';
+    import { stagger } from '$lib/motion/stagger';
     import { pill } from '../billing/labels';
     import SearchBox from '../shared/SearchBox.svelte';
     import SortHeader from '../shared/SortHeader.svelte';
@@ -112,7 +113,7 @@
                         <SortHeader {table} key="status" label="状态" />
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-border">
+                <tbody class="divide-y divide-border" use:stagger={{ selector: 'tr', distance: 6, step: 0.02 }}>
                     {#each servers.data.items as s (s.id)}
                         {@const st = serverStatus(s.status)}
                         <tr>

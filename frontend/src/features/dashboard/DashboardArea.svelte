@@ -5,6 +5,7 @@
     import RouteView from '$lib/router/RouteView.svelte';
     import { visibleRoutes } from '$lib/router/types';
     import { getLinks } from '$lib/api/links';
+    import { animateRouteChange } from '$lib/motion';
     import Sidebar from './Sidebar.svelte';
     import MobileSidebar from './MobileSidebar.svelte';
     import DashboardAlert from './components/DashboardAlert.svelte';
@@ -27,12 +28,20 @@
     // `/account`, matching the legacy URL layout.
     const isIndex = $derived(router.pathname.replace(/\/+$/, '') === '');
     const match = $derived(isIndex ? null : resolveRoute(routes, router.pathname, '/account'));
+
+    // The content area settles in whenever the route changes.
+    let main = $state<HTMLElement>();
+
+    $effect(() => {
+        const path = router.pathname;
+        if (main) animateRouteChange(main, path);
+    });
 </script>
 
 <div class="flex min-h-screen">
     <Sidebar links={linksQuery.data ?? []} />
 
-    <main class="min-w-0 flex-1">
+    <main bind:this={main} class="min-w-0 flex-1">
         <DashboardAlert />
         {#if isIndex}
             <ServersPage />

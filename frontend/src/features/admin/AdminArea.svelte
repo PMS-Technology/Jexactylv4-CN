@@ -12,6 +12,7 @@
     import MobileNav from '$lib/components/mobile-nav/MobileNav.svelte';
     import MobileNavItem from '$lib/components/mobile-nav/MobileNavItem.svelte';
     import MobileNavDivider from '$lib/components/mobile-nav/MobileNavDivider.svelte';
+    import { animateRouteChange } from '$lib/motion';
     import adminRoutes, { adminCategoryLabels, adminRouteCategories } from './routes';
 
     /**
@@ -61,6 +62,14 @@
             app.flags?.tickets.enabled && { text: '已启用工单系统', icon: Ticket },
         ].filter(Boolean) as { text: string; icon: typeof RefreshCw }[],
     );
+
+    // The content area settles in whenever the route changes.
+    let main = $state<HTMLElement>();
+
+    $effect(() => {
+        const path = router.pathname;
+        if (main) animateRouteChange(main, path);
+    });
 </script>
 
 <div class="flex min-h-screen">
@@ -128,7 +137,7 @@
         </div>
     </aside>
 
-    <main class="min-w-0 flex-1">
+    <main bind:this={main} class="min-w-0 flex-1">
         {#if servedLegacyPath}
             <div class="p-6">
                 <Alert variant="warning" title="此页面尚未迁移">

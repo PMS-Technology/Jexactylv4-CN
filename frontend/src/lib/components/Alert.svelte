@@ -2,6 +2,7 @@
     import type { Snippet } from 'svelte';
     import { AlertTriangle, CheckCircle2, Info, XCircle } from '@lucide/svelte';
     import { cn } from '$lib/utils/cn';
+    import { animateIn } from '$lib/motion';
 
     type Props = {
         variant?: 'info' | 'success' | 'warning' | 'destructive';
@@ -34,9 +35,18 @@
     } as const;
 
     const Icon = $derived(icons[variant]);
+
+    // Messages settle in rather than appearing out of nowhere; most of them are
+    // rendered the moment a request fails, so the fade carries the change.
+    let root = $state<HTMLElement>();
+
+    $effect(() => {
+        if (root) animateIn(root, { duration: 0.22, distance: 4 });
+    });
 </script>
 
 <div
+    bind:this={root}
     class={cn('flex gap-3 rounded-lg border p-4 text-sm', styles[variant], className)}
     role={variant === 'destructive' ? 'alert' : 'status'}
 >

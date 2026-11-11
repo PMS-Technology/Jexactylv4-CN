@@ -7,6 +7,7 @@
     import AdminArea from '$features/admin/AdminArea.svelte';
     import OnboardingDialog from '$features/dashboard/components/OnboardingDialog.svelte';
     import Spinner from '$lib/ui/Spinner.svelte';
+    import { preloadMotion } from '$lib/motion';
     import { authState } from '$features/auth/state.svelte';
 
     /**
@@ -51,6 +52,12 @@
 
     // Laravel only serves /admin to admins, but a client-side link can still land here.
     const isAdminPath = $derived(/^\/admin(\/|$)/.test(router.pathname) && app.isAdmin);
+
+    // Fetch the animation library once a signed-in user is in, so the first transition
+    // does not have to wait on the network.
+    $effect(() => {
+        if (app.user) preloadMotion();
+    });
 </script>
 
 {#if !app.initialized}

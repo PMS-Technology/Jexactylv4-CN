@@ -10,6 +10,7 @@
     import Avatar from '$lib/components/Avatar.svelte';
     import Link from '$lib/components/Link.svelte';
     import SearchModal from '$features/dashboard/components/SearchModal.svelte';
+    import { animateIn, animateOut } from '$lib/motion';
     import MobileNavAction from './MobileNavAction.svelte';
 
     /**
@@ -20,8 +21,8 @@
      * panel show the current scope (area, then server); the panel lists the area's
      * pages, the account, and utility rows ending with sign-out.
      *
-     * Like Vercel it opens and closes without animation. Escape, the button, the dimmed
-     * page, a navigation, or widening past `md` closes it and returns focus to the button.
+     * Escape, the button, the dimmed page, a navigation, or widening past `md` closes it
+     * and returns focus to the button.
      */
     type Area = 'dashboard' | 'admin' | 'server';
 
@@ -60,6 +61,48 @@
     ];
 
     const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(color:--mn-focus)';
+
+    /**
+     * The panel stays in the document while it animates out, so `shown` trails `open`
+     * by the length of the closing animation.
+     */
+    let shown = $state(false);
+    let backdrop = $state<HTMLElement | null>(null);
+    let panel = $state<HTMLElement | null>(null);
+
+    /** Invalidates a running animation when the menu is reopened. */
+    let token = 0;
+
+    $effect(() => {
+        if (!open) return;
+
+        shown = true;
+    });
+
+    // Runs once the panel is in the document. Reading the element references here is
+    // what makes the effect wait for them.
+    $effect(() => {
+        if (!open || !shown || !backdrop || !panel) return;
+
+        animateIn(backdrop, { duration: 0.2 });
+        animateIn(panel, { duration: 0.28, distance: 24 });
+    });
+
+    $effect(() => {
+        if (open || !shown) return;
+
+        const current = ++token;
+
+        void Promise.all([
+            animateOut(backdrop, { duration: 0.18 }),
+            animateOut(panel, { duration: 0.2 }),
+        ]).then(() => {
+            // The menu was reopened while it was closing; leave it alone.
+            if (current !== token) return;
+
+            shown = false;
+        });
+    });
 
     function close({ restoreFocus = true } = {}) {
         if (!open) return;
@@ -159,12 +202,20 @@
 <SearchModal bind:open={searchOpen} />
 
 <div bind:this={root} class="mn-theme md:hidden">
-    {#if open}
+    {#if shown}
         <!-- Tapping the dimmed page closes the menu; the keyboard equivalent is Escape. -->
         <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-        <div class="fixed inset-0 z-40 bg-(color:--mn-backdrop)" aria-hidden="true" onclick={() => close()}></div>
+        <div
+            bind:this={backdrop}
+            class="fixed inset-0 z-40 bg-(color:--mn-backdrop)"
+            aria-hidden="true"
+            onclick={() => close()}
+        ></div>
 
-        <div class="fixed inset-x-2 bottom-[calc(38px+env(safe-area-inset-bottom))] z-40 flex flex-col">
+        <div
+            bind:this={panel}
+            class="fixed inset-x-2 bottom-[calc(38px+env(safe-area-inset-bottom))] z-40 flex flex-col"
+        >
             <div class="flex min-w-0 gap-2 py-2">
                 <div
                     class="flex h-[38px] flex-none items-center rounded-full border border-(color:--mn-capsule-border)

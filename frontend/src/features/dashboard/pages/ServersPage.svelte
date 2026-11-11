@@ -10,6 +10,7 @@
     import ServerGroupDialog from '../components/ServerGroupDialog.svelte';
     import { Spinner } from '$lib/ui';
     import Alert from '$lib/components/Alert.svelte';
+    import { stagger } from '$lib/motion/stagger';
 
     let query = $state('');
     let showAll = $state(false);
@@ -105,7 +106,7 @@
             </p>
         </div>
     {:else}
-        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" use:stagger={{ distance: 10 }}>
             {#each servers as server (server.id)}
                 <ServerCard
                     {server}
