@@ -3,32 +3,48 @@
     import * as echarts from 'echarts';
     import { ArrowDownToLine, ArrowUpFromLine } from '@lucide/svelte';
     import { theme } from '$lib/stores/theme.svelte';
-    import { app } from '$lib/stores/app.svelte';
     import type { ServerStore } from '$lib/stores/server.svelte';
     import { SocketEvent, type SocketStats } from '$lib/api/definitions/events';
     import { websocketEvent } from '$lib/stores/server.svelte';
     import { bytesToString } from '$lib/utils/format';
+    import { SegmentedRadio } from '$lib/ui';
 
     /**
      * CPU / memory / network sparklines, ported from StatGraphs.tsx. The legacy
      * implementation kept a 20-slot Chart.js window pre-filled with -5 (values below the
      * axis floor so the line rises in from the bottom); this reproduces the same visual
      * with ECharts, which the new bundle already ships.
+     *
+     * The three resources share one chart with a segmented control above it, rather
+     * than being stacked in three separate cards: they are the same chart over
+     * different metrics, so showing one at a time keeps the rail short and lets the
+     * plot have room to breathe. The control carries the live value of each resource,
+     * so the current number is visible without switching.
+     *
+     * The series colours come from the chart tokens in `app.css`, not from the
+     * administrator's brand colour: a brand hue is a single colour and cannot be
+     * told apart from another series on the same chart.
      */
     let { store }: { store: ServerStore } = $props();
 
     const SLOTS = 20;
-    const PRIMARY = app.theme?.colors?.primary ?? '#38bdf8';
-    const CYAN = '#22d3ee';
+
+    /**
+     * The series colours are read from the CSS so they follow the light and dark
+     * surfaces; the chart is drawn on a canvas, so it cannot use the classes
+     * directly. The values mirror `--color-chart-1` and `--color-chart-2`.
+     */
+    const SERIES = {
+        light: { one: '#2a78d6', two: '#eb6834', grid: '#e1e0d9', axis: '#71717b' },
+        dark: { one: '#3987e5', two: '#c94a1c', grid: '#2c2c2a', axis: '#9f9fa9' },
+    };
+
+    const palette = $derived(theme.resolved === 'dark' ? SERIES.dark : SERIES.light);
 
     // Unlike Chart.js (which clips values below the axis floor), ECharts expands the
     // axis to include negative points and renders the area under zero — so empty
     // windows are null-filled instead of the legacy -5 trick.
     const empty = () => Array(SLOTS).fill(null) as (number | null)[];
-
-    let cpuEl: HTMLDivElement;
-    let memoryEl: HTMLDivElement;
-    let networkEl: HTMLDivElement;
 
     let cpu = $state<(number | null)[]>(empty());
     let memory = $state<(number | null)[]>(empty());
@@ -71,8 +87,60 @@
         }
     });
 
+    /** The value a series shows at its most recent slot, for the control's labels. */
+    const latest = (data: (number | null)[]): number | null => {
+        for (let i = data.length - 1; i >= 0; i--) {
+            const value = data[i];
+            if (value !== null && value !== undefined) return value;
+        }
+
+        return null;
+    };
+
+    const cpuLatest = $derived(latest(cpu));
+    const memoryLatest = $derived(latest(memory));
+    const inLatest = $derived(latest(networkIn));
+    const outLatest = $derived(latest(networkOut));
+
+    /**
+     * The resources the control switches between. The control names the resource;
+     * the live value is the headline above the chart, so the number is read without
+     * having to interpret a label that has to fit a narrow segment.
+     */
+    const resources = [
+        { value: 'cpu', label: 'CPU' },
+        { value: 'memory', label: '内存' },
+        { value: 'network', label: '网络' },
+    ];
+
+    let active = $state('cpu');
+
+    let chartEl: HTMLDivElement | undefined = $state();
+    let chart = $state<echarts.ECharts | undefined>(undefined);
+
+    onMount(() => {
+        const el = chartEl;
+        if (!el) return;
+
+        const instance = echarts.init(el);
+        chart = instance;
+
+        const observer = new ResizeObserver(() => instance.resize());
+        observer.observe(el);
+
+        const onResize = () => instance.resize();
+        window.addEventListener('resize', onResize);
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('resize', onResize);
+            instance.dispose();
+            if (chart === instance) chart = undefined;
+        };
+    });
+
     function makeOption(
-        series: { data: (number | null)[]; color: string; fillOpacity?: number }[],
+        series: { data: (number | null)[]; color: string }[],
         yMax?: number,
         tick?: (v: number) => string,
     ) {
@@ -90,12 +158,12 @@
                 axisLabel: {
                     show: true,
                     fontSize: 10,
-                    color: theme.resolved === 'dark' ? '#94a3b8' : '#64748b',
+                    color: palette.axis,
                     formatter: (value: number) => (tick ? tick(value) : bytesToString(value, 1)),
                 },
                 splitLine: {
                     show: true,
-                    lineStyle: { color: theme.resolved === 'dark' ? '#1e293b' : '#e2e8f0' },
+                    lineStyle: { color: palette.grid },
                 },
             },
             series: series.map(s => ({
@@ -103,84 +171,102 @@
                 data: s.data,
                 smooth: 0.15,
                 showSymbol: false,
-                lineStyle: { width: 1.5, color: s.color },
+                lineStyle: { width: 2, color: s.color },
                 itemStyle: { color: s.color },
-                areaStyle: s.fillOpacity ? { opacity: s.fillOpacity } : undefined,
+                areaStyle: { opacity: 0.14 },
             })),
         };
     }
 
-    let cpuChart: echarts.ECharts;
-    let memoryChart: echarts.ECharts;
-    let networkChart: echarts.ECharts;
-
-    onMount(() => {
-        cpuChart = echarts.init(cpuEl);
-        memoryChart = echarts.init(memoryEl);
-        networkChart = echarts.init(networkEl);
-
-        const observer = new ResizeObserver(() => {
-            cpuChart?.resize();
-            memoryChart?.resize();
-            networkChart?.resize();
-        });
-        observer.observe(cpuEl);
-        observer.observe(memoryEl);
-        observer.observe(networkEl);
-
-        return () => {
-            observer.disconnect();
-            cpuChart?.dispose();
-            memoryChart?.dispose();
-            networkChart?.dispose();
-        };
-    });
-
+    // The option follows the selected resource: one series for CPU and memory, two for
+    // the network, which share a unit and so share an axis.
     $effect(() => {
-        cpuChart?.setOption(makeOption([{ data: cpu, color: PRIMARY, fillOpacity: 0.5 }], store.server?.limits.cpu, v => `${v}%`));
-    });
+        const instance = chart;
+        if (!instance) return;
 
-    $effect(() => {
-        memoryChart?.setOption(
-            makeOption([{ data: memory, color: PRIMARY, fillOpacity: 0.5 }], store.server?.limits.memory, v => `${v} MiB`),
-        );
+        if (active === 'cpu') {
+            instance.setOption(
+                makeOption([{ data: cpu, color: palette.one }], store.server?.limits.cpu || undefined, v => `${v}%`),
+                true,
+            );
+        } else if (active === 'memory') {
+            instance.setOption(
+                makeOption(
+                    [{ data: memory, color: palette.one }],
+                    store.server?.limits.memory || undefined,
+                    v => `${v} MiB`,
+                ),
+                true,
+            );
+        } else {
+            instance.setOption(
+                makeOption(
+                    [
+                        { data: networkIn, color: palette.one },
+                        { data: networkOut, color: palette.two },
+                    ],
+                    undefined,
+                    value => bytesToString(value, 1),
+                ),
+                true,
+            );
+        }
     });
-
-    $effect(() => {
-        networkChart?.setOption(
-            makeOption(
-                [
-                    { data: networkIn, color: CYAN, fillOpacity: 0.5 },
-                    { data: networkOut, color: PRIMARY, fillOpacity: 0.5 },
-                ],
-                undefined,
-                value => bytesToString(value, 1),
-            ),
-        );
-    });
-
-    const blockTitle = 'flex items-center justify-between px-4 pt-3 pb-1';
 </script>
 
-<div class="grid gap-2">
-    <div class="rounded-lg border border-border bg-card">
-        <div class={blockTitle}><h3 class="text-xs font-semibold text-muted-foreground">CPU</h3></div>
-        <div bind:this={cpuEl} class="h-20 w-full"></div>
+<div class="flex w-full flex-col rounded-lg border border-border bg-card p-3">
+    <SegmentedRadio
+        items={resources}
+        bind:value={active}
+        columns={3}
+        class="mb-3"
+        itemClass="px-1 text-2xs whitespace-nowrap"
+        aria-label="资源"
+    />
+
+    <!-- The live value of the selected resource. It is the number the chart is
+         about, so it is the headline rather than an axis label. -->
+    <div class="mb-1 flex items-baseline gap-2 px-1">
+        <span class="font-header text-lg font-semibold">
+            {#if active === 'cpu'}
+                {cpuLatest !== null ? `${cpuLatest}%` : '—'}
+            {:else if active === 'memory'}
+                {memoryLatest !== null ? `${memoryLatest} MiB` : '—'}
+            {:else}
+                <span class="text-base font-medium">网络</span>
+            {/if}
+        </span>
+        <span class="text-2xs text-muted-foreground">
+            {#if active === 'cpu'}
+                最近 20 次采样
+            {:else if active === 'memory'}
+                最近 20 次采样
+            {:else}
+                最近 20 次采样的增量
+            {/if}
+        </span>
     </div>
 
-    <div class="rounded-lg border border-border bg-card">
-        <div class={blockTitle}><h3 class="text-xs font-semibold text-muted-foreground">内存</h3></div>
-        <div bind:this={memoryEl} class="h-20 w-full"></div>
-    </div>
-
-    <div class="rounded-lg border border-border bg-card">
-        <div class={blockTitle}>
-            <h3 class="text-xs font-semibold text-muted-foreground">网络</h3>
-            <p class="flex items-center gap-2 text-muted-foreground">
-                <ArrowDownToLine class="size-3.5 text-cyan-400" aria-label="入站" />
-                <ArrowUpFromLine class="size-3.5 text-primary" aria-label="出站" />
-            </p>
+    {#if active === 'network'}
+        <!-- Two series, so the legend is always present; it carries the live value of
+             each series, which is the direct label. -->
+        <div class="flex items-center gap-3 px-1 pb-1">
+            <span class="inline-flex items-center gap-1.5 text-2xs text-muted-foreground">
+                <ArrowDownToLine class="size-3.5" color={palette.one} aria-hidden="true" />
+                入站
+                <span class="font-medium text-foreground">
+                    {inLatest !== null ? bytesToString(inLatest, 1) : '—'}
+                </span>
+            </span>
+            <span class="inline-flex items-center gap-1.5 text-2xs text-muted-foreground">
+                <ArrowUpFromLine class="size-3.5" color={palette.two} aria-hidden="true" />
+                出站
+                <span class="font-medium text-foreground">
+                    {outLatest !== null ? bytesToString(outLatest, 1) : '—'}
+                </span>
+            </span>
         </div>
-        <div bind:this={networkEl} class="h-20 w-full"></div>
-    </div>
+    {/if}
+
+    <div bind:this={chartEl} class="min-h-24 w-full flex-1"></div>
 </div>

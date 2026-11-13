@@ -1,7 +1,7 @@
 <script lang="ts">
     import { createQuery } from '@tanstack/svelte-query';
     import { ShoppingBag } from '@lucide/svelte';
-    import { billingKeys, getCategories, getProducts } from '$lib/api/billing';
+    import { billingKeys, getCategories, getPaymentMethods, getProducts } from '$lib/api/billing';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
     import { cn } from '$lib/utils/cn';
@@ -12,12 +12,18 @@
     import StoreUnavailable from './components/StoreUnavailable.svelte';
     import { formatMoney } from './money';
 
-    const configured = $derived(Boolean(app.flags?.billing.keys.secret));
+    // The ways the customer can pay. Without one of them the checkout cannot be
+    // completed, so the store is not shown at all.
+    const methodsQuery = createQuery(() => ({
+        queryKey: billingKeys.paymentMethods,
+        queryFn: getPaymentMethods,
+    }));
+    const configured = $derived(methodsQuery.isSuccess && methodsQuery.data.length > 0);
 
     const categoriesQuery = createQuery(() => ({
         queryKey: billingKeys.categories,
         queryFn: getCategories,
-        enabled: configured,
+        enabled: methodsQuery.isSuccess,
     }));
 
     let selected = $state<number | null>(null);
@@ -27,7 +33,7 @@
     const productsQuery = createQuery(() => ({
         queryKey: billingKeys.products(categoryId ?? 0),
         queryFn: () => getProducts(categoryId!),
-        enabled: configured && categoryId !== null,
+        enabled: methodsQuery.isSuccess && categoryId !== null,
     }));
 </script>
 
@@ -35,7 +41,9 @@
     <title>订购服务 | {app.settings?.name ?? 'Panel'}</title>
 </svelte:head>
 
-{#if !configured}
+{#if methodsQuery.isPending}
+    <Spinner centered />
+{:else if !configured}
     <StoreUnavailable />
 {:else}
     <div class="mx-auto max-w-7xl p-6 lg:p-8">

@@ -3,10 +3,11 @@
     import { ArrowLeft, ShoppingBag } from '@lucide/svelte';
     import type { ServerStore } from '$lib/stores/server.svelte';
     import type { Product } from '$lib/api/definitions/billing';
-    import { getUpgradeCharge, getUpgradeOptions, processUpgrade } from '$lib/api/billing';
+    import { getUpgradeCharge, getUpgradeOptions, getPaymentMethods, processUpgrade, billingKeys } from '$lib/api/billing';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
     import { formatMoney } from '$features/dashboard/billing/money';
+    import PaymentMethodPicker from '$features/dashboard/billing/components/PaymentMethodPicker.svelte';
     import ProductLimits from '$features/dashboard/billing/components/ProductLimits.svelte';
     import { Button, buttonVariants, Card, Spinner } from '$lib/ui';
     import Dialog from '$lib/ui/dialog/Dialog.svelte';
@@ -44,6 +45,18 @@
     let submitting = $state(false);
     let submitError = $state('');
 
+    // The ways the customer can pay for the difference.
+    const methodsQuery = createQuery(() => ({
+        queryKey: billingKeys.paymentMethods,
+        queryFn: getPaymentMethods,
+        retry: false,
+    }));
+    const methods = $derived(methodsQuery.data ?? []);
+
+    let choice = $state<string | null>(null);
+    // The first method is preselected, the way the node list picks its first entry.
+    const method = $derived(methods.find(m => m.identifier === choice) ?? methods[0] ?? null);
+
     function configure(product: Product) {
         selected = product;
         submitError = '';
@@ -51,12 +64,12 @@
     }
 
     async function submit() {
-        if (!selected || submitting) return;
+        if (!selected || submitting || !method) return;
 
         submitting = true;
         submitError = '';
         try {
-            window.location.assign(await processUpgrade(server.uuid, selected.id));
+            window.location.assign(await processUpgrade(server.uuid, selected.id, method.identifier));
         } catch (e) {
             submitError = httpErrorToHuman(e);
             submitting = false;
@@ -139,12 +152,27 @@
                     从 {server.renewalDate.toLocaleDateString()} 起，续期费用将变为 {formatMoney(selected.price)} / 月。
                 </p>
             {/if}
+
+            <div class="space-y-1.5 border-t border-border pt-4">
+                <p class="font-medium">支付方式</p>
+                {#if methodsQuery.isPending}
+                    <Spinner centered />
+                {:else if !methods.length}
+                    <Alert variant="destructive">目前没有可用的支付方式，请联系管理员。</Alert>
+                {:else}
+                    <PaymentMethodPicker
+                        {methods}
+                        value={method?.identifier ?? null}
+                        onChange={identifier => (choice = identifier)}
+                    />
+                {/if}
+            </div>
         </div>
 
         {#snippet footer()}
             <Button variant="ghost" size="sm" disabled={submitting} onclick={() => (open = false)}>取消</Button>
-            <!-- A zero charge means no time is left in the cycle; Stripe rejects a 0 amount. -->
-            <Button size="sm" loading={submitting} disabled={!charge.data} onclick={submit}>立即升级</Button>
+            <!-- A zero charge means no time is left in the cycle; the gateway rejects a 0 amount. -->
+            <Button size="sm" loading={submitting} disabled={!charge.data || !method} onclick={submit}>立即升级</Button>
         {/snippet}
     </Dialog>
 {/if}

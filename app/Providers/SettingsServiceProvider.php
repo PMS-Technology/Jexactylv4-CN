@@ -62,6 +62,29 @@ class SettingsServiceProvider extends ServiceProvider
         'modules:billing:renewal:threshold',
         'modules:billing:allow_upgrades',
 
+        // Payment channel settings. Several channels can be set up at the same time;
+        // the credentials of each are stored, so a payment method can point at any of
+        // them.
+
+        'modules:billing:channels:stripe:secret',
+        'modules:billing:channels:epay:pid',
+        'modules:billing:channels:epay:key',
+        'modules:billing:channels:epay:gateway_url',
+        'modules:billing:channels:creem:api_key',
+        'modules:billing:channels:creem:webhook_secret',
+        'modules:billing:channels:creem:base_url',
+        'modules:billing:channels:waffo:api_key',
+        'modules:billing:channels:waffo:merchant_id',
+        'modules:billing:channels:waffo:private_key',
+        'modules:billing:channels:waffo:public_key',
+        'modules:billing:channels:waffo:base_url',
+        'modules:billing:channels:waffo_pancake:api_key',
+        'modules:billing:channels:waffo_pancake:merchant_id',
+        'modules:billing:channels:waffo_pancake:private_key',
+        'modules:billing:channels:waffo_pancake:public_key',
+        'modules:billing:channels:waffo_pancake:base_url',
+        'modules:billing:channels:waffo_pancake:currency',
+
         // Ticket module settings
         'modules:tickets:enabled',
         'modules:tickets:max_count',

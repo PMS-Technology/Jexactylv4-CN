@@ -1,9 +1,10 @@
 <script lang="ts">
     import { ArrowUpDown, ArrowLeftRight, CircleDollarSign, Download, Gavel, KeyRound, Power, Upload } from '@lucide/svelte';
     import { useQueryClient } from '@tanstack/svelte-query';
-    import { adminBillingKeys, deleteStripeKeys, exportBillingConfig, updateBillingSetting } from '$lib/api/admin/billing';
+    import { adminBillingKeys, exportBillingConfig, updateBillingSetting } from '$lib/api/admin/billing';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
+    import { navigate } from '$lib/router/router.svelte';
     import { Button, Card, CardContent, CardHeader, CardTitle, Select } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
@@ -11,7 +12,6 @@
     import Alert from '$lib/components/Alert.svelte';
     import { currencies } from '../currency';
     import ImportConfigDialog from './ImportConfigDialog.svelte';
-    import StripeKeyDialog from './StripeKeyDialog.svelte';
 
     /**
      * Billing settings, ported from SettingsContainer.tsx and BillingLinksForm.tsx. The
@@ -86,15 +86,8 @@
         );
     };
 
-    let stripeOpen = $state(false);
-    let resetKeysOpen = $state(false);
     let importOpen = $state(false);
     let disableOpen = $state(false);
-
-    const resetKeys = async () => {
-        await deleteStripeKeys();
-        patch({ keys: { secret: false } });
-    };
 
     const disable = async () => {
         await updateBillingSetting('enabled', false);
@@ -102,7 +95,6 @@
     };
 </script>
 
-<StripeKeyDialog bind:open={stripeOpen} />
 <ImportConfigDialog
     bind:open={importOpen}
     onImported={() => {
@@ -110,9 +102,6 @@
         void queryClient.invalidateQueries({ queryKey: adminBillingKeys.all });
     }}
 />
-<ConfirmDialog bind:open={resetKeysOpen} title="删除 Stripe API 密钥" confirmLabel="删除密钥" onConfirm={resetKeys}>
-    删除后，购买和续费等所有计费功能都会停止工作，直到重新填写新的密钥。确定继续吗？
-</ConfirmDialog>
 <ConfirmDialog bind:open={disableOpen} title="停用计费模块" confirmLabel="停用" onConfirm={disable}>
     停用后，用户无法购买或续费服务器。请确认这不会影响到你的用户。已有的商品、订单和设置会保留。
 </ConfirmDialog>
@@ -172,19 +161,15 @@
     </Card>
 
     <Card>
-        <CardHeader><CardTitle class="flex items-center gap-2"><KeyRound class="size-4" />Stripe API 密钥</CardTitle></CardHeader>
+        <CardHeader><CardTitle class="flex items-center gap-2"><KeyRound class="size-4" />支付渠道</CardTitle></CardHeader>
         <CardContent class="space-y-3 text-sm">
-            {#if !billing.keys.secret}
-                <p class="text-muted-foreground">没有 Stripe API 密钥时计费系统无法工作。用户可以进入结账页面，但在填写有效密钥之前都会报错。</p>
-                {#if app.can('billing.update')}
-                    <div class="text-right"><Button size="sm" onclick={() => (stripeOpen = true)}>填写 API 密钥</Button></div>
-                {/if}
-            {:else}
-                <p class="text-muted-foreground">已保存 Stripe Secret Key。删除后，所有计费功能（例如购买或续费）都会停止，直到填写新的密钥。</p>
-                {#if app.can('billing.delete-keys')}
-                    <div class="text-right"><Button variant="destructive" size="sm" onclick={() => (resetKeysOpen = true)}>删除 API 密钥</Button></div>
-                {/if}
-            {/if}
+            <p class="text-muted-foreground">
+                收款渠道的凭证在“支付渠道”标签页里配置，用户在下单时选择的支付方式决定走哪一个渠道。
+            </p>
+            <div class="flex flex-wrap justify-end gap-2">
+                <Button variant="outline" size="sm" onclick={() => navigate('/admin/billing/channels')}>打开支付渠道</Button>
+                <Button variant="outline" size="sm" onclick={() => navigate('/admin/billing/methods')}>管理支付方式</Button>
+            </div>
         </CardContent>
     </Card>
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Banknote, CalendarDays, CircleDollarSign, Cog, FileText, LayoutGrid, Monitor, ShoppingCart, XCircle } from '@lucide/svelte';
+    import { Banknote, CalendarDays, CircleDollarSign, Cog, CreditCard, FileText, LayoutGrid, Monitor, ShoppingCart, Wallet, XCircle } from '@lucide/svelte';
     import { updateBillingSetting } from '$lib/api/admin/billing';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
@@ -18,6 +18,8 @@
     import ExceptionsTab from './ExceptionsTab.svelte';
     import RenewalTab from './RenewalTab.svelte';
     import DiscountCodesTab from './discounts/DiscountCodesTab.svelte';
+    import ChannelsPage from './channels/ChannelsPage.svelte';
+    import MethodsPage from './methods/MethodsPage.svelte';
     import SettingsTab from './settings/SettingsTab.svelte';
 
     /**
@@ -38,6 +40,8 @@
             { path: 'exceptions', name: '异常', icon: XCircle, permission: 'billing.exceptions' },
             { path: 'renewal-dates', name: '续期', icon: CalendarDays, permission: 'billing.read' },
             { path: 'discount-codes', name: '优惠码', icon: CircleDollarSign, permission: 'billing.discount-codes' },
+            { path: 'channels', name: '支付渠道', icon: CreditCard, permission: 'billing.read' },
+            { path: 'methods', name: '支付方式', icon: Wallet, permission: 'billing.read' },
             { path: 'settings', name: '设置', icon: Cog, permission: 'billing.read' },
         ].filter(tab => app.can(tab.permission)),
     );
@@ -123,6 +127,10 @@
             <RenewalTab />
         {:else if sub === 'discount-codes'}
             <DiscountCodesTab />
+        {:else if sub === 'channels'}
+            <ChannelsPage />
+        {:else if sub === 'methods'}
+            <MethodsPage />
         {:else if sub === 'settings'}
             <SettingsTab />
         {:else}

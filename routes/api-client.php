@@ -90,6 +90,9 @@ Route::prefix('/')->middleware([SuspendedAccount::class])->group(function () {
         // Discount code checking
         Route::post('/discount-codes', [Client\Billing\DiscountCodeController::class, 'index']);
 
+        // The payment methods the customer can choose from at checkout
+        Route::get('/payment-methods', [Client\Billing\StoreController::class, 'paymentMethods']);
+
         // Viewing of available categories/products
         Route::get('/categories/{category:id}', [Client\Billing\StoreController::class, 'products']);
         Route::get('/products/{product:id}', [Client\Billing\StoreController::class, 'product']);
@@ -102,8 +105,8 @@ Route::prefix('/')->middleware([SuspendedAccount::class])->group(function () {
         Route::get('/orders/{order:id}/invoice', [Client\Billing\OrderController::class, 'invoice']);
 
         // Billing controllers and services
-        Route::post('/stripe/create', [Client\Billing\StripeController::class, 'create']);
-        Route::post('/stripe/process', [Client\Billing\StripeController::class, 'process']);
+        Route::post('/checkout/create', [Client\Billing\CheckoutController::class, 'create']);
+        Route::post('/checkout/process', [Client\Billing\CheckoutController::class, 'process']);
 
         Route::post('/free/process', [Client\Billing\FreeProductController::class, 'process']);
     });

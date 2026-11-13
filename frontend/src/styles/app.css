@@ -3,10 +3,19 @@
 /**
  * Design tokens.
  *
- * The panel ships a server-driven theme (window.ThemeConfiguration) that supplies a
- * background colour and accent. Those are applied at runtime onto the `--background`
- * and `--primary` variables by $lib/stores/theme.svelte.ts, so the values below are
- * the defaults used before the server theme is applied and whenever it is unset.
+ * The panel ships a server-driven theme (window.ThemeConfiguration) that carries the
+ * administrator's brand colour. It is applied at runtime onto the `--brand` variable
+ * by $lib/stores/theme.svelte.ts, and everything accent-shaped is derived from it
+ * here: `--primary` is the brand at a fixed lightness per mode, so the colour the
+ * administrator picked is the colour that shows up, and the foreground on top of it
+ * is a constant (white in light mode, near-black in dark mode) rather than something
+ * that has to be computed per colour.
+ *
+ * The lightness is fixed rather than carried over from the picked colour because a
+ * free lightness cannot be guaranteed readable: the brand has to work as a fill
+ * under a fixed foreground, as text on every surface, and as text on its own 15%
+ * tint. Pinning it per mode makes all three hold for every colour an administrator
+ * can pick. The values below are the defaults used before the server theme arrives.
  */
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -21,6 +30,18 @@
 
 @layer base {
     :root {
+        /* The administrator's brand colour. The theme store writes the real value onto
+           the document element before the first paint; this is the fallback for when
+           the server has nothing to say. */
+        --brand: #16a34a;
+    }
+
+    /* The surface tokens are also exposed as classes so the theme editor can show
+       both modes side by side: `.surface-light` and `.surface-dark` replay one of the
+       two token sets inside a subtree, while the document itself keeps using the
+       `dark` class on the root element. */
+    :root,
+    .surface-light {
         --background: oklch(1 0 0);
         --foreground: oklch(0.141 0.005 285.823);
 
@@ -30,8 +51,13 @@
         --popover: oklch(1 0 0);
         --popover-foreground: oklch(0.141 0.005 285.823);
 
-        --primary: oklch(0.21 0.006 285.885);
-        --primary-foreground: oklch(0.985 0 0);
+        /* The brand at the lightness the light surfaces need: dark enough for white
+           text on top of it and for the colour itself to read as text on white.
+           It also has to sit clear of the status colours, which are lighter than
+           this, so that a brand that happens to be green, red or orange does not
+           read as the matching status. */
+        --primary: oklch(from var(--brand) 0.36 c h);
+        --primary-foreground: oklch(1 0 0);
 
         --secondary: oklch(0.967 0.001 286.375);
         --secondary-foreground: oklch(0.21 0.006 285.885);
@@ -43,10 +69,10 @@
         --accent-foreground: oklch(0.21 0.006 285.885);
 
         --destructive: oklch(0.577 0.245 27.325);
-        --destructive-foreground: oklch(0.985 0 0);
+        --destructive-foreground: oklch(1 0 0);
 
         --success: oklch(0.596 0.145 163.225);
-        --success-foreground: oklch(0.985 0 0);
+        --success-foreground: oklch(0.141 0.005 285.823);
 
         --warning: oklch(0.769 0.158 70.08);
         --warning-foreground: oklch(0.21 0.006 285.885);
@@ -62,7 +88,8 @@
         --radius: 0.625rem;
     }
 
-    .dark {
+    .dark,
+    .surface-dark {
         --background: oklch(0.141 0.005 285.823);
         --foreground: oklch(0.985 0 0);
 
@@ -72,8 +99,10 @@
         --popover: oklch(0.21 0.006 285.885);
         --popover-foreground: oklch(0.985 0 0);
 
-        --primary: oklch(0.92 0.004 286.32);
-        --primary-foreground: oklch(0.21 0.006 285.885);
+        /* The dark surfaces need a light brand, and a light brand needs dark text on
+           top of it — the same colour cannot serve both modes. */
+        --primary: oklch(from var(--brand) 0.92 c h);
+        --primary-foreground: oklch(0.141 0.005 285.823);
 
         --secondary: oklch(0.274 0.006 286.033);
         --secondary-foreground: oklch(0.985 0 0);
@@ -84,13 +113,17 @@
         --accent: oklch(0.274 0.006 286.033);
         --accent-foreground: oklch(0.985 0 0);
 
-        --destructive: oklch(0.704 0.191 22.216);
-        --destructive-foreground: oklch(0.985 0 0);
+        /* The status colours sit a step away from the brand colour, so that a brand
+           that happens to be green, red or orange does not read as the matching
+           status. The dark brand is light, so the status colours are pulled down to
+           keep the two apart; they stay light enough to read on the dark surfaces. */
+        --destructive: oklch(0.6 0.191 22.216);
+        --destructive-foreground: oklch(0.141 0.005 285.823);
 
-        --success: oklch(0.696 0.17 162.48);
+        --success: oklch(0.64 0.17 162.48);
         --success-foreground: oklch(0.141 0.005 285.823);
 
-        --warning: oklch(0.828 0.189 84.429);
+        --warning: oklch(0.58 0.189 84.429);
         --warning-foreground: oklch(0.141 0.005 285.823);
 
         --border: oklch(1 0 0 / 10%);
@@ -101,6 +134,38 @@
         --sidebar-foreground: oklch(0.985 0 0);
         --sidebar-border: oklch(1 0 0 / 10%);
     }
+}
+
+/**
+ * Chart series colours.
+ *
+ * These are a fixed categorical pair rather than the admin's brand colour: a chart
+ * series has to be told apart from the other series on the same chart, and the
+ * brand colour is a single hue that an administrator can pick freely, so it cannot
+ * carry that job. Both steps were chosen for their own surface — the dark pair is
+ * not the light pair inverted — and the pair clears the colour-vision separation
+ * and contrast checks against the card background in both modes.
+ *
+ * The pair is also kept clear of the brand colour the administrator picks, so that
+ * a brand that happens to be blue or orange does not read as a chart series. That
+ * is what pulls the dark orange down a step: the dark brand colour is light, and a
+ * light orange brand and a light orange series would be the same colour.
+ *
+ * `--chart-grid` is the hairline the gridlines are drawn in: one shade off the
+ * surface, so the grid recedes behind the data.
+ */
+@theme {
+    --color-chart-1: #2a78d6;
+    --color-chart-2: #eb6834;
+
+    --chart-grid: #e1e0d9;
+}
+
+.dark {
+    --color-chart-1: #3987e5;
+    --color-chart-2: #c94a1c;
+
+    --chart-grid: #2c2c2a;
 }
 
 @theme inline {

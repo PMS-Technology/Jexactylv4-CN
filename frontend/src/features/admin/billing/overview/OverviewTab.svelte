@@ -10,7 +10,6 @@
     import Alert from '$lib/components/Alert.svelte';
     import Link from '$lib/components/Link.svelte';
     import { formatMoney } from '$features/dashboard/billing/money';
-    import StripeKeyDialog from '../settings/StripeKeyDialog.svelte';
 
     /**
      * Billing overview, ported from overview/OverviewContainer.tsx, SuccessChart.tsx and
@@ -36,7 +35,6 @@
     /** The select works in strings; the chart maths want a number of days. */
     let history = $state('14');
     const historyDays = $derived(Number(history));
-    let stripeOpen = $state(false);
 
     const stats = $derived.by(() => {
         const orders = analytics.data?.orders;
@@ -78,11 +76,14 @@
     const conversion = $derived(stats && stats.total ? `${((stats.processed / stats.total) * 100).toFixed(1)}%` : '—');
     const hasProducts = $derived((analytics.data?.productCount ?? 0) > 0);
     const hasOrders = $derived((analytics.data?.orders.length ?? 0) > 0);
+    // The methods the storefront can offer: a method whose channel is not configured
+    // does not count, because the checkout could not be completed with it.
+    const hasPaymentMethods = $derived((billing.payment_methods?.length ?? 0) > 0);
 
     const steps = $derived([
         { label: '启用计费模块', done: true, href: null },
         { label: '添加第一个商品', done: hasProducts, href: '/admin/billing/categories' },
-        { label: '填写 Stripe API 密钥', done: billing.keys.secret, href: '/admin/billing/settings' },
+        { label: '配置支付方式', done: hasPaymentMethods, href: '/admin/billing/methods' },
         { label: '完成第一笔订单', done: hasOrders, href: '/admin/billing/orders' },
     ]);
     const nextStep = $derived(steps.findIndex(s => !s.done));
@@ -91,14 +92,12 @@
     let tableOpen = $state(false);
 </script>
 
-<StripeKeyDialog bind:open={stripeOpen} />
-
-{#if !billing.keys.secret}
-    <Alert variant="warning" title="还没有配置 Stripe" class="mb-4">
+{#if !hasPaymentMethods}
+    <Alert variant="warning" title="还没有可用的支付方式" class="mb-4">
         <div class="flex flex-wrap items-center justify-between gap-3">
-            <span>在填写 Stripe API 密钥之前，用户可以浏览商店，但无法完成付款。</span>
+            <span>在配置支付渠道和支付方式之前，用户可以浏览商店，但无法完成付款。</span>
             {#if app.can('billing.update')}
-                <Button size="sm" onclick={() => (stripeOpen = true)}>填写密钥</Button>
+                <Button size="sm" href="/admin/billing/methods">配置支付方式</Button>
             {/if}
         </div>
     </Alert>

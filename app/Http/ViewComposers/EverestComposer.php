@@ -3,6 +3,9 @@
 namespace Everest\Http\ViewComposers;
 
 use Illuminate\View\View;
+use Illuminate\Database\QueryException;
+use Everest\Models\Billing\PaymentMethod;
+use Everest\Services\Billing\PaymentMethodService;
 
 class EverestComposer
 {
@@ -64,6 +67,9 @@ class EverestComposer
                     'threshold' => config('modules.billing.renewal.threshold'),
                 ],
                 'allow_upgrades' => config('modules.billing.allow_upgrades'),
+                // The payment methods a customer can pay with. An empty list means the
+                // storefront cannot take money at all.
+                'payment_methods' => $this->paymentMethods(),
             ],
             'alert' => [
                 'enabled' => boolval(config('modules.alert.enabled', false)),
@@ -88,5 +94,31 @@ class EverestComposer
                 'url' => !empty(config('modules.webhooks.url')),
             ],
         ]);
+    }
+
+    /**
+     * The payment methods offered at checkout.
+     *
+     * A method whose channel has not been configured is left out, so the customer is
+     * never offered a way to pay that cannot be completed.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function paymentMethods(): array
+    {
+        try {
+            return app(PaymentMethodService::class)->available()
+                ->map(fn (PaymentMethod $method) => [
+                    'identifier' => $method->identifier,
+                    'name' => $method->name,
+                    'icon' => $method->icon,
+                    'description' => $method->description,
+                ])
+                ->values()
+                ->all();
+        } catch (QueryException) {
+            // The table does not exist yet on an installation that has not migrated.
+            return [];
+        }
     }
 }

@@ -2,14 +2,11 @@
 
 namespace Everest\Http\Controllers\Api\Client\Billing;
 
-use Stripe\StripeClient;
 use Everest\Models\Server;
-use Everest\Models\Billing\Order;
 use Everest\Models\Billing\Product;
 use Everest\Exceptions\DisplayException;
-use Everest\Services\Billing\PaymentService;
 use Everest\Services\Billing\UpgradeService;
-use Everest\Services\Billing\CreateOrderService;
+use Everest\Services\Billing\CheckoutService;
 use Everest\Transformers\Api\Client\ProductTransformer;
 use Everest\Http\Controllers\Api\Client\ClientApiController;
 use Everest\Http\Requests\Api\Client\Billing\ProcessUpgradeRequest;
@@ -18,16 +15,11 @@ use Everest\Http\Requests\Api\Client\Billing\GetUpgradeOptionsRequest;
 
 class UpgradeController extends ClientApiController
 {
-    private StripeClient $stripe;
-
     public function __construct(
         private UpgradeService $upgradeService,
-        private PaymentService $paymentService,
-        private CreateOrderService $orderService,
+        private CheckoutService $checkoutService,
     ) {
         parent::__construct();
-
-        $this->stripe = new StripeClient(config('modules.billing.keys.secret'));
     }
 
     /**
@@ -62,7 +54,7 @@ class UpgradeController extends ClientApiController
     }
 
     /**
-     * Process a one-time upgrade fee through payment gateway and
+     * Process a one-time upgrade fee through the chosen payment method and
      * update the server with new resources according to new package.
      */
     public function create(ProcessUpgradeRequest $request, Server $server): string
@@ -81,27 +73,12 @@ class UpgradeController extends ClientApiController
             throw new DisplayException('You cannot upgrade to a cheaper plan.');
         }
 
-        $metadata = [
-            'user_id' => (string) $request->user()->id,
-            'customer_email' => $request->user()->email,
-            'product_id' => (string) $new_product->id,
-            'server_id' => (string) $server->id,
-            'order_type' => Order::TYPE_UPGRADE,
-        ];
-
-        $transaction = $this->paymentService->create($this->stripe, $request->user(), $new_product, $metadata, $price);
-
-        $order = $this->orderService->create(
-            $transaction->id,
+        return $this->checkoutService->createUpgrade(
             $request->user(),
+            $server,
             $new_product,
-            Order::STATUS_PENDING,
-            Order::TYPE_UPGRADE,
             $price,
+            (string) $request->input('payment_method'),
         );
-
-        $order->assignServer($server);
-
-        return $transaction->url;
     }
 }

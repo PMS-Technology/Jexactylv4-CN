@@ -1,19 +1,13 @@
 <script lang="ts">
-    import { Download, LoaderCircle, Pencil } from '@lucide/svelte';
-    import stripAnsi from 'strip-ansi';
+    import { LoaderCircle, Pencil } from '@lucide/svelte';
     import { app } from '$lib/stores/app.svelte';
     import type { ServerStore } from '$lib/stores/server.svelte';
-    import { SocketEvent } from '$lib/api/definitions/events';
-    import { websocketEvent } from '$lib/stores/server.svelte';
     import { renameServer, reinstallServer } from '$lib/api/servers';
     import { httpErrorToHuman } from '$lib/api/http';
-    import { Button } from '$lib/ui';
+    import { Badge, Button, Card, Input, Label, Textarea } from '$lib/ui';
+    import { Dialog, AlertDialog } from '$lib/ui/dialog';
     import Alert from '$lib/components/Alert.svelte';
-    import ConfirmDialog from '$lib/ui/dialog/ConfirmDialog.svelte';
-    import Dialog from '$lib/ui/dialog/Dialog.svelte';
-    import Input from '$lib/ui/Input.svelte';
-    import Label from '$lib/ui/Label.svelte';
-    import Textarea from '$lib/ui/Textarea.svelte';
+    import Tooltip from '$lib/ui/tooltip/Tooltip.svelte';
     import Terminal from './Terminal.svelte';
     import StatsCharts from './StatsCharts.svelte';
     import DetailsStats from './DetailsStats.svelte';
@@ -48,17 +42,18 @@
     }
 
     const statusMeta = $derived.by(() => {
-        if (store.isInstalling) return { text: '安装中', tone: 'text-amber-500' };
-        if (store.server?.isTransferring) return { text: '迁移中', tone: 'text-amber-500' };
+        if (store.isInstalling) return { text: '安装中', variant: 'warning' as const };
+        if (store.server?.isTransferring) return { text: '迁移中', variant: 'warning' as const };
+
         switch (store.status) {
             case 'running':
-                return { text: '运行中', tone: 'text-green-500' };
+                return { text: '运行中', variant: 'success' as const };
             case 'offline':
-                return { text: '离线', tone: 'text-red-500' };
+                return { text: '离线', variant: 'destructive' as const };
             case null:
-                return { text: '离线', tone: 'text-red-500' };
+                return { text: '离线', variant: 'destructive' as const };
             default:
-                return { text: store.status ?? '', tone: 'text-amber-500' };
+                return { text: store.status ?? '', variant: 'warning' as const };
         }
     });
 
@@ -129,34 +124,6 @@
             reinstalling = false;
         }
     }
-
-    // --- Console log export (SaveButton) ----------------------------------
-    let consoleLog: string[] = [];
-
-    websocketEvent(store, SocketEvent.CONSOLE_OUTPUT, (line: string) => {
-        consoleLog = [...consoleLog, line.startsWith('>') ? line.substring(1) : line].slice(-1000);
-    });
-
-    let savingLogs = $state(false);
-    let savedNotice = $state('');
-
-    async function saveLogs() {
-        if (!store.server || savingLogs) return;
-
-        savingLogs = true;
-        savedNotice = '';
-        try {
-            const data = stripAnsi(consoleLog.map(it => it.replace('\r', '')).join('\n')) || '';
-            const file = `/.console-logs/${new Date().toLocaleTimeString()}.log`;
-            const { saveFileContents } = await import('$lib/api/files');
-            await saveFileContents(store.server.uuid, file, data);
-            savedNotice = `日志已保存到 ${file}`;
-        } catch {
-            savedNotice = '保存日志失败，请重试。';
-        } finally {
-            savingLogs = false;
-        }
-    }
 </script>
 
 <svelte:head>
@@ -180,31 +147,38 @@
         <Alert variant="warning" class="mb-4">此服务器正在迁移到其他节点，所有操作均不可用。</Alert>
     {/if}
 
-    <div class="mb-4 flex flex-col justify-between gap-4 rounded-lg border border-border bg-card p-5 sm:flex-row sm:items-center">
+    <Card class="mb-4 flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center">
         <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2">
                 <h1 class="font-header line-clamp-1 text-2xl leading-relaxed">{store.server?.name}</h1>
-                <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-muted/60 px-2 py-0.5 text-2xs font-medium">
-                    {#if store.isInstalling}
-                        <Download class="size-3" />
+                {#if store.isInstalling}
+                    <Badge variant="warning">
+                        <LoaderCircle class="size-3 animate-spin" />
                         安装中
-                    {:else if store.server?.isTransferring}
+                    </Badge>
+                {:else if store.server?.isTransferring}
+                    <Badge variant="warning">
                         <LoaderCircle class="size-3 animate-spin" />
                         迁移中
-                    {:else}
-                        <span class="size-2 rounded-full {statusMeta.tone === 'text-green-500' ? 'bg-green-500' : statusMeta.tone === 'text-red-500' ? 'bg-red-500' : 'bg-amber-500'}"></span>
-                        {statusMeta.text}
-                    {/if}
-                </span>
+                    </Badge>
+                {:else}
+                    <Badge variant={statusMeta.variant} dot>{statusMeta.text}</Badge>
+                {/if}
                 {#if store.can('settings.rename')}
-                    <button
-                        type="button"
-                        class="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                        aria-label="编辑服务器信息"
-                        onclick={openEdit}
-                    >
-                        <Pencil class="size-3.5" />
-                    </button>
+                    <Tooltip content="编辑服务器信息">
+                        {#snippet child({ props })}
+                            <Button
+                                {...props}
+                                variant="ghost"
+                                size="sm"
+                                class="size-7"
+                                onclick={openEdit}
+                                aria-label="编辑服务器信息"
+                            >
+                                <Pencil class="size-3.5" />
+                            </Button>
+                        {/snippet}
+                    </Tooltip>
                 {/if}
             </div>
             <p class="line-clamp-2 text-sm text-muted-foreground">
@@ -216,22 +190,11 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <button
-                type="button"
-                class="hidden items-center gap-1.5 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors
-                       hover:bg-accent hover:text-accent-foreground md:inline-flex"
-                onclick={saveLogs}
-                disabled={savingLogs}
-                title="将控制台日志保存到 /.console-logs/"
-            >
-                <Download class="size-4" />
-                保存日志
-            </button>
             {#if store.can(['control.start', 'control.stop', 'control.restart'])}
                 <StatusControls {store} />
             {/if}
         </div>
-    </div>
+    </Card>
 
     {#if !expand}
         <DetailsStats {store} />
@@ -239,12 +202,15 @@
 
     <div class="mt-4 grid gap-2 sm:gap-4 lg:grid-cols-4">
         <!-- min-w-0: xterm measures its container; without it the auto min-content
-             width of the grid item pushes the terminal past the viewport. -->
-        <div class="flex min-w-0 lg:col-span-3">
+             width of the grid item pushes the terminal past the viewport. The expanded
+             console takes the whole row, since the chart rail is hidden in that mode. -->
+        <div class="flex min-w-0 lg:col-span-3" class:lg:col-span-4={expand}>
             <Terminal {store} {expand} onToggleExpand={toggleExpand} />
         </div>
         {#if !expand}
-            <div class="my-auto min-w-0">
+            <!-- The chart fills the rail rather than floating in it, so the two read as
+                 one row instead of two unrelated blocks. -->
+            <div class="flex min-w-0">
                 <StatsCharts {store} />
             </div>
         {/if}
@@ -253,18 +219,7 @@
 
 <Features {store} enabled={store.server?.eggFeatures ?? []} />
 
-{#if savedNotice}
-    <div class="fixed right-4 bottom-20 z-50 rounded-lg border border-border bg-popover px-4 py-2 text-sm text-popover-foreground shadow-lg md:bottom-4">
-        {savedNotice}
-    </div>
-{/if}
-
-<Dialog
-    bind:open={editOpen}
-    title="编辑服务器"
-    preventClose={saving}
-    footer={undefined}
->
+<Dialog bind:open={editOpen} title="编辑服务器" preventClose={saving} footer={undefined}>
     <div class="space-y-4">
         {#if editError}
             <Alert variant="destructive">{editError}</Alert>
@@ -286,17 +241,18 @@
     </div>
 </Dialog>
 
-<ConfirmDialog
+<AlertDialog
     bind:open={reinstallOpen}
     title="确认重装服务器"
+    description="重装会停止服务器并重新执行初始安装脚本。"
     confirmLabel="是，重装服务器"
+    destructive
     onConfirm={reinstall}
 >
     {#if reinstallError}
         <Alert variant="destructive">{reinstallError}</Alert>
     {/if}
     <div class="rounded-lg bg-warning/10 p-4 text-sm">
-        重装会停止服务器并重新执行初始安装脚本。
         <strong class="font-medium">部分文件可能被删除或修改，请先备份你的数据。</strong>
     </div>
-</ConfirmDialog>
+</AlertDialog>

@@ -13,6 +13,7 @@ import type {
     DiscountCode,
     Order,
     OrderVariable,
+    PaymentMethod,
     Product,
 } from '$lib/api/definitions/billing';
 import type { EggVariable, Server } from '$lib/api/definitions/server';
@@ -40,6 +41,7 @@ export const billingKeys = {
     eggs: (productId: number) => ['billing', 'products', productId, 'eggs'] as const,
     variables: (eggId: number) => ['billing', 'eggs', eggId, 'variables'] as const,
     orders: ['billing', 'orders'] as const,
+    paymentMethods: ['billing', 'payment-methods'] as const,
 };
 
 const list = <T>(data: FractalResponseList, map: (d: any) => T): T[] => (data.data ?? []).map(map);
@@ -95,8 +97,31 @@ export async function validateDiscountCode(code: string): Promise<DiscountCode> 
     return toDiscountCode(data);
 }
 
+/**
+ * The payment methods the customer can choose from.
+ *
+ * A method whose channel has not been configured is left out by the backend, so the
+ * list only ever holds ways to pay that can actually be completed.
+ */
+export async function getPaymentMethods(): Promise<PaymentMethod[]> {
+    const { data } = await http.get('/api/client/billing/payment-methods');
+
+    return list(data, ({ attributes: a }: any) => ({
+        id: Number(a.id),
+        identifier: a.identifier,
+        name: a.name,
+        icon: a.icon || null,
+        description: a.description || null,
+    }));
+}
+
 export interface CheckoutRequest {
     productId: number;
+    /**
+     * The payment method the customer picked. Its identifier decides which channel the
+     * money is collected through.
+     */
+    paymentMethod: string;
     /**
      * Omit for renewals. The backend validates it with `exists:nodes,id`, so a placeholder
      * such as 0 fails validation instead of selecting the renewal path.
@@ -112,10 +137,14 @@ export interface CheckoutRequest {
     serverId?: number;
 }
 
-/** Creates a Stripe Checkout session and returns the hosted payment page URL. */
+/**
+ * Creates a checkout through the payment method the customer picked and returns the
+ * hosted payment page URL.
+ */
 export async function createCheckoutSession(req: CheckoutRequest): Promise<string> {
-    const { data } = await http.post('/api/client/billing/stripe/create', {
+    const { data } = await http.post('/api/client/billing/checkout/create', {
         product_id: req.productId,
+        payment_method: req.paymentMethod,
         node_id: req.nodeId,
         egg_id: req.eggId,
         variables: req.variables,
@@ -127,15 +156,28 @@ export async function createCheckoutSession(req: CheckoutRequest): Promise<strin
     return data as string;
 }
 
-/** Completes a paid order after Stripe redirects back, deploying the server. */
-export async function processCheckoutSession(session: string): Promise<Server> {
-    const { data } = await http.post('/api/client/billing/stripe/process', { session });
+/**
+ * Confirms a payment once the customer comes back from the gateway.
+ *
+ * Stripe can be asked directly whether the payment went through, so the server comes
+ * back with it. The other channels notify the panel over HTTP, so this may have to wait
+ * for the notification to arrive; the caller polls until it does.
+ */
+export async function processCheckoutSession(reference: string, session?: string): Promise<Server | 'pending'> {
+    const { data } = await http.post('/api/client/billing/checkout/process', {
+        reference,
+        ...(session ? { session } : {}),
+    });
+
+    if (data === 'pending' || (data && typeof data === 'object' && (data as { status?: string }).status === 'pending')) {
+        return 'pending';
+    }
 
     return toServer(data);
 }
 
 /** Deploys a free product immediately, or renews one when `serverId` is set. */
-export async function processFreeOrder(req: Omit<CheckoutRequest, 'discountCode'>): Promise<Server> {
+export async function processFreeOrder(req: Omit<CheckoutRequest, 'discountCode' | 'paymentMethod'>): Promise<Server> {
     const { data } = await http.post('/api/client/billing/free/process', {
         product_id: req.productId,
         node_id: req.nodeId,
@@ -179,9 +221,12 @@ export async function getUpgradeCharge(uuid: string, productId: number): Promise
     return Number(data.charge);
 }
 
-/** Creates the Stripe Checkout session for an upgrade and returns its URL. */
-export async function processUpgrade(uuid: string, productId: number): Promise<string> {
-    const { data } = await http.post(`/api/client/servers/${uuid}/upgrade`, { product_id: productId });
+/** Creates the checkout for an upgrade through the chosen payment method and returns its URL. */
+export async function processUpgrade(uuid: string, productId: number, paymentMethod: string): Promise<string> {
+    const { data } = await http.post(`/api/client/servers/${uuid}/upgrade`, {
+        product_id: productId,
+        payment_method: paymentMethod,
+    });
 
     return data as string;
 }

@@ -19,7 +19,7 @@ parameters:
         # would introduce a real null-pointer fatal error at runtime.
         -
             message: '#^Using nullsafe property access "\?->id" on left side of \?\? is unnecessary\. Use -> instead\.$#'
-            path: app/Http/Controllers/Api/Client/Billing/StripeController.php
+            path: app/Services/Billing/CheckoutService.php
         # Laravel Sanctum's HasApiTokens::currentAccessToken() is documented as
         # `@return TToken` without `|null`, but Sanctum's own code (and the fact that
         # withAccessToken() is only called for actual token-authenticated requests)

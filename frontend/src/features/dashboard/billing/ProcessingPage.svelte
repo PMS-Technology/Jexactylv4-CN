@@ -9,29 +9,56 @@
     import OutcomeCard from './components/OutcomeCard.svelte';
 
     /**
-     * Stripe's `success_url` (PaymentService) lands here with `?session=…`. The backend
-     * claims the order atomically, so a refresh after success gets "already processed"
-     * rather than a second deployment.
+     * Where the customer lands after paying.
+     *
+     * Stripe sends the checkout session id; the gateways that notify the panel over
+     * HTTP send the payment reference instead. The backend claims the order
+     * atomically, so a refresh after success gets "already processed" rather than a
+     * second deployment.
+     *
+     * A channel that notifies the panel may not have delivered its notification yet
+     * when the customer arrives, so the page keeps asking until the order is done.
      */
     let error = $state('');
 
-    onMount(() => {
-        const session = router.query.get('session');
+    const session = router.query.get('session');
+    const reference = router.query.get('reference');
 
-        if (!session) {
+    onMount(() => {
+        if (!session && !reference) {
             navigate('/account/billing/cancel', { replace: true });
 
             return;
         }
 
-        processCheckoutSession(session)
-            // The server page is still served by the legacy bundle, so it needs a document load.
-            .then(server => window.location.replace(`/server/${server.id}`))
-            .catch(e => {
-                // Payment may have gone through even when processing fails, so this must not
-                // claim the user was not charged; point them at their orders instead.
-                error = httpErrorToHuman(e);
+        const deadline = Date.now() + 60_000;
+
+        const check = () =>
+            processCheckoutSession(reference ?? '', session ?? undefined).then(result => {
+                if (result === 'pending') {
+                    if (Date.now() > deadline) {
+                        // The notification is taking a while. The order is still there,
+                        // so the customer can see it on the orders page.
+                        navigate('/account/billing/orders', { replace: true });
+
+                        return;
+                    }
+
+                    setTimeout(check, 2000);
+
+                    return;
+                }
+
+                // The server page is still served by the legacy bundle, so it needs a
+                // document load.
+                window.location.replace(`/server/${result.id}`);
             });
+
+        check().catch(e => {
+            // Payment may have gone through even when processing fails, so this must not
+            // claim the user was not charged; point them at their orders instead.
+            error = httpErrorToHuman(e);
+        });
     });
 </script>
 

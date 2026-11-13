@@ -24,6 +24,7 @@ export const adminBillingKeys = {
     invoices: ['admin', 'billing', 'invoices'] as const,
     exceptions: ['admin', 'billing', 'exceptions'] as const,
     discountCodes: ['admin', 'billing', 'discount-codes'] as const,
+    paymentMethods: ['admin', 'billing', 'payment-methods'] as const,
 };
 
 const list = async <T>(url: string, params: QueryBuilderParams, map: (d: FractalResponseData) => T): Promise<PaginatedResult<T>> => {
@@ -59,6 +60,109 @@ export async function updateBillingSetting(key: BillingSettingKey, value: boolea
 /** Forgets `keys:secret`. Purchasing and renewing stop working until a new key is saved. */
 export async function deleteStripeKeys(): Promise<void> {
     await http.delete('/api/application/billing/keys');
+}
+
+// --- Payment channels -------------------------------------------------------
+
+export type PaymentChannelId = 'stripe' | 'epay' | 'creem' | 'waffo' | 'waffo_pancake';
+
+export interface PaymentChannel {
+    id: PaymentChannelId;
+    label: string;
+    description: string;
+    /** Whether every credential this channel needs has been filled in. */
+    configured: boolean;
+    /** The settings keys the channel needs before it can be used. */
+    required_keys: string[];
+    /** The keys that hold a secret and are never sent to the browser. */
+    secret_keys: string[];
+    /** The keys that are not secret. */
+    public_keys: string[];
+    /** Whether the channel notifies the panel when a payment settles. */
+    uses_callbacks: boolean;
+    /** The address to paste into the gateway's dashboard, when it notifies the panel. */
+    callback_url: string | null;
+}
+
+export interface PaymentChannels {
+    channels: PaymentChannel[];
+}
+
+/** The payment channels, with whether each one is configured. */
+export async function getPaymentChannels(): Promise<PaymentChannels> {
+    const { data } = await http.get('/api/application/billing/channels');
+
+    return data as PaymentChannels;
+}
+
+/** Stores the credentials of a channel. */
+export async function updatePaymentChannel(channel: PaymentChannelId, values: Record<string, string>): Promise<void> {
+    await http.put('/api/application/billing/channels', { channel, ...values });
+}
+
+/** Forgets the credentials of a channel. */
+export async function deletePaymentChannel(channel: PaymentChannelId): Promise<void> {
+    await http.delete('/api/application/billing/channels', { data: { channel } });
+}
+
+// --- Payment methods --------------------------------------------------------
+
+export interface AdminPaymentMethod {
+    id: number;
+    uuid: string;
+    /** The identifier that decides the flow, e.g. `stripe` or `epay:wxpay`. */
+    identifier: string;
+    name: string;
+    icon: string | null;
+    description: string | null;
+    enabled: boolean;
+    sort: number;
+    /** The channel the method pays through, without the method part. */
+    channel: PaymentChannelId;
+    createdAt: Date;
+}
+
+export interface PaymentMethodValues {
+    identifier: string;
+    name: string;
+    icon: string | null;
+    description: string | null;
+    enabled: boolean;
+    sort: number;
+}
+
+const toPaymentMethod = ({ attributes: a }: FractalResponseData): AdminPaymentMethod => ({
+    id: a.id,
+    uuid: a.uuid,
+    identifier: a.identifier,
+    name: a.name,
+    icon: a.icon || null,
+    description: a.description || null,
+    enabled: Boolean(a.enabled),
+    sort: Number(a.sort ?? 0),
+    channel: a.channel,
+    createdAt: new Date(a.created_at),
+});
+
+export type PaymentMethodQuery = QueryBuilderParams<'identifier' | 'name', 'id' | 'identifier' | 'name' | 'sort' | 'created_at'>;
+
+export const getPaymentMethods = (params: PaymentMethodQuery = {}) =>
+    list('/api/application/billing/payment-methods', params, toPaymentMethod);
+
+export async function createPaymentMethod(values: PaymentMethodValues): Promise<AdminPaymentMethod> {
+    const { data } = await http.post('/api/application/billing/payment-methods', values);
+
+    return toPaymentMethod(data);
+}
+
+export async function updatePaymentMethod(id: number, values: PaymentMethodValues): Promise<AdminPaymentMethod> {
+    const { data } = await http.patch(`/api/application/billing/payment-methods/${id}`, values);
+
+    return toPaymentMethod(data);
+}
+
+export async function deletePaymentMethod(id: number): Promise<void> {
+    await http.delete(`/api/application/billing/payment-methods/${id}`);
 }
 
 // --- Categories -------------------------------------------------------------
@@ -141,6 +245,8 @@ export interface AdminProduct {
     icon: string | null;
     price: number;
     description: string | null;
+    /** The product id the payment gateway knows this product by. */
+    externalId: string | null;
     limits: ProductLimits;
     createdAt: Date;
 }
@@ -150,6 +256,8 @@ export interface ProductValues {
     icon: string | null;
     price: number;
     description: string | null;
+    /** The product id the payment gateway knows this product by. */
+    externalId?: string | null;
     limits: ProductLimits;
 }
 
@@ -161,6 +269,7 @@ const toProduct = ({ attributes: a }: FractalResponseData): AdminProduct => ({
     icon: a.icon || null,
     price: Number(a.price),
     description: a.description || null,
+    externalId: a.external_id || null,
     limits: a.limits,
     createdAt: new Date(a.created_at),
 });
@@ -177,13 +286,25 @@ export async function getProduct(id: number): Promise<AdminProduct> {
 }
 
 export async function createProduct(categoryId: number, values: ProductValues): Promise<AdminProduct> {
-    const { data } = await http.post(`/api/application/billing/categories/${categoryId}/products`, values);
+    const { data } = await http.post(`/api/application/billing/categories/${categoryId}/products`, productBody(values));
 
     return toProduct(data);
 }
 
 export async function updateProduct(categoryId: number, productId: number, values: ProductValues): Promise<void> {
-    await http.patch(`/api/application/billing/categories/${categoryId}/products/${productId}`, values);
+    await http.patch(`/api/application/billing/categories/${categoryId}/products/${productId}`, productBody(values));
+}
+
+/**
+ * The request body for a product. The API names its fields in snake_case, while the
+ * form works in camelCase.
+ */
+function productBody(values: ProductValues) {
+    return {
+        ...values,
+        external_id: values.externalId ?? null,
+        externalId: undefined,
+    };
 }
 
 export async function deleteProduct(categoryId: number, productId: number): Promise<void> {

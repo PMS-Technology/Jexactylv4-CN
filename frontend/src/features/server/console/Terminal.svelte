@@ -4,12 +4,13 @@
     import { FitAddon } from '@xterm/addon-fit';
     import { SearchAddon } from '@xterm/addon-search';
     import { WebLinksAddon } from '@xterm/addon-web-links';
-    import { ChevronsRight, Maximize2, Minimize2 } from '@lucide/svelte';
+    import { ChevronsRight, Download, Maximize2, Minimize2, Trash2 } from '@lucide/svelte';
+    import stripAnsi from 'strip-ansi';
     import type { ServerStore } from '$lib/stores/server.svelte';
     import { SocketEvent, SocketRequest } from '$lib/api/definitions/events';
     import { websocketEvent } from '$lib/stores/server.svelte';
     import { ScrollDownHelperAddon } from '$lib/websocket/ScrollDownHelperAddon';
-    import Spinner from '$lib/ui/Spinner.svelte';
+    import { IconButton, Spinner } from '$lib/ui';
     import { cn } from '$lib/utils/cn';
 
     import '@xterm/xterm/css/xterm.css';
@@ -20,8 +21,11 @@
      * command input keeps a persisted history (ArrowUp/Down) and sends commands as
      * `send command` events.
      */
-    let { store, expand = false, onToggleExpand }: { store: ServerStore; expand?: boolean; onToggleExpand?: () => void } =
-        $props();
+    let {
+        store,
+        expand = false,
+        onToggleExpand,
+    }: { store: ServerStore; expand?: boolean; onToggleExpand?: () => void } = $props();
 
     // Ported verbatim from the legacy Console.tsx — the palette is part of the look.
     const theme = {
@@ -87,21 +91,26 @@
             return true;
         });
 
-        const onResize = () => terminal.element && fitAddon.fit();
-        window.addEventListener('resize', onResize);
+        /**
+         * The terminal measures its container, so it has to be re-fitted whenever the
+         * container changes size. A resize observer covers every case: the window
+         * being resized, the console being expanded, and the terminal being shown
+         * again after its tab was hidden — a hidden container has no size, so the
+         * fit would otherwise measure zero.
+         */
+        const observer = new ResizeObserver(() => {
+            // A container that is not laid out has nothing to measure; fitting it
+            // would collapse the terminal to a single row.
+            if (container.clientWidth === 0 || container.clientHeight === 0) return;
+
+            fitAddon.fit();
+        });
+        observer.observe(container);
 
         return () => {
-            window.removeEventListener('resize', onResize);
+            observer.disconnect();
             terminal.dispose();
         };
-    });
-
-    // Re-fit after the min-height transition settles, otherwise xterm measures mid-animation.
-    $effect(() => {
-        expand;
-        const timeout = window.setTimeout(() => terminal.element && fitAddon.fit(), 500);
-
-        return () => window.clearTimeout(timeout);
     });
 
     const handleConsoleOutput = (line: string, prelude = false) =>
@@ -139,6 +148,30 @@
         store.instance.send(SocketRequest.SEND_LOGS);
     });
 
+    // --- Console log export -------------------------------------------------
+    let consoleLog: string[] = [];
+
+    websocketEvent(store, SocketEvent.CONSOLE_OUTPUT, (line: string) => {
+        consoleLog = [...consoleLog, line.startsWith('>') ? line.substring(1) : line].slice(-1000);
+    });
+
+    let savingLogs = $state(false);
+
+    async function saveLogs() {
+        if (!store.server || savingLogs) return;
+
+        savingLogs = true;
+        try {
+            const data = stripAnsi(consoleLog.map(it => it.replace('\r', '')).join('\n')) || '';
+            const file = `/.console-logs/${new Date().toLocaleTimeString()}.log`;
+            const { saveFileContents } = await import('$lib/api/files');
+            await saveFileContents(store.server.uuid, file, data);
+        } finally {
+            savingLogs = false;
+        }
+    }
+
+    // --- Command history ----------------------------------------------------
     // Command history, persisted per server like the legacy usePersistedState key.
     const historyKey = $derived(`${store.server?.id ?? 'unknown'}:command_history`);
 
@@ -196,8 +229,11 @@
 
 <div
     class={cn(
-        'relative flex w-full flex-col rounded-lg bg-black/90 p-2 transition-all duration-500 ease-linear',
-        expand ? 'min-h-[48rem]' : 'min-h-[16rem]',
+        'relative flex w-full flex-col overflow-hidden rounded-lg border border-border bg-black/90',
+        // The console is given a definite height rather than growing with its
+        // content: xterm measures its container to work out how many rows fit, so a
+        // container that sized itself to the terminal would grow on every fit.
+        expand ? 'h-[calc(100dvh-11rem)] min-h-[24rem]' : 'h-[calc(100dvh-19rem)] min-h-[20rem]',
     )}
 >
     {#if !store.connected}
@@ -206,7 +242,47 @@
         </div>
     {/if}
 
-    <div class="relative min-w-0 flex-1 overflow-hidden rounded-t p-1 font-mono text-sm sm:p-2">
+    <!-- The output area keeps the legacy dark surface; the controls above it carry
+         the panel's own chrome, so the terminal reads as part of the page. -->
+    <div class="flex items-center gap-1 border-b border-white/10 px-2 py-1.5">
+        <span class="flex-1 px-1 text-2xs font-medium text-white/40">控制台输出</span>
+
+        <IconButton
+            label="保存日志到 /.console-logs/"
+            variant="ghost"
+            class="text-white/70 hover:bg-white/10 hover:text-white"
+            disabled={savingLogs || !store.connected}
+            onclick={saveLogs}
+        >
+            <Download class="size-4" />
+        </IconButton>
+
+        <IconButton
+            label="清空终端"
+            variant="ghost"
+            class="text-white/70 hover:bg-white/10 hover:text-white"
+            onclick={() => terminal.clear()}
+        >
+            <Trash2 class="size-4" />
+        </IconButton>
+
+        {#if onToggleExpand}
+            <IconButton
+                label={expand ? '收起控制台' : '展开控制台'}
+                variant="ghost"
+                class="text-white/70 hover:bg-white/10 hover:text-white"
+                onclick={onToggleExpand}
+            >
+                {#if expand}
+                    <Minimize2 class="size-4" />
+                {:else}
+                    <Maximize2 class="size-4" />
+                {/if}
+            </IconButton>
+        {/if}
+    </div>
+
+    <div class="relative min-h-0 min-w-0 flex-1 overflow-hidden rounded-t p-1 font-mono text-sm sm:p-2">
         <div bind:this={container} class="h-full"></div>
     </div>
 
@@ -229,21 +305,6 @@
             <span class="pointer-events-none absolute top-0 left-0 flex h-full select-none items-center px-3 text-slate-100">
                 <ChevronsRight class="size-4" />
             </span>
-            {#if onToggleExpand}
-                <button
-                    type="button"
-                    class="absolute top-0 right-0 flex h-full select-none items-center px-3 text-slate-100/80
-                           transition-colors hover:text-green-400"
-                    aria-label={expand ? '收起控制台' : '展开控制台'}
-                    onclick={onToggleExpand}
-                >
-                    {#if expand}
-                        <Minimize2 class="size-4" />
-                    {:else}
-                        <Maximize2 class="size-4" />
-                    {/if}
-                </button>
-            {/if}
         </div>
     {/if}
 </div>

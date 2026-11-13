@@ -49,6 +49,19 @@ export interface BillingEgg {
     name: string;
 }
 
+/**
+ * A way the customer can pay. The identifier decides the flow, so it is what the
+ * checkout sends back: `stripe` is Stripe itself, `epay:wxpay` is the WeChat Pay
+ * method of the Epay channel.
+ */
+export interface PaymentMethod {
+    id: number;
+    identifier: string;
+    name: string;
+    icon: string | null;
+    description: string | null;
+}
+
 export interface DiscountCode {
     code: string;
     description: string;

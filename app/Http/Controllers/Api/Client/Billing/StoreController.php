@@ -8,6 +8,7 @@ use Everest\Models\EggVariable;
 use Everest\Models\Billing\Product;
 use Everest\Models\Billing\Category;
 use Everest\Models\Billing\BillingException;
+use Everest\Services\Billing\PaymentMethodService;
 use Everest\Services\Billing\NodeCollectionService;
 use Everest\Transformers\Api\Client\EggTransformer;
 use Everest\Transformers\Api\Client\NodeTransformer;
@@ -15,11 +16,14 @@ use Everest\Transformers\Api\Client\ProductTransformer;
 use Everest\Transformers\Api\Client\CategoryTransformer;
 use Everest\Transformers\Api\Client\EggVariableTransformer;
 use Everest\Http\Controllers\Api\Client\ClientApiController;
+use Everest\Transformers\Api\Client\PaymentMethodTransformer;
 
 class StoreController extends ClientApiController
 {
-    public function __construct(private NodeCollectionService $nodeCollectionService)
-    {
+    public function __construct(
+        private NodeCollectionService $nodeCollectionService,
+        private PaymentMethodService $paymentMethodService,
+    ) {
         parent::__construct();
     }
 
@@ -98,5 +102,16 @@ class StoreController extends ClientApiController
         $nodes = $this->nodeCollectionService->handle($product);
 
         return $this->transform($nodes, NodeTransformer::class);
+    }
+
+    /**
+     * The payment methods the customer can choose from.
+     *
+     * A method whose channel has not been configured is left out, so the customer is
+     * never offered a way to pay that cannot be completed.
+     */
+    public function paymentMethods(): array
+    {
+        return $this->transform($this->paymentMethodService->available(), PaymentMethodTransformer::class);
     }
 }

@@ -79,6 +79,15 @@ export interface SiteSettings {
 export type AlertType = 'success' | 'warning' | 'danger' | 'info';
 export type AlertPosition = 'top-center' | 'bottom-right' | 'bottom-left' | 'center';
 
+/** A payment method offered at checkout. */
+export interface PaymentMethodOption {
+    /** The identifier the checkout is sent back with; it decides the flow. */
+    identifier: string;
+    name: string;
+    icon: string | null;
+    description: string | null;
+}
+
 /** Feature flags. Route tables gate entries on these, so they must be read synchronously. */
 export interface EverestSettings {
     auth: {
@@ -99,6 +108,11 @@ export interface EverestSettings {
         links: { terms: string; privacy: string };
         renewal: { days: number; threshold: number };
         allow_upgrades: boolean;
+        /**
+         * The payment methods offered at checkout. An empty list means the storefront
+         * cannot take money at all.
+         */
+        payment_methods: PaymentMethodOption[];
     };
     alert: {
         enabled: boolean;

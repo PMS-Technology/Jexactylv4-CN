@@ -1,65 +1,70 @@
 <script lang="ts">
-    import { CheckCircle2, Monitor, Paintbrush, RotateCcw } from '@lucide/svelte';
-    import { resetTheme, updateThemeColor, type ThemeColorKey } from '$lib/api/admin/appearance';
+    import { CheckCircle2, Paintbrush, RotateCcw } from '@lucide/svelte';
+    import { resetTheme, updateThemeColor } from '$lib/api/admin/appearance';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
-    import { Button, Card, CardContent, CardHeader, CardTitle, Spinner } from '$lib/ui';
+    import { theme } from '$lib/stores/theme.svelte';
+    import { BRAND_PRESETS, DEFAULT_BRAND, normalizeBrand } from '$lib/theme/presets';
+    import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Meter, Spinner } from '$lib/ui';
     import ConfirmDialog from '$lib/ui/dialog/ConfirmDialog.svelte';
     import Alert from '$lib/components/Alert.svelte';
     import PageHeader from '$lib/components/PageHeader.svelte';
 
     /**
-     * Theme colours, ported from ThemeContainer.tsx, ColorSelect.tsx and Preview.tsx.
+     * The panel's brand colour.
      *
-     * These are the brand colours in `window.ThemeConfiguration`. The legacy Preact pages
-     * paint with them; this Svelte shell uses its own design tokens and only reads
-     * `primary` for chart lines, so the preview is a mock-up of the legacy layout.
+     * This page used to edit five colours: the accent, a secondary tone and the
+     * background, header and sidebar surfaces of the legacy layout. Those surfaces
+     * are not what the current frontend draws with, so what is configurable now is
+     * the one colour the whole panel is built around.
+     *
+     * The picked colour is a hue, not a tone: the tokens in `app.css` pin its
+     * lightness per mode, so it stays readable as a button fill, as text and as a
+     * label on its own tint whatever colour it is. The preview below shows both
+     * modes with the panel's own components, rather than a drawing of the old one.
      */
-    const fields: { key: ThemeColorKey; label: string; help: string }[] = [
-        { key: 'primary', label: '主要内容（强调色）', help: '应用的主文字色，也用于按钮等组件。' },
-        { key: 'secondary', label: '次要内容（组件）', help: '卡片、表格等组件的底色，通常是不易与背景混淆的深色。' },
-        { key: 'background', label: '背景色', help: '整个应用的背景颜色。' },
-        { key: 'headers', label: '组件标题', help: '表单、卡片、表格的标题栏颜色，建议比“次要内容”稍深。' },
-        { key: 'sidebar', label: '侧边栏与导航', help: '左侧侧边栏的颜色。' },
-    ];
-
     const canUpdate = $derived(app.can('settings.update'));
 
-    const initial = app.theme?.colors ?? { headers: '', sidebar: '', background: '' };
-    let colors = $state<Record<ThemeColorKey, string>>({
-        primary: initial.primary ?? '#16a34a',
-        secondary: initial.secondary ?? '#27272a',
-        background: initial.background,
-        headers: initial.headers,
-        sidebar: initial.sidebar,
-    });
-
-    let saving = $state(0);
+    /** The colour that is actually stored; the page falls back to it when a save fails. */
+    const initial = normalizeBrand(app.theme?.colors?.primary) ?? DEFAULT_BRAND;
+    let stored = $state(initial);
+    let brand = $state(initial);
+    let saving = $state(false);
     let saved = $state(false);
     let error = $state('');
 
-    // A colour input fires on every drag step; the legacy page sent a request for each.
-    const timers: Partial<Record<ThemeColorKey, ReturnType<typeof setTimeout>>> = {};
+    // A colour input fires on every drag step; the legacy page sent a request for
+    // each. The colour is applied locally straight away and stored once the drag
+    // settles, so the page shows the colour while it is still being picked.
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
-    function change(key: ThemeColorKey, value: string) {
-        colors[key] = value;
-        clearTimeout(timers[key]);
-        timers[key] = setTimeout(() => void save(key, value), 400);
+    function change(value: string) {
+        const hex = normalizeBrand(value);
+        if (!hex) return;
+
+        brand = hex;
+        theme.setBrand(hex);
+        saved = false;
+        clearTimeout(timer);
+        timer = setTimeout(() => void save(hex), 400);
     }
 
-    async function save(key: ThemeColorKey, value: string) {
-        saving++;
-        saved = false;
+    async function save(hex: string) {
+        saving = true;
         error = '';
         try {
-            await updateThemeColor(key, value);
-            if (app.theme) app.theme = { colors: { ...app.theme.colors, [key]: value } };
+            await updateThemeColor('primary', hex);
+            stored = hex;
+            if (app.theme) app.theme = { colors: { ...app.theme.colors, primary: hex } };
             saved = true;
             setTimeout(() => (saved = false), 2000);
         } catch (e) {
             error = httpErrorToHuman(e);
+            // Put the stored colour back, so the page and the panel agree again.
+            brand = stored;
+            theme.setBrand(stored);
         } finally {
-            saving--;
+            saving = false;
         }
     }
 
@@ -70,6 +75,12 @@
         // The defaults come from config and reach the page through the Blade globals.
         window.location.reload();
     }
+
+    /** The two surfaces the preview shows, each with the token set it uses. */
+    const surfaces = [
+        { key: 'light', label: '浅色模式', surface: 'surface-light' },
+        { key: 'dark', label: '深色模式', surface: 'surface-dark' },
+    ] as const;
 </script>
 
 <svelte:head>
@@ -77,7 +88,7 @@
 </svelte:head>
 
 <div class="mx-auto max-w-7xl p-6 lg:p-8">
-    <PageHeader title="系统主题" description="查看并修改界面的品牌配色。">
+    <PageHeader title="系统主题" description="选择面板的品牌色，其余配色由它推导。">
         {#if canUpdate}
             <Button variant="outline" onclick={() => (resetOpen = true)}><RotateCcw />恢复默认</Button>
         {/if}
@@ -87,12 +98,12 @@
         <Alert variant="destructive" class="mb-4">{error}</Alert>
     {/if}
 
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <Card>
+    <div class="grid gap-4 lg:grid-cols-3">
+        <Card class="lg:col-span-1">
             <CardHeader>
                 <div class="flex items-center justify-between">
-                    <CardTitle class="flex items-center gap-2"><Paintbrush class="size-4" />颜色</CardTitle>
-                    {#if saving > 0}
+                    <CardTitle class="flex items-center gap-2"><Paintbrush class="size-4" />品牌色</CardTitle>
+                    {#if saving}
                         <Spinner size="sm" />
                     {:else if saved}
                         <CheckCircle2 class="size-4 text-success" aria-label="已保存" />
@@ -100,71 +111,103 @@
                 </div>
             </CardHeader>
             <CardContent class="space-y-5">
-                {#each fields as field (field.key)}
-                    <div class="space-y-1.5">
-                        <label for="color-{field.key}" class="text-sm font-medium">{field.label}</label>
-                        <div class="flex items-center gap-2">
-                            <input
-                                id="color-{field.key}"
-                                type="color"
-                                value={colors[field.key]}
-                                disabled={!canUpdate}
-                                oninput={e => change(field.key, e.currentTarget.value)}
-                                class="h-9 w-14 cursor-pointer rounded-md border border-input bg-background p-1 disabled:cursor-not-allowed disabled:opacity-50"
-                            />
-                            <code class="font-mono text-xs text-muted-foreground">{colors[field.key]}</code>
-                        </div>
-                        <p class="text-xs text-muted-foreground">{field.help}</p>
+                <div class="space-y-1.5">
+                    <label for="brand-color" class="text-sm font-medium">自定义颜色</label>
+                    <div class="flex items-center gap-2">
+                        <input
+                            id="brand-color"
+                            type="color"
+                            value={brand}
+                            disabled={!canUpdate}
+                            oninput={e => change(e.currentTarget.value)}
+                            class="h-9 w-14 cursor-pointer rounded-md border border-input bg-background p-1 disabled:cursor-not-allowed disabled:opacity-50"
+                        />
+                        <code class="font-mono text-xs text-muted-foreground">{brand}</code>
                     </div>
-                {/each}
+                    <p class="text-xs text-muted-foreground">
+                        面板会保留这个色相，并按明暗模式固定明度，因此它在任何表面上都能读。
+                    </p>
+                </div>
+
+                <div class="space-y-1.5">
+                    <p class="text-sm font-medium">预设</p>
+                    <div class="flex flex-wrap gap-3">
+                        {#each BRAND_PRESETS as preset (preset.hex)}
+                            <div class="flex flex-col items-center gap-1">
+                                <button
+                                    type="button"
+                                    disabled={!canUpdate}
+                                    onclick={() => change(preset.hex)}
+                                    title={preset.name}
+                                    aria-label={preset.name}
+                                    aria-pressed={brand === preset.hex}
+                                    style:background-color={preset.hex}
+                                    class="size-9 rounded-full border-2 transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 {brand === preset.hex
+                                        ? 'scale-110 border-foreground'
+                                        : 'border-border'}"
+                                ></button>
+                                <span class="text-2xs text-muted-foreground">{preset.name}</span>
+                            </div>
+                        {/each}
+                    </div>
+                </div>
             </CardContent>
         </Card>
 
-        <Card class="xl:col-span-2">
-            <CardHeader><CardTitle class="flex items-center gap-2"><Monitor class="size-4" />预览</CardTitle></CardHeader>
-            <CardContent class="space-y-2">
-                <!-- A mock-up rather than a live frame: SetSecurityHeaders sends
-                     X-Frame-Options: DENY, so the legacy <iframe src="/"> preview was always blank. -->
-                <div
-                    class="flex h-[50vh] min-h-72 overflow-hidden rounded-lg border-2 text-xs text-zinc-100 transition-colors"
-                    style:border-color={colors.primary}
-                    style:background-color={colors.background}
-                    aria-label="主题预览"
-                    role="img"
-                >
-                    <div class="flex w-16 shrink-0 flex-col gap-2 p-2 sm:w-32 sm:p-3" style:background-color={colors.sidebar}>
-                        <div class="h-3 w-16 rounded bg-white/70"></div>
-                        {#each [0, 1, 2, 3, 4] as i (i)}
-                            <div class="h-2.5 rounded {i === 1 ? '' : 'bg-white/20'}" style:background-color={i === 1 ? colors.primary : undefined}></div>
-                        {/each}
-                    </div>
-                    <div class="min-w-0 flex-1 space-y-3 p-3 sm:p-4">
-                        <div class="h-4 w-40 rounded bg-white/80"></div>
-                        <div class="overflow-hidden rounded-md" style:background-color={colors.secondary}>
-                            <div class="flex items-center justify-between px-3 py-2" style:background-color={colors.headers}>
-                                <span class="font-medium">服务器列表</span>
-                                <span class="rounded px-2 py-0.5 font-medium text-white" style:background-color={colors.primary}>新建</span>
-                            </div>
-                            {#each ['survival-01', 'creative-02', 'lobby'] as row (row)}
-                                <div class="flex items-center justify-between border-t border-black/30 px-3 py-2">
-                                    <span>{row}</span>
-                                    <span style:color={colors.primary}>运行中</span>
-                                </div>
-                            {/each}
-                        </div>
-                        <div class="grid grid-cols-3 gap-3">
-                            {#each ['CPU', '内存', '磁盘'] as stat (stat)}
-                                <div class="rounded-md p-3" style:background-color={colors.secondary}>
-                                    <p class="text-zinc-400">{stat}</p>
-                                    <div class="mt-2 h-1.5 overflow-hidden rounded bg-black/40">
-                                        <div class="h-full w-2/3" style:background-color={colors.primary}></div>
+        <Card class="lg:col-span-2">
+            <CardHeader><CardTitle>预览</CardTitle></CardHeader>
+            <CardContent class="space-y-4">
+                <div class="grid gap-4 xl:grid-cols-2">
+                    {#each surfaces as preview (preview.key)}
+                        <div>
+                            <p class="mb-1.5 text-2xs font-medium text-muted-foreground">{preview.label}</p>
+                            <div
+                                class="rounded-lg border border-border bg-background p-4 text-foreground {preview.surface}"
+                            >
+                                <div class="space-y-3">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <Button size="sm">主要按钮</Button>
+                                        <Button size="sm" variant="outline">次要按钮</Button>
+                                        <Button size="sm" variant="destructive">危险操作</Button>
+                                    </div>
+
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <Badge variant="success">已启用</Badge>
+                                        <Badge variant="warning">待处理</Badge>
+                                        <Badge variant="destructive">已暂停</Badge>
+                                        <span
+                                            class="rounded-full bg-primary/15 px-2 py-0.5 text-2xs font-medium text-primary"
+                                        >
+                                            品牌标签
+                                        </span>
+                                    </div>
+
+                                    <Card>
+                                        <CardHeader><CardTitle>服务器列表</CardTitle></CardHeader>
+                                        <CardContent class="space-y-2">
+                                            <div class="flex items-center justify-between text-sm">
+                                                <span>survival-01</span>
+                                                <span class="text-primary">运行中</span>
+                                            </div>
+                                            <p class="text-xs text-muted-foreground">正文与次要文字</p>
+                                        </CardContent>
+                                    </Card>
+
+                                    <div class="space-y-1.5">
+                                        <div class="flex items-baseline justify-between text-2xs">
+                                            <span>内存</span>
+                                            <span class="text-muted-foreground">1.5 GiB / 4 GiB</span>
+                                        </div>
+                                        <Meter value={1.5} max={4} fillClass="bg-chart-1" aria-label="内存" />
                                     </div>
                                 </div>
-                            {/each}
+                            </div>
                         </div>
-                    </div>
+                    {/each}
                 </div>
-                <p class="text-xs text-muted-foreground">示意图。这些颜色作用于尚未迁移的旧版页面，新前端使用自己的配色方案。</p>
+                <p class="text-xs text-muted-foreground">
+                    预览使用面板自身的组件与配色变量，两种模式同时显示；改动会立即应用到整个面板。
+                </p>
             </CardContent>
         </Card>
     </div>

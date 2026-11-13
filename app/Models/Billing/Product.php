@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $backup_limit
  * @property int $database_limit
  * @property int $allocation_limit
+ * @property string|null $external_id
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property mixed $category
@@ -45,6 +46,7 @@ class Product extends Model
         'name', 'icon', 'price', 'description',
         'cpu_limit', 'memory_limit', 'disk_limit',
         'backup_limit', 'database_limit', 'allocation_limit',
+        'external_id',
     ];
 
     /**
@@ -75,6 +77,7 @@ class Product extends Model
         'backup_limit' => 'required|integer',
         'database_limit' => 'required|integer',
         'allocation_limit' => 'required|integer',
+        'external_id' => 'nullable|string|max:191',
     ];
 
     /**

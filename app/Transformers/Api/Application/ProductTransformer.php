@@ -25,6 +25,9 @@ class ProductTransformer extends Transformer
             'icon' => $model->icon,
             'price' => $model->price,
             'description' => $model->description,
+            // The product id the payment gateway knows this product by, for the channels
+            // that sell products that already exist in their own dashboard.
+            'external_id' => $model->external_id,
             'limits' => [
                 'cpu' => $model->cpu_limit,
                 'memory' => $model->memory_limit,

@@ -69,6 +69,19 @@ Route::middleware([AdminSubject::class])->group(function () {
 
         Route::delete('/keys', [Application\Billing\BillingController::class, 'resetKeys']);
 
+        // Payment channels. Several can be set up at the same time; the credentials
+        // for each are kept so a channel does not have to be typed again.
+        Route::get('/channels', [Application\Billing\PaymentChannelController::class, 'index']);
+        Route::put('/channels', [Application\Billing\PaymentChannelController::class, 'update']);
+        Route::delete('/channels', [Application\Billing\PaymentChannelController::class, 'destroy']);
+
+        // Payment methods. The identifier of a method decides which channel it pays
+        // through, so a customer picks a method at checkout.
+        Route::get('/payment-methods', [Application\Billing\PaymentMethodController::class, 'index']);
+        Route::post('/payment-methods', [Application\Billing\PaymentMethodController::class, 'store']);
+        Route::patch('/payment-methods/{paymentMethod:id}', [Application\Billing\PaymentMethodController::class, 'update']);
+        Route::delete('/payment-methods/{paymentMethod:id}', [Application\Billing\PaymentMethodController::class, 'delete']);
+
         Route::get('/products/{product:id}', [Application\Billing\ProductController::class, 'view']);
 
         Route::group(['prefix' => '/categories'], function () {

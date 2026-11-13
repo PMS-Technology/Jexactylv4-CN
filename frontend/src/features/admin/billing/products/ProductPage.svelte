@@ -48,6 +48,8 @@
     let description = $state('');
     let icon = $state('');
     let price = $state('');
+    /** The product id the payment gateway knows this product by. */
+    let externalId = $state('');
     let limits = $state<Record<LimitKey, string>>({ cpu: '', memory: '', disk: '', backup: '', database: '', allocation: '' });
     let loaded = $state(false);
 
@@ -56,6 +58,7 @@
         description = p?.description ?? '';
         icon = p?.icon ?? '';
         price = p ? String(p.price) : '9.99';
+        externalId = p?.externalId ?? '';
         const l = p?.limits ?? { cpu: 100, memory: 1024, disk: 4096, backup: 0, database: 0, allocation: 1 };
         limits = {
             cpu: String(l.cpu),
@@ -106,6 +109,7 @@
             description: description.trim() || null,
             icon: icon.trim() || null,
             price: priceValue!,
+            externalId: externalId.trim() || null,
             limits: Object.fromEntries(limitFields.map(f => [f.key, Number(limits[f.key])])) as unknown as ProductLimits,
         };
         try {
@@ -194,6 +198,19 @@
                         <Label for="product-price">月费（{app.flags?.billing.currency.code?.toUpperCase()}）</Label>
                         <Input id="product-price" inputmode="decimal" bind:value={price} disabled={!canSave || saving} error={errors.price} />
                         <p class="text-xs text-muted-foreground">每个续期周期向用户收取的金额。</p>
+                    </div>
+                    <div class="space-y-1.5">
+                        <Label for="product-external-id">支付渠道商品编号</Label>
+                        <Input
+                            id="product-external-id"
+                            bind:value={externalId}
+                            placeholder="prod_xxx"
+                            class="font-mono"
+                            disabled={!canSave || saving}
+                        />
+                        <p class="text-xs text-muted-foreground">
+                            使用 Creem 或 Pancake 收款时必填：填上对方平台里这个商品的编号。Stripe 不需要，它会自己创建商品。
+                        </p>
                     </div>
                 </CardContent>
             </Card>

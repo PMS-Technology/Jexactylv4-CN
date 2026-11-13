@@ -4,6 +4,8 @@
     import { finishSetup, getSetupData, updateMode, type SetupData } from '$lib/api/admin/general';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
+    import { theme } from '$lib/stores/theme.svelte';
+    import { BRAND_PRESETS, DEFAULT_BRAND, normalizeBrand } from '$lib/theme/presets';
     import type { PanelMode } from '$types/bootstrap';
     import { Button, Card, Spinner } from '$lib/ui';
     import Alert from '$lib/components/Alert.svelte';
@@ -17,7 +19,7 @@
      * just picked (it stayed on the colour the wizard opened with).
      */
     const name = $derived(app.settings?.name || 'Jexactyl');
-    const steps = ['欢迎', '现有数据', '主题颜色', '面板模式', '完成'];
+    const steps = ['欢迎', '现有数据', '品牌色', '面板模式', '完成'];
     let step = $state(0);
 
     // --- Existing data
@@ -32,29 +34,24 @@
     });
 
     // --- Theme colour
-    const colors = [
-        { hex: '#16a34a', name: 'Jexactyl 绿' },
-        { hex: '#12aaaa', name: '青绿' },
-        { hex: '#ff0000', name: '砖红' },
-        { hex: '#9D00FF', name: '鸢尾紫' },
-        { hex: '#FFA500', name: '橙' },
-        { hex: '#32559f', name: 'Ptero 蓝' },
-        { hex: '#ff99c8', name: '粉' },
-        { hex: '#5e6472', name: '灰' },
-    ];
-    let primary = $state(app.theme?.colors?.primary ?? '#16a34a');
+    // The same list the theme editor offers, so the wizard and the editor cannot
+    // drift apart.
+    let primary = $state(normalizeBrand(app.theme?.colors?.primary) ?? DEFAULT_BRAND);
     let colorSaving = $state<string | null>(null);
     let colorError = $state('');
 
     async function pickColor(hex: string) {
         colorSaving = hex;
         colorError = '';
+        // Applied before the request lands, so the wizard picks up the colour at once.
+        theme.setBrand(hex);
         try {
             await updateThemeColor('primary', hex);
             primary = hex;
             if (app.theme) app.theme = { colors: { ...app.theme.colors, primary: hex } };
         } catch (e) {
             colorError = httpErrorToHuman(e);
+            theme.setBrand(primary);
         } finally {
             colorSaving = null;
         }
@@ -130,7 +127,7 @@
         {#if step === 0}
             <div class="text-center">
                 <h1 class="font-header text-4xl font-semibold lg:text-6xl">欢迎使用 <span class="text-primary">{name}</span></h1>
-                <p class="mt-4 text-muted-foreground">接下来几步会检查现有数据、选择主题颜色和面板模式。这些之后都可以在管理后台修改。</p>
+                <p class="mt-4 text-muted-foreground">接下来几步会检查现有数据、选择品牌色和面板模式。这些之后都可以在管理后台修改。</p>
             </div>
         {:else if step === 1}
             <h1 class="font-header text-2xl font-semibold">现有数据</h1>
@@ -157,11 +154,11 @@
                 {/if}
             {/if}
         {:else if step === 2}
-            <h1 class="font-header text-2xl font-semibold">主题颜色</h1>
-            <p class="mt-1 mb-6 text-sm text-muted-foreground">选一个主色，点击后立即保存。更多颜色可以在“外观 → 主题”里设置。</p>
+            <h1 class="font-header text-2xl font-semibold">品牌色</h1>
+            <p class="mt-1 mb-6 text-sm text-muted-foreground">选一个品牌色，点击后立即保存并应用到面板。之后可以在“外观 → 主题”里更换。</p>
             {#if colorError}<Alert variant="destructive" class="mb-4">{colorError}</Alert>{/if}
             <div class="grid grid-cols-4 gap-4 lg:grid-cols-8">
-                {#each colors as c (c.hex)}
+                {#each BRAND_PRESETS as c (c.hex)}
                     <button
                         type="button"
                         class="group flex flex-col items-center gap-2 rounded-lg p-2 text-xs hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:opacity-60"

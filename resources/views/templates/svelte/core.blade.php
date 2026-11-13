@@ -49,8 +49,9 @@
             </script>
         @endif
 
-        {{-- Applies the stored colour scheme before first paint so the page does not
-             flash the wrong theme while the bundle loads. --}}
+        {{-- Applies the stored colour scheme and the panel's brand colour before the
+             first paint, so the page does not flash the wrong theme while the bundle
+             loads. --}}
         <script>
             (function () {
                 try {
@@ -62,6 +63,15 @@
                     document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
                 } catch (e) {
                     // localStorage can throw in private modes; the default theme is fine.
+                }
+
+                // The brand colour belongs to the panel rather than to the user, so it
+                // comes from the server theme instead of from local storage. The
+                // accent tokens are derived from it in CSS.
+                var theme = window.ThemeConfiguration;
+                var brand = theme && theme.colors && theme.colors.primary;
+                if (brand && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(brand)) {
+                    document.documentElement.style.setProperty('--brand', brand);
                 }
             })();
         </script>

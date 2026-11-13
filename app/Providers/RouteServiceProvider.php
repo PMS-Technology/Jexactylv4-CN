@@ -46,6 +46,10 @@ class RouteServiceProvider extends ServiceProvider
                 Route::middleware('guest')->prefix('/auth')->group(base_path('routes/auth.php'));
             });
 
+            // Payment notifications come from the gateways rather than from the panel,
+            // so they carry no credentials and sit outside the authenticated groups.
+            Route::prefix('/api/client/billing')->group(base_path('routes/payments.php'));
+
             Route::middleware(['api', RequireTwoFactorAuthentication::class])->group(function () {
                 Route::middleware(['application-api', 'throttle:api.application'])
                     ->prefix('/api/application')
