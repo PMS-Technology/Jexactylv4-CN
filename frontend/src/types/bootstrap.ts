@@ -90,6 +90,12 @@ export interface PaymentMethodOption {
 
 /** Feature flags. Route tables gate entries on these, so they must be read synchronously. */
 export interface EverestSettings {
+    /**
+     * Whether the panel ignores the settings stored in the database
+     * (`APP_ENVIRONMENT_ONLY`). The settings screens then have no effect, so the
+     * interface says so instead of letting a saved change disappear on reload.
+     */
+    environment_only: boolean;
     auth: {
         registration: { enabled: boolean };
         security: { force2fa: boolean; attempts: number };

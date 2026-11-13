@@ -137,7 +137,22 @@
         </div>
     </aside>
 
-    <main bind:this={main} class="min-w-0 flex-1">
+    <main bind:this={main} class="min-w-0 flex-1 pb-[calc(3.75rem+env(safe-area-inset-bottom))] md:pb-0">
+        {#if app.flags?.environment_only}
+            <div class="p-6 pb-0">
+                <Alert variant="warning" title="受限环境：设置不会生效">
+                    这个面板设置了
+                    <code class="font-mono text-xs">APP_ENVIRONMENT_ONLY=true</code>
+                    ，数据库里保存的设置不会被应用——在这里的修改刷新后就会消失。把
+                    <code class="font-mono text-xs">.env</code>
+                    里的
+                    <code class="font-mono text-xs">APP_ENVIRONMENT_ONLY</code>
+                    改成
+                    <code class="font-mono text-xs">false</code>
+                    后才会生效。
+                </Alert>
+            </div>
+        {/if}
         {#if servedLegacyPath}
             <div class="p-6">
                 <Alert variant="warning" title="此页面尚未迁移">

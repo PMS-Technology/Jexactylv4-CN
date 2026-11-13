@@ -41,7 +41,7 @@
 <div class="flex min-h-screen">
     <Sidebar links={linksQuery.data ?? []} />
 
-    <main bind:this={main} class="min-w-0 flex-1">
+    <main bind:this={main} class="min-w-0 flex-1 pb-[calc(3.75rem+env(safe-area-inset-bottom))] md:pb-0">
         <DashboardAlert />
         {#if isIndex}
             <ServersPage />

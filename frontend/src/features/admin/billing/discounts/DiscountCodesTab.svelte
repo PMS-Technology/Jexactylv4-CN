@@ -108,7 +108,10 @@
                                     <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">{code.code}</code>
                                     <CopyButton text={code.code} label="" class="px-1" />
                                 </span>
-                                <span class="block text-xs text-muted-foreground">{code.description}</span>
+                                <!-- Kept on one line: Chinese wraps anywhere, so the column
+                                     would otherwise collapse to a sliver and the table would
+                                     not scroll but squeeze. -->
+                                <span class="block text-xs whitespace-nowrap text-muted-foreground">{code.description}</span>
                             </td>
                             <td class="px-4 py-3 whitespace-nowrap">
                                 {code.type === 'percentage' ? `${code.value}%` : `${symbol}${code.value}`} off

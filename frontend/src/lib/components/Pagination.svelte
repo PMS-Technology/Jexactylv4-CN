@@ -21,12 +21,13 @@
 </script>
 
 {#if pagination && pagination.totalPages > 1}
-    <div class="mt-6 flex items-center justify-between">
-        <p class="text-sm text-muted-foreground">
+    <!-- Stacked on a phone: side by side, the count is squeezed into a sliver. -->
+    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p class="text-sm whitespace-nowrap text-muted-foreground">
             显示第 {pagination.count} 项，共 {pagination.total} 项
         </p>
 
-        <div class="flex gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <Button
                 variant="outline"
                 size="sm"

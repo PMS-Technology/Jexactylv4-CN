@@ -15,6 +15,10 @@ class EverestComposer
     public function compose(View $view): void
     {
         $view->with('everestConfiguration', [
+            // Whether the panel ignores the settings stored in the database. When it
+            // does, the settings screens have no effect, so the interface says so
+            // rather than letting a saved change disappear on the next reload.
+            'environment_only' => boolval(config('everest.load_environment_only', false)),
             'auth' => [
                 'registration' => [
                     'enabled' => boolval(config('modules.auth.registration.enabled', false)),

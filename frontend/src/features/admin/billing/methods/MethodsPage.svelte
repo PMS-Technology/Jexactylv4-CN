@@ -125,9 +125,12 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3">
-                                    {method.name}
+                                    <!-- Kept on one line: Chinese wraps anywhere, so the
+                                         column would otherwise collapse to a sliver and the
+                                         table would not scroll but squeeze. -->
+                                    <span class="whitespace-nowrap">{method.name}</span>
                                     {#if method.description}
-                                        <span class="block text-xs text-muted-foreground">{method.description}</span>
+                                        <span class="block text-xs whitespace-nowrap text-muted-foreground">{method.description}</span>
                                     {/if}
                                 </td>
                                 <td class="px-4 py-3 font-mono text-xs">{method.channel}</td>
