@@ -91,31 +91,27 @@ class EpayChannel implements Channel
     /**
      * Signs a set of parameters the way Epay expects.
      *
-     * The signature and the sign type are left out, the rest are sorted by name and
-     * concatenated as `namevalue` pairs with no separator, and the merchant key is
-     * appended before hashing.
+     * This follows the V1 interface: the parameters are sorted by name, the empty ones
+     * are left out, and the rest are joined into `key=value&key=value` before the
+     * merchant key is appended and the whole thing is hashed. The signature itself and
+     * the signature type are not part of it.
+     *
+     * The values are signed as they are, before they are encoded into the URL — the
+     * gateway decodes what it receives and signs that.
      */
     public function sign(array $params, ?string $key = null): string
     {
         $key ??= (string) $this->channel()->setting('key');
 
-        unset($params['sign'], $params['sign_type'], $params['key']);
-
-        // Empty values are not part of the signature.
-        $params = array_filter($params, fn ($value) => $value !== null && $value !== '');
-
-        ksort($params);
-
-        $source = '';
-        foreach ($params as $name => $value) {
-            $source .= $name . $value;
-        }
-
-        return md5($source . $key);
+        return md5($this->signContent($params) . $key);
     }
 
     /**
      * Checks the signature of a callback and returns the parameters when it holds.
+     *
+     * The V1 format is what the gateway signs with. Some older builds sign the same
+     * parameters without the `=` and `&` separators, and a callback that is rejected
+     * leaves the order unfulfilled, so that form is accepted as well.
      */
     public function verify(array $params, ?string $key = null): bool
     {
@@ -125,7 +121,60 @@ class EpayChannel implements Channel
             return false;
         }
 
-        return hash_equals($this->sign($params, $key), $received);
+        $key ??= (string) $this->channel()->setting('key');
+
+        if (hash_equals(md5($this->signContent($params) . $key), $received)) {
+            return true;
+        }
+
+        return hash_equals(md5($this->legacySignContent($params) . $key), $received);
+    }
+
+    /**
+     * The string the signature is computed over.
+     *
+     * @param array<string, mixed> $params
+     */
+    private function signContent(array $params): string
+    {
+        unset($params['sign'], $params['sign_type'], $params['key']);
+
+        ksort($params);
+
+        $parts = [];
+
+        foreach ($params as $name => $value) {
+            if (is_array($value) || $value === null || trim((string) $value) === '') {
+                continue;
+            }
+
+            $parts[] = $name . '=' . $value;
+        }
+
+        return implode('&', $parts);
+    }
+
+    /**
+     * The signing string of the older Epay builds, which joined the parameters without
+     * any separator.
+     *
+     * @param array<string, mixed> $params
+     */
+    private function legacySignContent(array $params): string
+    {
+        unset($params['sign'], $params['sign_type'], $params['key']);
+
+        $params = array_filter($params, fn ($value) => $value !== null && $value !== '');
+
+        ksort($params);
+
+        $source = '';
+
+        foreach ($params as $name => $value) {
+            $source .= $name . $value;
+        }
+
+        return $source;
     }
 
     private function callbackUrl(): string

@@ -13,11 +13,12 @@ use Everest\Services\Billing\Channels\RsaSignature;
 class ChannelSignatureTest extends TestCase
 {
     /**
-     * The Epay signature is an MD5 over the sorted parameters plus the merchant key.
-     * A real gateway has to agree with it, so the formula is checked against the
-     * classic one rather than against itself.
+     * The Epay V1 signature is an MD5 over the sorted parameters, joined as
+     * `key=value&key=value`, plus the merchant key. A real gateway has to agree with
+     * it, so the formula is checked against the one the gateway uses rather than
+     * against itself.
      */
-    public function testEpaySignatureMatchesTheClassicFormula(): void
+    public function testEpaySignatureMatchesTheV1Formula(): void
     {
         $channel = $this->channel();
 
@@ -36,10 +37,56 @@ class ChannelSignatureTest extends TestCase
         ksort($expected);
         $source = '';
         foreach ($expected as $name => $value) {
+            $source .= $name . '=' . $value . '&';
+        }
+        $source = substr($source, 0, -1);
+
+        $this->assertSame(md5($source . 'merchant-key'), $sign);
+    }
+
+    /**
+     * The empty values are left out of the signature, the way the gateway does it.
+     */
+    public function testEpaySignatureLeavesOutEmptyValues(): void
+    {
+        $channel = $this->channel();
+
+        $params = [
+            'pid' => '1001',
+            'type' => 'alipay',
+            'sitename' => '',
+            'param' => null,
+        ];
+
+        $sign = $channel->sign($params, 'merchant-key');
+
+        $this->assertSame(md5('pid=1001&type=alipaymerchant-key'), $sign);
+    }
+
+    /**
+     * The older Epay builds signed the same parameters without the separators. A
+     * callback signed that way is still accepted, so the order is not left unfulfilled.
+     */
+    public function testEpayCallbackAlsoAcceptsTheOlderSignatureFormat(): void
+    {
+        $channel = $this->channel();
+
+        $params = [
+            'pid' => '1001',
+            'out_trade_no' => 'PD1-2-abcdef',
+            'money' => '12.34',
+        ];
+
+        $expected = $params;
+        ksort($expected);
+        $source = '';
+        foreach ($expected as $name => $value) {
             $source .= $name . $value;
         }
 
-        $this->assertSame(md5($source . 'merchant-key'), $sign);
+        $params['sign'] = md5($source . 'merchant-key');
+
+        $this->assertTrue($channel->verify($params, 'merchant-key'));
     }
 
     public function testEpaySignatureDoesNotDependOnTheParameterOrder(): void
@@ -93,6 +140,50 @@ class ChannelSignatureTest extends TestCase
 
         // A missing signature must not verify.
         $this->assertFalse($channel->verify(['pid' => '1001'], 'merchant-key'));
+    }
+
+    /**
+     * The gateway signs the parameters it receives, so the signature has to survive the
+     * trip through the URL. This walks the request the way the gateway does: the query
+     * string is parsed back into an array and the signature is checked over that.
+     */
+    public function testTheSignatureSurvivesTheTripThroughTheUrl(): void
+    {
+        $channel = $this->channel();
+
+        $params = [
+            'pid' => '1001',
+            'type' => 'wxpay',
+            'out_trade_no' => 'PD1-2-abcdef',
+            'notify_url' => 'https://panel.test/api/client/billing/epay/notify',
+            'return_url' => 'https://panel.test/account/billing/processing?reference=PD1-2-abcdef',
+            'name' => '付费套餐',
+            'money' => '12.34',
+            'clientip' => '127.0.0.1',
+        ];
+
+        $params['sign'] = $channel->sign($params, 'merchant-key');
+        $params['sign_type'] = 'MD5';
+
+        // What the gateway receives.
+        parse_str(http_build_query($params), $received);
+
+        // The gateway's own signing rule.
+        $sign = $received['sign'];
+        unset($received['sign'], $received['sign_type']);
+        ksort($received);
+
+        $source = '';
+        foreach ($received as $name => $value) {
+            if (is_array($value) || $value === null || trim((string) $value) === '') {
+                continue;
+            }
+
+            $source .= $name . '=' . $value . '&';
+        }
+        $source = substr($source, 0, -1);
+
+        $this->assertSame(md5($source . 'merchant-key'), $sign);
     }
 
     /**
