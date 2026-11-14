@@ -33,7 +33,7 @@ class EpayChannel implements Channel
         return PaymentChannel::Epay;
     }
 
-    public function create(CheckoutContext $context, ChannelRoute $route): string
+    public function create(CheckoutContext $context, ChannelRoute $route): CheckoutTarget
     {
         $gatewayUrl = $this->gatewayUrl();
 
@@ -53,15 +53,25 @@ class EpayChannel implements Channel
             $context->orderMetadata(),
         );
 
-        return $gatewayUrl . '/submit.php?' . http_build_query($params);
+        // The gateway reads the signed fields from the query string or from a form
+        // body, and which one it reads is its own choice. The same fields are put in
+        // both, so it finds the whole set either way and signs the same string we did.
+        return new CheckoutTarget(
+            $gatewayUrl . '/submit.php?' . http_build_query($params),
+            $params,
+        );
     }
 
     /**
-     * The parameters the merchant's own payment page is given.
+     * The fields the merchant hands the gateway.
      *
-     * The `type` parameter is the payment method within the Epay channel: `epay:wxpay`
-     * sends `wxpay`. A method that names no Epay type falls back to the one Epay
-     * treats as the default.
+     * The set is the one the Epay V1 interface expects: the payment method, the
+     * trade number, where to notify and where to return, the product name and the
+     * amount. The device says which page the customer is on.
+     *
+     * The product name is signed as it is, but `&` and `=` are taken out of it first:
+     * they are the separators of the signing string, so a name carrying them would
+     * make the signature ambiguous.
      *
      * @return array<string, string>
      */
@@ -72,11 +82,21 @@ class EpayChannel implements Channel
             'type' => $route->subtype ?? 'alipay',
             'out_trade_no' => $context->reference,
             'notify_url' => $this->callbackUrl(),
-            'return_url' => $this->returnUrl($context->reference),
-            'name' => $context->product->name,
+            'name' => $this->productName($context),
             'money' => number_format($context->total(), 2, '.', ''),
-            'clientip' => $context->user->last_ip ?? '127.0.0.1',
+            'device' => 'pc',
+            'return_url' => $this->returnUrl($context->reference),
         ];
+    }
+
+    /**
+     * The product name as the gateway is told it.
+     */
+    private function productName(CheckoutContext $context): string
+    {
+        $name = str_replace(['&', '='], ['＆', '＝'], (string) $context->product->name);
+
+        return trim($name);
     }
 
     public function process(string $identifier): Order

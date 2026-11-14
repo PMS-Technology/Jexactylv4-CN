@@ -24,15 +24,18 @@ class CheckoutController extends ClientApiController
     /**
      * Starts a checkout through the payment method the customer picked.
      *
-     * Returns the URL of the hosted payment page; the client sends the customer there.
+     * Returns where the customer is sent to pay: a URL to follow, or a URL plus the
+     * signed fields to submit as a form, which is how the Epay protocol works.
      */
-    public function create(CreateCheckoutRequest $request): string
+    public function create(CreateCheckoutRequest $request): array
     {
-        return $this->checkoutService->create(
-            $request->user(),
-            $request->all(),
-            (string) $request->input('payment_method'),
-        );
+        return $this->checkoutService
+            ->create(
+                $request->user(),
+                $request->all(),
+                (string) $request->input('payment_method'),
+            )
+            ->toArray();
     }
 
     /**

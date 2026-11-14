@@ -10,6 +10,7 @@ use Everest\Models\Billing\Order;
 use Everest\Models\Billing\Product;
 use Everest\Exceptions\DisplayException;
 use Everest\Services\Billing\Channels\ChannelManager;
+use Everest\Services\Billing\Channels\CheckoutTarget;
 
 /**
  * Turns a checkout request into a hosted payment page.
@@ -32,7 +33,7 @@ class CheckoutService
      *
      * @param array<string, mixed> $input the request body from the client
      */
-    public function create(User $user, array $input, string $methodIdentifier): string
+    public function create(User $user, array $input, string $methodIdentifier): CheckoutTarget
     {
         $method = $this->paymentMethods->methodFor($methodIdentifier);
         $route = $this->paymentMethods->routeFor($method->identifier);
@@ -94,7 +95,7 @@ class CheckoutService
      * Creates the checkout for a server upgrade, which is billed as the difference
      * between the two products rather than the full price of the new one.
      */
-    public function createUpgrade(User $user, Server $server, Product $newProduct, float $price, string $methodIdentifier): string
+    public function createUpgrade(User $user, Server $server, Product $newProduct, float $price, string $methodIdentifier): CheckoutTarget
     {
         $method = $this->paymentMethods->methodFor($methodIdentifier);
         $route = $this->paymentMethods->routeFor($method->identifier);

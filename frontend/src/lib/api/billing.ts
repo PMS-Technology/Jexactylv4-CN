@@ -10,6 +10,7 @@ import type {
     BillingEgg,
     BillingNode,
     Category,
+    CheckoutTarget,
     DiscountCode,
     Order,
     OrderVariable,
@@ -138,10 +139,10 @@ export interface CheckoutRequest {
 }
 
 /**
- * Creates a checkout through the payment method the customer picked and returns the
- * hosted payment page URL.
+ * Creates a checkout through the payment method the customer picked and returns where
+ * they are sent to pay.
  */
-export async function createCheckoutSession(req: CheckoutRequest): Promise<string> {
+export async function createCheckoutSession(req: CheckoutRequest): Promise<CheckoutTarget> {
     const { data } = await http.post('/api/client/billing/checkout/create', {
         product_id: req.productId,
         payment_method: req.paymentMethod,
@@ -153,7 +154,39 @@ export async function createCheckoutSession(req: CheckoutRequest): Promise<strin
         ...(req.discountCode ? { discount_code: req.discountCode } : {}),
     });
 
-    return data as string;
+    return data as CheckoutTarget;
+}
+
+/**
+ * Sends the customer to the payment page.
+ *
+ * Most gateways are reached by following a link. The Epay protocol hands the gateway a
+ * set of signed fields instead, which are submitted as a form; the gateway reads them
+ * from the form body, from the query string, or from either, and the URL carries the
+ * same fields so it finds them wherever it looks.
+ */
+export function submitCheckout(target: CheckoutTarget): void {
+    if (!target.params || target.method !== 'POST') {
+        window.location.assign(target.url);
+        return;
+    }
+
+    const form = document.createElement('form');
+    form.action = target.url;
+    form.method = 'POST';
+    form.style.display = 'none';
+
+    for (const [name, value] of Object.entries(target.params)) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        form.appendChild(input);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
 }
 
 /**
@@ -221,14 +254,14 @@ export async function getUpgradeCharge(uuid: string, productId: number): Promise
     return Number(data.charge);
 }
 
-/** Creates the checkout for an upgrade through the chosen payment method and returns its URL. */
-export async function processUpgrade(uuid: string, productId: number, paymentMethod: string): Promise<string> {
+/** Creates the checkout for an upgrade through the chosen payment method and returns where the customer is sent to pay. */
+export async function processUpgrade(uuid: string, productId: number, paymentMethod: string): Promise<CheckoutTarget> {
     const { data } = await http.post(`/api/client/servers/${uuid}/upgrade`, {
         product_id: productId,
         payment_method: paymentMethod,
     });
 
-    return data as string;
+    return data as CheckoutTarget;
 }
 
 /** Downloads an order's PDF invoice through the session, then hands it to the browser. */

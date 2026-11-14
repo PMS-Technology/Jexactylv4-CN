@@ -33,7 +33,7 @@ class WaffoChannel implements Channel
         return PaymentChannel::Waffo;
     }
 
-    public function create(CheckoutContext $context, ChannelRoute $route): string
+    public function create(CheckoutContext $context, ChannelRoute $route): CheckoutTarget
     {
         $apiKey = (string) $this->channel()->setting('api_key');
         $merchantId = (string) $this->channel()->setting('merchant_id');
@@ -99,7 +99,7 @@ class WaffoChannel implements Channel
             $context->orderMetadata(),
         );
 
-        return $this->checkoutUrl($data);
+        return new CheckoutTarget($this->checkoutUrl($data));
     }
 
     public function process(string $identifier): Order

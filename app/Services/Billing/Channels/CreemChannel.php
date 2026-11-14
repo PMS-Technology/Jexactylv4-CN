@@ -31,7 +31,7 @@ class CreemChannel implements Channel
         return PaymentChannel::Creem;
     }
 
-    public function create(CheckoutContext $context, ChannelRoute $route): string
+    public function create(CheckoutContext $context, ChannelRoute $route): CheckoutTarget
     {
         $apiKey = (string) $this->channel()->setting('api_key');
 
@@ -91,7 +91,7 @@ class CreemChannel implements Channel
             $context->orderMetadata(),
         );
 
-        return (string) $response->json('checkout_url');
+        return new CheckoutTarget((string) $response->json('checkout_url'));
     }
 
     public function process(string $identifier): Order

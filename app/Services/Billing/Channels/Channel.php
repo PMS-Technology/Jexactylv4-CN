@@ -22,12 +22,12 @@ interface Channel
     public function channel(): PaymentChannel;
 
     /**
-     * Starts a checkout and returns the URL the customer is sent to.
+     * Starts a checkout and returns where the customer is sent to pay.
      *
      * The route says which method within the channel the customer picked; the channel
      * uses it where the gateway takes one, and ignores it where it does not.
      */
-    public function create(CheckoutContext $context, ChannelRoute $route): string;
+    public function create(CheckoutContext $context, ChannelRoute $route): CheckoutTarget;
 
     /**
      * Confirms a payment and returns the order that was fulfilled.

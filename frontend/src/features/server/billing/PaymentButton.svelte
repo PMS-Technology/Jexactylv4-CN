@@ -3,7 +3,7 @@
     import { CreditCard } from '@lucide/svelte';
     import type { Product } from '$lib/api/definitions/billing';
     import type { Server } from '$lib/api/definitions/server';
-    import { billingKeys, createCheckoutSession, getPaymentMethods } from '$lib/api/billing';
+    import { billingKeys, createCheckoutSession, getPaymentMethods, submitCheckout } from '$lib/api/billing';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
     import { Button, Spinner } from '$lib/ui';
@@ -45,13 +45,13 @@
         loading = true;
         error = '';
         try {
-            const url = await createCheckoutSession({
+            const target = await createCheckoutSession({
                 productId: product.id,
                 serverId: Number(server.internalId),
                 variables: [],
                 paymentMethod: method.identifier,
             });
-            window.location.assign(url);
+            submitCheckout(target);
         } catch (e) {
             error = httpErrorToHuman(e);
             loading = false;

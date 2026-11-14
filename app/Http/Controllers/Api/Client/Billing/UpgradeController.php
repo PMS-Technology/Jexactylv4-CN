@@ -57,7 +57,7 @@ class UpgradeController extends ClientApiController
      * Process a one-time upgrade fee through the chosen payment method and
      * update the server with new resources according to new package.
      */
-    public function create(ProcessUpgradeRequest $request, Server $server): string
+    public function create(ProcessUpgradeRequest $request, Server $server): array
     {
         $validated = $this->upgradeService->validate($request->user());
 
@@ -73,12 +73,14 @@ class UpgradeController extends ClientApiController
             throw new DisplayException('You cannot upgrade to a cheaper plan.');
         }
 
-        return $this->checkoutService->createUpgrade(
-            $request->user(),
-            $server,
-            $new_product,
-            $price,
-            (string) $request->input('payment_method'),
-        );
+        return $this->checkoutService
+            ->createUpgrade(
+                $request->user(),
+                $server,
+                $new_product,
+                $price,
+                (string) $request->input('payment_method'),
+            )
+            ->toArray();
     }
 }

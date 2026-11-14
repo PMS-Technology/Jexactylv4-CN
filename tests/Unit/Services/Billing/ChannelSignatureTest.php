@@ -9,6 +9,7 @@ use Everest\Services\Billing\CheckoutContext;
 use Everest\Services\Billing\Channels\EpayChannel;
 use Everest\Services\Billing\Channels\ChannelRoute;
 use Everest\Services\Billing\Channels\RsaSignature;
+use Everest\Services\Billing\Channels\CheckoutTarget;
 
 class ChannelSignatureTest extends TestCase
 {
@@ -184,6 +185,63 @@ class ChannelSignatureTest extends TestCase
         $source = substr($source, 0, -1);
 
         $this->assertSame(md5($source . 'merchant-key'), $sign);
+    }
+
+    /**
+     * The fields the gateway is given are the ones the Epay V1 interface expects.
+     *
+     * A gateway that signs a different set of fields signs a different string, so the
+     * set is pinned here.
+     */
+    public function testTheGatewayIsGivenTheFieldsTheV1InterfaceExpects(): void
+    {
+        $channel = $this->channel();
+
+        $params = $channel->checkoutParameters(
+            $this->context(),
+            ChannelRoute::fromIdentifier('epay:wxpay')
+        );
+
+        $this->assertSame(
+            ['pid', 'type', 'out_trade_no', 'notify_url', 'name', 'money', 'device', 'return_url'],
+            array_keys($params)
+        );
+
+        $this->assertSame('wxpay', $params['type']);
+        $this->assertSame('pc', $params['device']);
+    }
+
+    /**
+     * The customer is sent to the gateway with the signed fields, and the gateway may
+     * read them from the query string or from a form body — so both carry the same set.
+     */
+    public function testTheSignedFieldsAreOfferedBothInTheUrlAndAsAForm(): void
+    {
+        $channel = $this->channel();
+
+        $params = $channel->checkoutParameters(
+            $this->context(),
+            ChannelRoute::fromIdentifier('epay:wxpay')
+        );
+        $params['sign'] = $channel->sign($params, 'merchant-key');
+        $params['sign_type'] = 'MD5';
+
+        $target = new CheckoutTarget(
+            'https://pay.example.test/submit.php?' . http_build_query($params),
+            $params,
+        );
+
+        $this->assertTrue($target->isForm());
+        $this->assertSame('POST', $target->toArray()['method']);
+
+        // What the gateway finds in the query string.
+        parse_str(parse_url($target->url, PHP_URL_QUERY), $fromQuery);
+
+        // And what it finds in the form body.
+        $fromBody = $params;
+
+        $this->assertSame($fromBody, $fromQuery);
+        $this->assertSame($fromBody['sign'], $channel->sign($fromBody, 'merchant-key'));
     }
 
     /**

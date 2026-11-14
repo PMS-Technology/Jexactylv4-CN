@@ -3,7 +3,14 @@
     import { ArrowLeft, ShoppingBag } from '@lucide/svelte';
     import type { ServerStore } from '$lib/stores/server.svelte';
     import type { Product } from '$lib/api/definitions/billing';
-    import { getUpgradeCharge, getUpgradeOptions, getPaymentMethods, processUpgrade, billingKeys } from '$lib/api/billing';
+    import {
+        billingKeys,
+    getUpgradeCharge,
+    getUpgradeOptions,
+    getPaymentMethods,
+    processUpgrade,
+    submitCheckout,
+} from '$lib/api/billing';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
     import { formatMoney } from '$features/dashboard/billing/money';
@@ -69,7 +76,7 @@
         submitting = true;
         submitError = '';
         try {
-            window.location.assign(await processUpgrade(server.uuid, selected.id, method.identifier));
+            submitCheckout(await processUpgrade(server.uuid, selected.id, method.identifier));
         } catch (e) {
             submitError = httpErrorToHuman(e);
             submitting = false;

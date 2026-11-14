@@ -50,6 +50,20 @@ export interface BillingEgg {
 }
 
 /**
+ * Where the customer is sent to pay.
+ *
+ * Most gateways are reached by following a URL. The Epay protocol instead hands the
+ * gateway a set of signed fields, which are submitted as a form — the gateway reads
+ * them from the form body, from the query string, or from either.
+ */
+export interface CheckoutTarget {
+    url: string;
+    /** `POST` when the signed fields have to be submitted as a form. */
+    method: 'GET' | 'POST';
+    params: Record<string, string>;
+}
+
+/**
  * A way the customer can pay. The identifier decides the flow, so it is what the
  * checkout sends back: `stripe` is Stripe itself, `epay:wxpay` is the WeChat Pay
  * method of the Epay channel.

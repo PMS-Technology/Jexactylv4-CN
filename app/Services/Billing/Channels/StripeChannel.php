@@ -25,7 +25,7 @@ class StripeChannel implements Channel
         return PaymentChannel::Stripe;
     }
 
-    public function create(CheckoutContext $context, ChannelRoute $route): string
+    public function create(CheckoutContext $context, ChannelRoute $route): CheckoutTarget
     {
         $stripe = new StripeClient((string) $this->channel()->setting('secret'));
 
@@ -48,7 +48,7 @@ class StripeChannel implements Channel
             $context->orderMetadata(),
         );
 
-        return $transaction->url;
+        return new CheckoutTarget($transaction->url);
     }
 
     public function process(string $identifier): Order

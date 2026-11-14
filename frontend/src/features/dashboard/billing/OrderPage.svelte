@@ -10,6 +10,7 @@
         getProductEggs,
         getViableNodes,
         processFreeOrder,
+        submitCheckout,
     } from '$lib/api/billing';
     import { httpErrorToHuman } from '$lib/api/http';
     import type { DiscountCode } from '$lib/api/definitions/billing';
@@ -150,14 +151,14 @@
                 await queryClient.invalidateQueries({ queryKey: ['servers'] });
                 navigate('/');
             } else {
-                const url = await createCheckoutSession({
+                const target = await createCheckoutSession({
                     ...request,
                     paymentMethod: method!.identifier,
                     discountCode: discount?.code,
                 });
                 // Leaving for the gateway's hosted checkout; keep the button busy until
                 // the page unloads.
-                window.location.assign(url);
+                submitCheckout(target);
                 return;
             }
         } catch (e) {
