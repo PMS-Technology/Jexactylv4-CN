@@ -5,6 +5,10 @@
  * cover it: every helper checks the preference itself and leaves the element alone when
  * the user asked for less motion.
  *
+ * GSAP also owns the `transform` property of everything it animates, so an element
+ * that is centred with Tailwind's `-translate-x-1/2` must not be centred twice; see
+ * `readCentering` for how the two are kept apart.
+ *
  * The library is loaded on demand. `preloadMotion()` fetches it once a signed-in user
  * is in, so the first transition does not wait on the network; helpers that run before
  * it is ready do nothing rather than animating late.
@@ -69,6 +73,53 @@ export function prefersReducedMotion(): boolean {
     );
 }
 
+/**
+ * The centring an element carries in the independent `translate` property.
+ *
+ * GSAP takes over the `transform` property of whatever it animates and clears the
+ * independent `translate`, `rotate` and `scale` properties on it. It reads the
+ * element's own transform when the tween is created and folds that into the new one,
+ * but an element that is not laid out yet — a dialog that is still `display: none` —
+ * reports no matrix. A centring written as `translate: -50% -50%`, which is what
+ * Tailwind's `-translate-x-1/2` produces, would then be dropped: the element would sit
+ * with its corner at the middle of the screen for the whole animation and jump into
+ * place when the tween cleared its props.
+ *
+ * Reading the property here and handing the values to GSAP as percentages keeps the
+ * centring in the transform it writes itself.
+ */
+type Centering = {
+    xPercent?: number;
+    yPercent?: number;
+    x?: number;
+    y?: number;
+};
+
+function readCentering(element: HTMLElement): Centering {
+    const value = getComputedStyle(element).translate;
+    if (!value || value === 'none') return {};
+
+    const centering: Centering = {};
+
+    // The property takes one, two or three lengths; the third one is the z offset,
+    // which the panel does not use.
+    for (const [index, part] of value.trim().split(/\s+/).slice(0, 2).entries()) {
+        const number = parseFloat(part);
+        if (Number.isNaN(number)) continue;
+
+        if (part.endsWith('%')) {
+            if (index === 0) centering.xPercent = number;
+            else centering.yPercent = number;
+        } else if (index === 0) {
+            centering.x = number;
+        } else {
+            centering.y = number;
+        }
+    }
+
+    return centering;
+}
+
 /** Whether the animation library is loaded and animations may run. */
 export function motionReady(): boolean {
     return gsap !== null && !prefersReducedMotion();
@@ -80,6 +131,10 @@ export function motionReady(): boolean {
  *
  * This runs synchronously once the library is loaded: the element is moved to its
  * starting state in the same frame, so it is never painted before the animation.
+ *
+ * An element that is still `display: none` has no box to measure, so the centring it
+ * carries in the `translate` property is read here and given to GSAP as percentages;
+ * without that the element would sit at the wrong place until the tween ended.
  */
 export function animateIn(
     element: HTMLElement | HTMLElement[] | null | undefined,
@@ -91,22 +146,52 @@ export function animateIn(
     const targets = Array.isArray(element) ? element : [element];
     if (!targets.length) return;
 
+    // An element without a box reports no transform, so GSAP would drop a centring
+    // that lives in the `translate` property. It is read here and handed over.
+    const first = targets[0];
+    const centering =
+        targets.length === 1 && first && !first.getClientRects().length
+            ? readCentering(first)
+            : {};
+
+    const from: Record<string, number> = { autoAlpha: 0 };
+    const to: Record<string, number> = { autoAlpha: 1 };
+
+    // The offsets the element already carries are the base the animation moves from.
+    if (distance !== undefined) {
+        from.y = (centering.y ?? 0) + distance;
+        to.y = centering.y ?? 0;
+    } else if (centering.y !== undefined) {
+        from.y = centering.y;
+        to.y = centering.y;
+    }
+
+    if (centering.x !== undefined) {
+        from.x = centering.x;
+        to.x = centering.x;
+    }
+
+    if (centering.xPercent !== undefined) {
+        from.xPercent = centering.xPercent;
+        to.xPercent = centering.xPercent;
+    }
+
+    if (centering.yPercent !== undefined) {
+        from.yPercent = centering.yPercent;
+        to.yPercent = centering.yPercent;
+    }
+
     // A second transition on the same element replaces the first one.
     gsap.killTweensOf(targets);
-    gsap.fromTo(
-        targets,
-        { autoAlpha: 0, ...(distance === undefined ? {} : { y: distance }) },
-        {
-            autoAlpha: 1,
-            ...(distance === undefined ? {} : { y: 0 }),
-            duration,
-            delay,
-            ease,
-            stagger,
-            clearProps: CLEARED,
-            overwrite: 'auto',
-        },
-    );
+    gsap.fromTo(targets, from, {
+        ...to,
+        duration,
+        delay,
+        ease,
+        stagger,
+        clearProps: CLEARED,
+        overwrite: 'auto',
+    });
 }
 
 /**
