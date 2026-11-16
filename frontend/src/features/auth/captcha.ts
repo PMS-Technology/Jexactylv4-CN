@@ -26,6 +26,10 @@ export async function captchaPayload(purpose: string = 'login'): Promise<Captcha
         widgetKey = key;
     }
 
+    // The auth pages are client-side routes, so the slot the widget lives in may
+    // have been replaced since the widget was created.
+    widget.ensureAttached();
+
     return widget.execute();
 }
 

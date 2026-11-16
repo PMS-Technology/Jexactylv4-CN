@@ -9,6 +9,9 @@ export type CaptchaProvider = 'recaptcha' | 'hcaptcha' | 'turnstile' | 'geetest'
 
 export type CaptchaPayload = Record<string, string>;
 
+/** Mount point rendered by the auth layout, directly under the copyright line. */
+export const CAPTCHA_SLOT_ID = 'captcha-slot';
+
 export interface CaptchaConfig {
     enabled: boolean;
     provider: CaptchaProvider;
@@ -20,6 +23,11 @@ export interface CaptchaConfig {
 export interface CaptchaWidget {
     execute(): Promise<CaptchaPayload>;
     destroy(): void;
+    /**
+     * Moves the widget container back into the current mount point. Needed after a
+     * client-side navigation replaced the page the container was appended to.
+     */
+    ensureAttached(): void;
 }
 
 interface Grecaptcha {
@@ -151,13 +159,35 @@ abstract class BaseWidget implements CaptchaWidget {
     protected readonly container: HTMLDivElement;
     protected pending: Pending | null = null;
 
-    constructor(protected readonly provider: CaptchaProvider, visible = false) {
+    constructor(protected readonly provider: CaptchaProvider, protected readonly visible = false) {
         this.container = document.createElement('div');
         this.container.dataset.captchaContainer = provider;
-        this.container.style.cssText = visible
+        this.mount();
+    }
+
+    /**
+     * Visible widgets live in the auth layout slot below the copyright line; the
+     * invisible ones stay hidden on the body. When the slot is missing (a page
+     * without the auth layout) the widget falls back to a floating corner.
+     */
+    protected mount(): void {
+        const slot = this.visible ? document.getElementById(CAPTCHA_SLOT_ID) : null;
+
+        if (slot) {
+            this.container.style.cssText = 'width:100%;display:flex;justify-content:center;';
+            slot.appendChild(this.container);
+
+            return;
+        }
+
+        this.container.style.cssText = this.visible
             ? 'position:fixed;right:16px;bottom:16px;z-index:2147483000;'
             : 'display:none;';
         document.body.appendChild(this.container);
+    }
+
+    ensureAttached(): void {
+        this.mount();
     }
 
     abstract execute(): Promise<CaptchaPayload>;

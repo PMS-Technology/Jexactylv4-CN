@@ -23,5 +23,7 @@
         </div>
         <Card class="p-6">{@render children()}</Card>
         <p class="mt-6 text-center text-xs text-muted-foreground">© {new Date().getFullYear()} {name}</p>
+        <!-- Mount point for the captcha widget, rendered under the copyright line. -->
+        <div id="captcha-slot" class="mt-4 flex justify-center empty:hidden"></div>
     </div>
 </div>
