@@ -1,5 +1,6 @@
 import { ClipboardList, Receipt, ShieldCheck, Ticket, User } from '@lucide/svelte';
 import { redirect, route, type RouteDefinition } from '$lib/router/types';
+import { standardOnly } from '$lib/mode';
 
 /**
  * Account routes, ported from `routers/routes/account.ts`.
@@ -27,10 +28,11 @@ const account: RouteDefinition[] = [
     route('tickets', () => import('./tickets/TicketsPage.svelte'), {
         name: '工单',
         icon: Ticket,
-        condition: flags => flags.tickets.enabled,
+        // Tickets are a hosting provider feature; personal mode drops them.
+        condition: flags => standardOnly(flags.mode) && flags.tickets.enabled,
     }),
     route('tickets/:id', () => import('./tickets/TicketPage.svelte'), {
-        condition: flags => flags.tickets.enabled,
+        condition: flags => standardOnly(flags.mode) && flags.tickets.enabled,
     }),
 
     // Billing. Only the two entry points carry the feature flag in the legacy table; the
@@ -40,15 +42,15 @@ const account: RouteDefinition[] = [
         name: '订购服务',
         end: true,
         icon: Receipt,
-        condition: flags => flags.billing.enabled,
+        condition: flags => standardOnly(flags.mode) && flags.billing.enabled,
     }),
     route('billing/order/:id', () => import('./billing/OrderPage.svelte'), {
-        condition: flags => flags.billing.enabled,
+        condition: flags => standardOnly(flags.mode) && flags.billing.enabled,
     }),
     route('billing/orders', () => import('./billing/OrdersPage.svelte'), {
         name: '订单',
         icon: ClipboardList,
-        condition: flags => flags.billing.enabled,
+        condition: flags => standardOnly(flags.mode) && flags.billing.enabled,
     }),
     route('billing/processing', () => import('./billing/ProcessingPage.svelte')),
     route('billing/success', () => import('./billing/SuccessPage.svelte')),

@@ -11,6 +11,7 @@ use Everest\Models\Database;
 use Everest\Models\Billing\Order;
 use Illuminate\Http\JsonResponse;
 use Everest\Models\Billing\Product;
+use Everest\Services\Panel\PanelMode;
 use Everest\Services\Helpers\SoftwareVersionService;
 use Everest\Http\Requests\Api\Application\OverviewRequest;
 
@@ -21,6 +22,7 @@ class OverviewController extends ApplicationApiController
      */
     public function __construct(
         private SoftwareVersionService $softwareVersionService,
+        private PanelMode $panelMode,
     ) {
         parent::__construct();
     }
@@ -58,7 +60,9 @@ class OverviewController extends ApplicationApiController
             'tickets' => Ticket::query()->where('status', 'pending')->count(),
         ];
 
-        if (config('modules.billing.enabled')) {
+        // The billing metrics only exist in standard mode; personal mode drops the
+        // whole billing system.
+        if (config('modules.billing.enabled') && $this->panelMode->allows('billing')) {
             $data['billing'] = [
                 'revenue' => (float) Order::query()->where('status', Order::STATUS_PROCESSED)->sum('total'),
                 'orders_pending' => Order::query()->where('status', Order::STATUS_PENDING)->count(),

@@ -16,6 +16,7 @@ import {
     User,
 } from '@lucide/svelte';
 import { route, type AdminRouteDefinition } from '$lib/router/types';
+import { standardOnly } from '$lib/mode';
 
 /**
  * Admin routes, ported from `routers/routes/admin.ts`. Patterns are relative to `/admin`.
@@ -59,6 +60,9 @@ const admin: AdminRouteDefinition[] = [
         category: 'general',
         advanced: true,
         permission: 'api.read',
+        // The application API is meant for automated panel integrations, which only
+        // a hosting provider runs. Personal mode drops it.
+        condition: flags => standardOnly(flags.mode),
     }),
 
     // --- Modules
@@ -76,6 +80,8 @@ const admin: AdminRouteDefinition[] = [
         category: 'modules',
         advanced: true,
         permission: 'billing.read',
+        // The billing system is a hosting provider feature; personal mode drops it.
+        condition: flags => standardOnly(flags.mode),
     }),
     // List, new, options and :id are matched inside TicketsArea.
     route<AdminRouteDefinition>('tickets/*', () => import('./tickets/TicketsArea.svelte'), {
@@ -84,6 +90,8 @@ const admin: AdminRouteDefinition[] = [
         category: 'modules',
         advanced: true,
         permission: 'tickets.read',
+        // Tickets are a hosting provider feature; personal mode drops them.
+        condition: flags => standardOnly(flags.mode),
     }),
     route<AdminRouteDefinition>('ai/*', () => import('./ai/AIArea.svelte'), {
         name: 'AI',
@@ -121,9 +129,12 @@ const admin: AdminRouteDefinition[] = [
         category: 'management',
         advanced: true,
         permission: 'databases.read',
+        // Database hosts are a hosting provider feature; personal mode drops them.
+        condition: flags => standardOnly(flags.mode),
     }),
     route<AdminRouteDefinition>('databases/:id', () => import('./databases/DatabaseHostPage.svelte'), {
         permission: 'databases.read',
+        condition: flags => standardOnly(flags.mode),
     }),
     // List, new and :id tabs are matched inside NodesArea.
     route<AdminRouteDefinition>('nodes/*', () => import('./nodes/NodesArea.svelte'), {

@@ -4,6 +4,7 @@
     import { setAuthModule, updateAuthSetting, type AuthModuleName, type AuthSettingGroup } from '$lib/api/admin/auth';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
+    import { isPersonalMode } from '$lib/mode';
     import { Button, Card, CardContent, CardHeader, CardTitle, Select, Spinner } from '$lib/ui';
     import Input from '$lib/ui/Input.svelte';
     import Label from '$lib/ui/Label.svelte';
@@ -20,6 +21,8 @@
      */
     const auth = $derived(app.flags!.auth);
     const canUpdate = $derived(app.can('auth.update'));
+    // Public signups are a standard mode feature; personal mode keeps the panel closed.
+    const personalMode = $derived(isPersonalMode(app.flags?.mode));
 
     // Per-card status: which card is saving, and which one just saved.
     let saving = $state<string | null>(null);
@@ -250,13 +253,15 @@
                         <Switch
                             checked={auth.registration.enabled}
                             aria-label="允许用户注册"
-                            disabled={!canUpdate || saving !== null}
+                            disabled={!canUpdate || saving !== null || personalMode}
                             onCheckedChange={v => save('registration', 'registration', { enabled: v }, a => (a.registration.enabled = v))}
                         />
                     {/key}
                 </label>
                 <p class="text-xs text-muted-foreground">控制用户能否通过内置页面注册。</p>
-                {#if !auth.registration.enabled}
+                {#if personalMode}
+                    <Alert variant="warning">个人模式下不开放公开注册，这里由面板模式控制。</Alert>
+                {:else if !auth.registration.enabled}
                     <Alert variant="warning">注册已关闭，Discord 等 OAuth 模块只能用于登录，不能注册新账号。</Alert>
                 {/if}
             </CardContent>

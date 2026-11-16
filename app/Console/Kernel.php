@@ -5,6 +5,7 @@ namespace Everest\Console;
 use Everest\Models\ActivityLog;
 use Everest\Models\JGuardDelay;
 use Everest\Models\JGuardAttempt;
+use Everest\Services\Panel\PanelMode;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Console\PruneCommand;
 use Everest\Console\Commands\AutoUpdateCommand;
@@ -57,7 +58,8 @@ class Kernel extends ConsoleKernel
             $schedule->command(AutoUpdateCommand::class)->daily();
         }
 
-        if (config('modules.billing.enabled')) {
+        // The billing jobs only run in standard mode; personal mode has no billing.
+        if (config('modules.billing.enabled') && app(PanelMode::class)->allows('billing')) {
             $schedule->command(CleanupOrdersCommand::class)->daily();
             $schedule->command(SuspendBillableServersCommand::class)->daily();
             $schedule->command(CalculateOrderThreatIndexCommand::class)->everyFiveMinutes();

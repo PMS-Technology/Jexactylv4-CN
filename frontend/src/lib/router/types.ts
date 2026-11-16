@@ -1,5 +1,5 @@
 import type { Component } from 'svelte';
-import type { EverestSettings } from '$types/bootstrap';
+import type { EverestSettings, PanelMode } from '$types/bootstrap';
 import { normalizePattern } from './match';
 
 /**
@@ -33,6 +33,8 @@ export interface RouteDefinition {
 export interface ServerRouteFlags {
     billable: boolean;
     activityEnabled: boolean;
+    /** The active panel mode; personal mode hides the hosting provider features. */
+    mode: PanelMode;
 }
 
 export interface ServerRouteDefinition extends Omit<RouteDefinition, 'condition'> {
@@ -45,6 +47,8 @@ export interface ServerRouteDefinition extends Omit<RouteDefinition, 'condition'
 /** Flags the legacy admin table gated on. */
 export interface AdminRouteFlags {
     activityEnabled: boolean;
+    /** The active panel mode; personal mode hides the hosting provider features. */
+    mode: PanelMode;
 }
 
 export interface AdminRouteDefinition extends Omit<RouteDefinition, 'condition'> {

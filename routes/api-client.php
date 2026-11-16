@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Everest\Http\Controllers\Api\Client;
 use Everest\Http\Middleware\BillingEnabled;
+use Everest\Http\Middleware\TicketsEnabled;
 use Everest\Http\Middleware\SuspendedAccount;
 use Everest\Http\Middleware\Activity\ServerSubject;
 use Everest\Http\Middleware\Activity\AccountSubject;
@@ -70,7 +71,7 @@ Route::prefix('/')->middleware([SuspendedAccount::class])->group(function () {
             Route::post('/remove', [Client\SSHKeyController::class, 'delete']);
         });
 
-        Route::prefix('/tickets')->group(function () {
+        Route::prefix('/tickets')->middleware([TicketsEnabled::class])->group(function () {
             Route::get('/', [Client\TicketController::class, 'index']);
             Route::post('/', [Client\TicketController::class, 'store']);
 

@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Container\Container;
 use Everest\Events\Auth\DirectLogin;
+use Everest\Services\Panel\PanelMode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Event;
 use Everest\Exceptions\DisplayException;
@@ -30,6 +31,7 @@ abstract class AbstractLoginController extends ApplicationApiController
     protected AuthManager $auth;
     protected UserCreationService $creation;
     protected JGuardService $jguard;
+    protected PanelMode $panelMode;
 
     /**
      * Lockout time for failed login requests.
@@ -56,6 +58,7 @@ abstract class AbstractLoginController extends ApplicationApiController
         $this->auth = Container::getInstance()->make(AuthManager::class);
         $this->creation = Container::getInstance()->make(UserCreationService::class);
         $this->jguard = Container::getInstance()->make(JGuardService::class);
+        $this->panelMode = Container::getInstance()->make(PanelMode::class);
     }
 
     /**
@@ -152,7 +155,9 @@ abstract class AbstractLoginController extends ApplicationApiController
         $guard = config('modules.auth.jguard.enabled') ?? false;
         $enabled = config('modules.auth.registration.enabled') ?? false;
 
-        if (!$enabled) {
+        // Public signups are a hosting provider feature; personal mode keeps the
+        // panel closed to new accounts.
+        if (!$enabled || !$this->panelMode->allows('registration')) {
             throw new DisplayException('User signup is disabled at this time.');
         }
 

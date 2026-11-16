@@ -19,6 +19,7 @@
     import { getMetrics, getVersion } from '$lib/api/admin/general';
     import { httpErrorToHuman } from '$lib/api/http';
     import { app } from '$lib/stores/app.svelte';
+    import { standardOnly } from '$lib/mode';
     import { Card, CardContent, CardHeader, CardTitle, Spinner } from '$lib/ui';
     import Alert from '$lib/components/Alert.svelte';
     import CopyButton from '$lib/components/CopyButton.svelte';
@@ -78,7 +79,7 @@
                 description: '开启自动更新后，面板会在后台保持最新与安全。',
             });
         }
-        if (!app.flags?.auth.registration.enabled) {
+        if (!app.flags?.auth.registration.enabled && standardOnly(app.flags?.mode)) {
             list.push({
                 icon: UserPlus,
                 href: '/admin/auth',

@@ -23,6 +23,9 @@
         try {
             await updateMode(mode);
             app.updateSettings({ mode });
+            // The feature flags carry the mode as well, so the route tables react to
+            // the change right away instead of on the next page load.
+            app.updateFlags({ mode });
             saved = true;
         } catch (e) {
             error = httpErrorToHuman(e);
@@ -42,7 +45,7 @@
             mode: 'personal',
             icon: Moon,
             title: '个人模式',
-            text: '个人模式会去掉主要面向大型组织和主机商的功能，让小规模使用者更容易托管和管理服务器。',
+            text: '个人模式会去掉主要面向大型组织和主机商的功能：计费系统、工单、用户注册、应用 API 和数据库主机都会关闭，只保留管理游戏服务器需要的部分。',
         },
     ] as const;
 </script>

@@ -1,5 +1,6 @@
 import { Archive, Banknote, Clock, Database, Eye, FolderOpen, Play, Terminal, Users, Wifi } from '@lucide/svelte';
 import { route, type ServerRouteDefinition } from '$lib/router/types';
+import { standardOnly } from '$lib/mode';
 
 /**
  * Server routes, ported from `routers/routes/server.ts`. Patterns are relative to
@@ -69,12 +70,14 @@ const server: ServerRouteDefinition[] = [
         permission: 'billing.*',
         name: '计费',
         icon: Banknote,
-        condition: flags => flags.billable,
+        // A billable server is only billable in standard mode; personal mode drops
+        // the whole billing system.
+        condition: flags => standardOnly(flags.mode) && flags.billable,
     }),
     // The legacy entry carried no permission; the upgrade API itself only checks access
     // to the server, so this is ported as-is.
     route('billing/upgrade', () => import('./billing/UpgradePage.svelte'), {
-        condition: flags => flags.billable,
+        condition: flags => standardOnly(flags.mode) && flags.billable,
     }),
 ];
 

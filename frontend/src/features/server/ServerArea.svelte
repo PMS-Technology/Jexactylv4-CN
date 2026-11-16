@@ -17,6 +17,7 @@
     import MobileNavDivider from '$lib/components/mobile-nav/MobileNavDivider.svelte';
     import MobileNavAction from '$lib/components/mobile-nav/MobileNavAction.svelte';
     import { animateRouteChange } from '$lib/motion';
+    import { standardOnly } from '$lib/mode';
     import serverRoutes, { categoryLabels, serverRouteCategories } from './routes';
 
     let { id }: { id: string } = $props();
@@ -31,9 +32,11 @@
 
     const activityEnabled = $derived(Boolean(app.settings?.activity.enabled.server));
     const billable = $derived(Boolean(store.server?.billingProductId));
+    const mode = $derived(app.flags?.mode ?? app.settings?.mode);
 
-    // The legacy table gates on { billable, activityEnabled }; ported verbatim.
-    const visible = $derived(serverRoutes.filter(r => !r.condition || r.condition({ billable, activityEnabled })));
+    // The legacy table gates on { billable, activityEnabled }; ported verbatim. The
+    // panel mode is added on top of it, since personal mode has no billing at all.
+    const visible = $derived(serverRoutes.filter(r => !r.condition || r.condition({ billable, activityEnabled, mode })));
 
     const isIndex = $derived(router.pathname.replace(/\/+$/, '') === `/server/${id}`);
     const match = $derived(resolveRoute(visible, router.pathname, `/server/${id}`));
@@ -63,9 +66,12 @@
     );
 
     // A billable server past its renewal date is locked behind the renewal screen.
+    // Personal mode has no billing, so a server that still carries a billing product
+    // is not locked out there.
     const renewalOverdue = $derived(
         Boolean(
-            store.server?.billingProductId &&
+            standardOnly(mode) &&
+                store.server?.billingProductId &&
                 store.server?.renewalDate &&
                 store.server.renewalDate.getTime() < Date.now(),
         ),

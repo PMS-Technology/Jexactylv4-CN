@@ -96,6 +96,11 @@ export interface EverestSettings {
      * interface says so instead of letting a saved change disappear on reload.
      */
     environment_only: boolean;
+    /**
+     * The active panel mode. Standard mode offers the full feature set, personal
+     * mode drops the features that only matter to hosting providers.
+     */
+    mode: PanelMode;
     auth: {
         registration: { enabled: boolean };
         security: { force2fa: boolean; attempts: number };

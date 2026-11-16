@@ -20,7 +20,8 @@
      * flag and admin permission, the module indicators, and the permission gate.
      */
     const activityEnabled = $derived(Boolean(app.settings?.activity.enabled.admin));
-    const visible = $derived(adminRoutes.filter(r => !r.condition || r.condition({ activityEnabled })));
+    const mode = $derived(app.flags?.mode ?? app.settings?.mode);
+    const visible = $derived(adminRoutes.filter(r => !r.condition || r.condition({ activityEnabled, mode })));
     const navigable = $derived(visible.filter(r => r.name && app.can(r.permission)));
 
     const match = $derived(resolveRoute(visible, router.pathname, '/admin'));

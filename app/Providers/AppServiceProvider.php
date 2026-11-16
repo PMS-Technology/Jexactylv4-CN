@@ -8,6 +8,7 @@ use Everest\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Pagination\Paginator;
+use Everest\Services\Panel\PanelMode;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -69,6 +70,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // The panel mode is read in several places during a request (the view
+        // composers, the module middlewares, the auth flow), so it is resolved
+        // once per request.
+        $this->app->singleton(PanelMode::class);
+
         // Only load the settings / theme service provider if the environment
         // is configured to allow it.
         if (!config('everest.load_environment_only', false) && $this->app->environment() !== 'testing') {

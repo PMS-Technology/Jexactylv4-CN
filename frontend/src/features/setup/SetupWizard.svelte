@@ -60,7 +60,7 @@
     // --- Mode
     const modes = [
         { mode: 'standard', icon: Monitor, title: '标准模式', text: '启用 Jexactyl 的全部常规功能，包括计费系统、工单、用户注册等。适合主机商和需要管理大量用户的团队。' },
-        { mode: 'personal', icon: Moon, title: '个人模式', text: '去掉主要面向主机商的功能，只保留管理游戏服务器需要的部分。适合自己或小圈子使用。' },
+        { mode: 'personal', icon: Moon, title: '个人模式', text: '去掉主要面向主机商的功能：计费系统、工单、用户注册、应用 API 和数据库主机都会关闭，只保留管理游戏服务器需要的部分。适合自己或小圈子使用。' },
     ] as const;
     let modeSaving = $state<PanelMode>(undefined);
     let modeError = $state('');
@@ -71,6 +71,7 @@
         try {
             await updateMode(mode);
             app.updateSettings({ mode });
+            app.updateFlags({ mode });
         } catch (e) {
             modeError = httpErrorToHuman(e);
         } finally {

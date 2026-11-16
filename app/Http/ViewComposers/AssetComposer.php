@@ -4,15 +4,16 @@ namespace Everest\Http\ViewComposers;
 
 use Illuminate\View\View;
 use Everest\Models\Setting;
+use Everest\Services\Panel\PanelMode;
 use Illuminate\Database\QueryException;
 use Everest\Services\Captcha\CaptchaSettings;
 
 class AssetComposer
 {
-    private const MODES = ['standard', 'personal'];
-
-    public function __construct(private CaptchaSettings $captcha)
-    {
+    public function __construct(
+        private CaptchaSettings $captcha,
+        private PanelMode $panelMode,
+    ) {
     }
 
     /**
@@ -76,23 +77,11 @@ class AssetComposer
      * config('app.mode'), which only the SettingsServiceProvider fills in. With
      * APP_ENVIRONMENT_ONLY=true that provider never runs, so a mode chosen in the
      * admin area was written to the database and then ignored, leaving the panel on
-     * the mode it had before. Read the stored row directly, the same way the setup
-     * state is handled above.
+     * the mode it had before. The PanelMode service reads the stored row directly,
+     * the same way the setup state is handled above.
      */
     protected function mode(): string
     {
-        try {
-            $mode = Setting::get('settings::app:mode');
-        } catch (QueryException) {
-            $mode = null;
-        }
-
-        if (is_string($mode) && in_array($mode, self::MODES, true)) {
-            return $mode;
-        }
-
-        $mode = config('app.mode');
-
-        return is_string($mode) && in_array($mode, self::MODES, true) ? $mode : 'standard';
+        return $this->panelMode->current();
     }
 }

@@ -11,6 +11,7 @@
     } from '@lucide/svelte';
     import { cubicOut } from 'svelte/easing';
     import { app } from '$lib/stores/app.svelte';
+    import { standardOnly } from '$lib/mode';
     import Tooltip from '$lib/ui/tooltip/Tooltip.svelte';
 
     interface QuickAction {
@@ -22,7 +23,8 @@
     /**
      * Quick links to the most common admin creation pages, ported from the legacy
      * `elements/SpeedDial.tsx`. AI and tickets follow their feature flags; the rest
-     * are always available when the dial itself is enabled.
+     * are always available when the dial itself is enabled. Tickets are also a
+     * standard mode feature, so personal mode drops that shortcut.
      */
     const actions = $derived.by(() => {
         const items: QuickAction[] = [];
@@ -34,7 +36,7 @@
             { icon: ServerCog, href: '/admin/servers/new', label: '创建服务器' },
             { icon: UserRoundPlus, href: '/admin/users/new', label: '创建用户' },
         );
-        if (app.flags?.tickets.enabled) {
+        if (app.flags?.tickets.enabled && standardOnly(app.flags?.mode)) {
             items.push({ icon: Ticket, href: '/admin/tickets', label: '查看工单' });
         }
         return items;

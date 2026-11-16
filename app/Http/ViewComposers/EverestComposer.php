@@ -3,25 +3,37 @@
 namespace Everest\Http\ViewComposers;
 
 use Illuminate\View\View;
+use Everest\Services\Panel\PanelMode;
 use Illuminate\Database\QueryException;
 use Everest\Models\Billing\PaymentMethod;
 use Everest\Services\Billing\PaymentMethodService;
 
 class EverestComposer
 {
+    public function __construct(private PanelMode $panelMode)
+    {
+    }
+
     /**
      * Provide access to the asset service in the views.
      */
     public function compose(View $view): void
     {
+        $mode = $this->panelMode->current();
+
         $view->with('everestConfiguration', [
             // Whether the panel ignores the settings stored in the database. When it
             // does, the settings screens have no effect, so the interface says so
             // rather than letting a saved change disappear on the next reload.
             'environment_only' => boolval(config('everest.load_environment_only', false)),
+            // The active panel mode. The route tables gate the features that only
+            // exist in standard mode on it.
+            'mode' => $mode,
             'auth' => [
                 'registration' => [
-                    'enabled' => boolval(config('modules.auth.registration.enabled', false)),
+                    // Public signups are a hosting provider feature; personal mode
+                    // keeps the panel closed.
+                    'enabled' => $this->panelMode->allows('registration') && boolval(config('modules.auth.registration.enabled', false)),
                 ],
                 'security' => [
                     'force2fa' => boolval(config('modules.auth.security.force2fa', false)),
@@ -50,11 +62,14 @@ class EverestComposer
                 ],
             ],
             'tickets' => [
-                'enabled' => boolval(config('modules.tickets.enabled', false)),
+                // Tickets are a hosting provider feature; personal mode drops them.
+                'enabled' => $this->panelMode->allows('tickets') && boolval(config('modules.tickets.enabled', false)),
                 'maxCount' => config('modules.tickets.max_count', 3),
             ],
             'billing' => [
-                'enabled' => boolval(config('modules.billing.enabled', false)),
+                // The billing system is a hosting provider feature; personal mode
+                // drops it, so no server is billed and no order can be placed.
+                'enabled' => $this->panelMode->allows('billing') && boolval(config('modules.billing.enabled', false)),
                 'keys' => [
                     'secret' => boolval(config('modules.billing.keys.secret')),
                 ],
