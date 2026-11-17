@@ -724,7 +724,12 @@
         </nav>
 
         {#if store.can('file.create')}
-            <div class="flex flex-wrap items-center gap-2">
+            <!--
+                On narrow screens the action buttons take a full row of their own: the
+                breadcrumb sits next to the "select all" checkbox and keeps its width,
+                otherwise the three buttons squeeze it down to nothing.
+            -->
+            <div class="flex w-full flex-wrap items-center gap-2 sm:w-auto">
                 {#if uploadCount > 0}
                     <button
                         type="button"
@@ -785,7 +790,12 @@
     </div>
 
     <div class="grid gap-4 xl:grid-cols-4">
-        <div class="xl:col-span-3">
+        <!--
+            `min-w-0` on both columns: a grid item defaults to `min-width: auto`, so the
+            fixed-width metadata cells in a file row would otherwise stretch the track
+            past the viewport and scroll the whole page sideways.
+        -->
+        <div class="min-w-0 xl:col-span-3">
             {#if filesQuery.isPending}
                 <Spinner centered />
             {:else if filesQuery.error}
@@ -868,12 +878,12 @@
                                         <span class="ml-3 flex-none text-muted-foreground">{@render rowIcon(file)}</span>
                                         <span class="min-w-0 flex-1 truncate">{file.name}</span>
                                         {#if file.isFile}
-                                            <span class="mr-2 hidden w-24 flex-none text-right text-muted-foreground sm:block">
+                                            <span class="mr-2 hidden w-20 flex-none text-right text-muted-foreground sm:block lg:w-24">
                                                 {bytesToString(file.size)}
                                             </span>
                                         {/if}
                                         <span
-                                            class="mr-2 hidden w-40 flex-none text-right text-muted-foreground/70 md:block"
+                                            class="mr-2 hidden w-32 flex-none text-right text-muted-foreground/70 lg:block xl:w-40"
                                             title={formatDateTime(file.modifiedAt)}
                                         >
                                             {Math.abs(differenceInHours(file.modifiedAt, new Date())) > 48
@@ -886,10 +896,10 @@
                                         <span class="ml-3 flex-none">{@render rowIcon(file)}</span>
                                         <span class="min-w-0 flex-1 truncate">{file.name}</span>
                                         {#if file.isFile}
-                                            <span class="mr-2 hidden w-24 flex-none text-right sm:block">{bytesToString(file.size)}</span>
+                                            <span class="mr-2 hidden w-20 flex-none text-right sm:block lg:w-24">{bytesToString(file.size)}</span>
                                         {/if}
                                         <span
-                                            class="mr-2 hidden w-40 flex-none text-right text-muted-foreground/70 md:block"
+                                            class="mr-2 hidden w-32 flex-none text-right text-muted-foreground/70 lg:block xl:w-40"
                                             title={formatDateTime(file.modifiedAt)}
                                         >
                                             {Math.abs(differenceInHours(file.modifiedAt, new Date())) > 48
@@ -918,7 +928,7 @@
         </div>
 
         {#if store.can('file.sftp')}
-            <div class="mt-6 xl:mt-0">
+            <div class="mt-6 min-w-0 xl:mt-0">
                 <div class="rounded-lg border border-border bg-card">
                     <div class="border-b border-border px-4 py-3">
                         <h2 class="font-header text-sm font-semibold">SFTP 信息</h2>
