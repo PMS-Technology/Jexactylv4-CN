@@ -137,6 +137,13 @@ Route::prefix('/')->middleware([SuspendedAccount::class])->group(function () {
         Route::post('/power', [Client\Servers\PowerController::class, 'index']);
         Route::post('/ai', [Client\Servers\AIController::class, 'index']);
 
+        // The server assistant. The browser drives the tool loop, so a turn is
+        // one request and the approved calls are executed by a second one.
+        Route::group(['prefix' => '/ai/assistant'], function () {
+            Route::post('/step', [Client\Servers\AIAssistantController::class, 'step']);
+            Route::post('/execute', [Client\Servers\AIAssistantController::class, 'execute']);
+        });
+
         Route::group(['prefix' => '/databases'], function () {
             Route::get('/', [Client\Servers\DatabaseController::class, 'index']);
             Route::post('/', [Client\Servers\DatabaseController::class, 'store']);

@@ -65,6 +65,8 @@ class Permission extends Model
 
     public const ACTION_ACTIVITY_READ = 'activity.read';
 
+    public const ACTION_AI_ASSISTANT = 'ai.assistant';
+
     public const ACTION_BILLING_READ = 'billing.read';
     public const ACTION_BILLING_RENEW = 'billing.renew';
     public const ACTION_BILLING_UPDATE = 'billing.update';
@@ -208,6 +210,13 @@ class Permission extends Model
             'description' => 'Permissions that control a user\'s access to the server activity logs.',
             'keys' => [
                 'read' => 'Allows a user to view the activity logs for the server.',
+            ],
+        ],
+
+        'ai' => [
+            'description' => 'Permissions that control a user\'s access to the JexpanelAI assistant for this server.',
+            'keys' => [
+                'assistant' => 'Allows a user to ask the AI assistant about this server. Changing anything the assistant proposes still requires the permissions for that action.',
             ],
         ],
 

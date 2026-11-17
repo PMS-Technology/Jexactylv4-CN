@@ -3,8 +3,8 @@
 namespace Everest\Http\Controllers\Api\Application\Settings;
 
 use Carbon\Carbon;
-use Everest\Facades\Activity;
 use Illuminate\Http\Request;
+use Everest\Facades\Activity;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

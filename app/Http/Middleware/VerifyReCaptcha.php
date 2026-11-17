@@ -4,11 +4,11 @@ namespace Everest\Http\Middleware;
 
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Psr\Log\LoggerInterface;
 use Illuminate\Http\Response;
 use Everest\Events\Auth\FailedCaptcha;
 use Illuminate\Contracts\Events\Dispatcher;
 use Everest\Services\Captcha\CaptchaSettings;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class VerifyReCaptcha

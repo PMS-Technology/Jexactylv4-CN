@@ -49,6 +49,13 @@ Route::middleware(['throttle:authentication'])->group(function () {
     Route::post('/password', [Auth\ForgotPasswordController::class, 'verify'])
         ->name('auth.post.forgot-password')
         ->middleware('recaptcha');
+
+    // The same page can send a reset link to the address of an account, for
+    // the panels that deliver mail. The account is not confirmed by the
+    // answer, so the endpoint cannot be used to find registered addresses.
+    Route::post('/password/email', [Auth\ForgotPasswordController::class, 'sendLink'])
+        ->name('auth.post.forgot-password-link')
+        ->middleware('recaptcha');
 });
 
 // Password reset routes. This endpoint is hit after going through

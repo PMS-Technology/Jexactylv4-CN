@@ -45,12 +45,10 @@ Note: If your `APP_URL` starts with `https://` you need to provide an `LE_EMAIL`
 | `REDIS_HOST`        | The hostname or IP address of the redis database                               | yes      |
 | `REDIS_PASSWORD`    | The password used to secure the redis database                                 | maybe    |
 | `REDIS_PORT`        | The port the redis database is using on the host                               | maybe    |
-| `MAIL_DRIVER`       | The email driver (see [Mail drivers](#mail-drivers) for details)               | yes      |
-| `MAIL_FROM`         | The email that should be used as the sender email                              | yes      |
-| `MAIL_HOST`         | The host of your mail driver instance                                          | maybe    |
-| `MAIL_PORT`         | The port of your mail driver instance                                          | maybe    |
-| `MAIL_USERNAME`     | The username for your mail driver                                              | maybe    |
-| `MAIL_PASSWORD`     | The password for your mail driver                                              | maybe    |
+
+> The mail settings are not read from the environment any more. They are stored in the
+> database and edited from **Admin → Settings → Mail**, so the `MAIL_*` variables that
+> older versions of this image used are ignored.
 
 
 ### Cache drivers
@@ -64,13 +62,8 @@ We recommend redis when using docker as it can be started in a container easily.
 | redis    | redis database password              | `REDIS_PASSWORD`                                       |
 
 ### Mail drivers
-You can choose between different mail drivers according to your needs.
-Every driver requires `MAIL_FROM` to be set.
+The panel delivers its mail through the transport that is picked in **Admin → Settings → Mail**:
+`smtp` (any SMTP server), `sendmail` (the sendmail binary of the host) or `log` (every message is
+written to the application log instead of being delivered). The credentials are stored in the
+database, not in the environment.
 
-| Driver   | Description                          | Required variables                                            |
-| -------- | ------------------------------------ | ------------------------------------------------------------- |
-| mail     | uses the installed php mail          |                                                               |
-| mandrill | [Mandrill](http://www.mandrill.com/) | `MAIL_USERNAME`                                               |
-| postmark | [Postmark](https://postmarkapp.com/) | `MAIL_USERNAME`                                               |
-| mailgun  | [Mailgun](https://www.mailgun.com/)  | `MAIL_USERNAME`, `MAIL_HOST`                                  |
-| smtp     | Any SMTP server can be configured    | `MAIL_USERNAME`, `MAIL_HOST`, `MAIL_PASSWORD`, `MAIL_PORT`    |

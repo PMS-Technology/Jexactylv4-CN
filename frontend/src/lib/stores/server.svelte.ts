@@ -36,6 +36,15 @@ export class ServerStore {
     /** Set once getServer() has either produced data or failed. */
     loadError = $state('');
 
+    /**
+     * The recent console output of this server.
+     *
+     * The panel does not keep a copy of the console anywhere else, and the
+     * assistant needs the log to diagnose a crash, so the lines are collected
+     * here where the terminal and the assistant can both reach them.
+     */
+    consoleLog = $state<string[]>([]);
+
     #uuid: string;
     #updatingToken = false;
     #disposers: (() => void)[] = [];
@@ -56,6 +65,14 @@ export class ServerStore {
 
     can(permission?: string | string[]): boolean {
         return hasServerPermission(this.permissions, permission);
+    }
+
+    /**
+     * Appends a line to the console buffer. The buffer is bounded so a chatty
+     * server cannot grow it without limit.
+     */
+    pushConsoleLine(line: string) {
+        this.consoleLog = [...this.consoleLog, line].slice(-1000);
     }
 
     async load() {

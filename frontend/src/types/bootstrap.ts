@@ -67,6 +67,13 @@ export interface SiteSettings {
         /** Server-side keys stay on the server; the form only shows whether one exists. */
         hasSecret: Record<CaptchaProvider, boolean>;
     };
+    mail: {
+        /**
+         * Whether the panel delivers mail at all. The pages that offer a reset
+         * link by mail only show it when the panel is set up to send mail.
+         */
+        enabled: boolean;
+    };
     activity: {
         enabled: {
             account: boolean;

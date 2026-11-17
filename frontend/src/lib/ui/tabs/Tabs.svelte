@@ -39,33 +39,38 @@
         contentClass,
         children,
     }: Props = $props();
+
+    // A list with a single entry is noise, so it is left out entirely.
+    const showList = $derived(items.length > 1);
 </script>
 
 <TabsPrimitive.Root bind:value onValueChange={v => onValueChange?.(v)}>
-    <TabsPrimitive.List
-        aria-label={ariaLabel}
-        class={cn(
-            'flex gap-1 overflow-x-auto border-b border-border scrollbar-thin',
-            listClass,
-        )}
-    >
-        {#each items as item (item.value)}
-            <TabsPrimitive.Trigger
-                value={item.value}
-                disabled={item.disabled}
-                class={cn(
-                    '-mb-px inline-flex shrink-0 items-center gap-2 border-b-2 border-transparent px-3 py-2',
-                    'text-sm whitespace-nowrap text-muted-foreground transition-colors',
-                    'hover:text-foreground',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                    'disabled:pointer-events-none disabled:opacity-50',
-                    'data-[state=active]:border-primary data-[state=active]:font-medium data-[state=active]:text-foreground',
-                )}
-            >
-                {item.label}
-            </TabsPrimitive.Trigger>
-        {/each}
-    </TabsPrimitive.List>
+    {#if showList}
+        <TabsPrimitive.List
+            aria-label={ariaLabel}
+            class={cn(
+                'flex gap-1 overflow-x-auto border-b border-border scrollbar-thin',
+                listClass,
+            )}
+        >
+            {#each items as item (item.value)}
+                <TabsPrimitive.Trigger
+                    value={item.value}
+                    disabled={item.disabled}
+                    class={cn(
+                        '-mb-px inline-flex shrink-0 items-center gap-2 border-b-2 border-transparent px-3 py-2',
+                        'text-sm whitespace-nowrap text-muted-foreground transition-colors',
+                        'hover:text-foreground',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                        'disabled:pointer-events-none disabled:opacity-50',
+                        'data-[state=active]:border-primary data-[state=active]:font-medium data-[state=active]:text-foreground',
+                    )}
+                >
+                    {item.label}
+                </TabsPrimitive.Trigger>
+            {/each}
+        </TabsPrimitive.List>
+    {/if}
 
     {#each items as item (item.value)}
         <TabsPrimitive.Content

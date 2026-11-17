@@ -5,6 +5,7 @@ namespace Everest\Http\ViewComposers;
 use Illuminate\View\View;
 use Everest\Models\Setting;
 use Everest\Services\Panel\PanelMode;
+use Everest\Services\Mail\MailSettings;
 use Illuminate\Database\QueryException;
 use Everest\Services\Captcha\CaptchaSettings;
 
@@ -13,6 +14,7 @@ class AssetComposer
     public function __construct(
         private CaptchaSettings $captcha,
         private PanelMode $panelMode,
+        private MailSettings $mail,
     ) {
     }
 
@@ -38,6 +40,11 @@ class AssetComposer
             'speed_dial' => boolval(config('app.speed_dial', false)),
             'indicators' => boolval(config('app.indicators', false)),
             'captcha' => $this->captcha->clientConfiguration(),
+            // The panel only offers the pages that send mail when mail is
+            // actually turned on, so the browser needs to know about it.
+            'mail' => [
+                'enabled' => $this->mail->enabled(),
+            ],
             'activity' => [
                 'enabled' => [
                     'account' => config('activity.enabled.account', true),

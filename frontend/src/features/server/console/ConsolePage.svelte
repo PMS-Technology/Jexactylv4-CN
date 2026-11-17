@@ -4,7 +4,7 @@
     import type { ServerStore } from '$lib/stores/server.svelte';
     import { renameServer, reinstallServer } from '$lib/api/servers';
     import { httpErrorToHuman } from '$lib/api/http';
-    import { Badge, Button, Card, Input, Label, Textarea } from '$lib/ui';
+    import { Badge, Button, Card, Input, Label, Tabs, Textarea } from '$lib/ui';
     import { Dialog, AlertDialog } from '$lib/ui/dialog';
     import Alert from '$lib/components/Alert.svelte';
     import Tooltip from '$lib/ui/tooltip/Tooltip.svelte';
@@ -13,10 +13,15 @@
     import DetailsStats from './DetailsStats.svelte';
     import StatusControls from './StatusControls.svelte';
     import Features from '../features/Features.svelte';
+    import AIAssistantPanel from './ai/AIAssistantPanel.svelte';
 
     /**
      * Server console, ported from ServerConsoleContainer.tsx: header with the live
      * status, power controls, the terminal, live resource strip and sparklines.
+     *
+     * The AI assistant lives next to the terminal as a second tab: it works on
+     * the same server, and both need the console output, which the terminal
+     * keeps in the store.
      */
     let { store }: { store: ServerStore } = $props();
 
@@ -40,6 +45,24 @@
             // Private browsing; the preference just won't persist.
         }
     }
+
+    // The assistant is only offered when the module is on and the user may use
+    // it; the panel itself repeats the check for the case where it is reached
+    // from a stale tab.
+    const aiAvailable = $derived(
+        Boolean(app.flags?.ai.enabled) &&
+            store.can('ai.assistant') &&
+            (Boolean(app.flags?.ai.user_access) ||
+                Boolean(app.user?.rootAdmin) ||
+                Boolean(app.user?.adminRoleId)),
+    );
+
+    const consoleTabs = $derived([
+        { value: 'console', label: '控制台' },
+        ...(aiAvailable ? [{ value: 'ai', label: 'AI 助手' }] : []),
+    ]);
+
+    let activeTab = $state('console');
 
     const statusMeta = $derived.by(() => {
         if (store.isInstalling) return { text: '安装中', variant: 'warning' as const };
@@ -204,8 +227,24 @@
         <!-- min-w-0: xterm measures its container; without it the auto min-content
              width of the grid item pushes the terminal past the viewport. The expanded
              console takes the whole row, since the chart rail is hidden in that mode. -->
-        <div class="flex min-w-0 lg:col-span-3" class:lg:col-span-4={expand}>
-            <Terminal {store} {expand} onToggleExpand={toggleExpand} />
+        <div class="flex min-w-0 flex-col gap-2 lg:col-span-3" class:lg:col-span-4={expand}>
+            <!-- The tabs sit above the console card. The terminal keeps running
+                 while the assistant tab is open, so the console output the
+                 assistant reads stays up to date. -->
+            <Tabs items={consoleTabs} bind:value={activeTab} aria-label="控制台面板" listClass="-mb-px">
+                {#snippet children({ value })}
+                    {#if value === 'ai'}
+                        <AIAssistantPanel
+                            {store}
+                            class={expand
+                                ? 'h-[calc(100dvh-15rem)] min-h-[24rem]'
+                                : 'h-[calc(100dvh-19rem)] min-h-[20rem]'}
+                        />
+                    {:else}
+                        <Terminal {store} {expand} onToggleExpand={toggleExpand} />
+                    {/if}
+                {/snippet}
+            </Tabs>
         </div>
         {#if !expand}
             <!-- The chart fills the rail rather than floating in it, so the two read as

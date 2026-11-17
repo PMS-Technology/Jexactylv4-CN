@@ -3,6 +3,7 @@
 namespace Everest\Console\Commands;
 
 use Illuminate\Console\Command;
+use Everest\Services\Mail\MailSettings;
 use Everest\Services\Helpers\SoftwareVersionService;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 
@@ -15,7 +16,7 @@ class InfoCommand extends Command
     /**
      * VersionCommand constructor.
      */
-    public function __construct(private ConfigRepository $config, private SoftwareVersionService $softwareVersionService)
+    public function __construct(private ConfigRepository $config, private SoftwareVersionService $softwareVersionService, private MailSettings $mail)
     {
         parent::__construct();
     }
@@ -56,6 +57,19 @@ class InfoCommand extends Command
             ['Port', $this->config->get("database.connections.$driver.port")],
             ['Database', $this->config->get("database.connections.$driver.database")],
             ['Username', $this->config->get("database.connections.$driver.username")],
+        ], 'compact');
+
+        // The mail settings live in the database, not in the environment, so
+        // they are read from the settings table here as well.
+        $this->output->title('Mail Configuration');
+        $this->table([], [
+            ['Delivery', $this->formatText($this->mail->enabled() ? 'Enabled' : 'Disabled', $this->mail->enabled() ? 'bg=green' : 'bg=red')],
+            ['Transport', $this->mail->driver()],
+            ['Host', $this->mail->host()],
+            ['Port', $this->mail->port()],
+            ['Encryption', $this->mail->encryption()],
+            ['Username', $this->mail->username()],
+            ['Sender', $this->mail->fromName() . ' <' . $this->mail->fromAddress() . '>'],
         ], 'compact');
     }
 

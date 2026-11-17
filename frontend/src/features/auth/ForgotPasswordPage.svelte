@@ -1,9 +1,11 @@
 <script lang="ts">
     import { z } from 'zod';
-    import { resetWithRecoveryCode } from '$lib/api/auth';
+    import { resetWithRecoveryCode, sendPasswordResetLink } from '$lib/api/auth';
+    import { httpErrorToHuman } from '$lib/api/http';
     import { Form } from '$lib/forms/form.svelte';
     import { navigate } from '$lib/router/router.svelte';
-    import { Button, Input, Label } from '$lib/ui';
+    import { app } from '$lib/stores/app.svelte';
+    import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from '$lib/ui';
     import Alert from '$lib/components/Alert.svelte';
     import Link from '$lib/components/Link.svelte';
     import AuthLayout from './AuthLayout.svelte';
@@ -42,10 +44,38 @@
         { key: 'password', label: '新密码', type: 'password', autocomplete: 'new-password', help: '至少 8 个字符。' },
         { key: 'password_confirm', label: '确认新密码', type: 'password', autocomplete: 'new-password', help: '' },
     ] as const;
+
+    /**
+     * The panel can also mail a reset link, but only when the admin configured
+     * a mail server. The answer is the same for every address, so it cannot be
+     * used to find out which addresses have an account.
+     */
+    const mailEnabled = $derived(Boolean(app.settings?.mail.enabled));
+
+    let linkEmail = $state('');
+    let sendingLink = $state(false);
+    let linkSent = $state(false);
+    let linkError = $state('');
+
+    async function sendLink() {
+        if (sendingLink) return;
+
+        sendingLink = true;
+        linkSent = false;
+        linkError = '';
+        try {
+            await sendPasswordResetLink(linkEmail.trim(), await captchaPayload('password'));
+            linkSent = true;
+        } catch (e) {
+            linkError = httpErrorToHuman(e);
+        } finally {
+            sendingLink = false;
+        }
+    }
 </script>
 
 <AuthLayout title="重置密码" description="用账号恢复码设置新密码。">
-    <form class="space-y-4" onsubmit={e => form.submit(e)} novalidate>
+    <form class="space-y-4" onsubmit={form.submit} novalidate>
         {#if form.errors._}<Alert variant="destructive">{form.errors._}</Alert>{/if}
         {#each fields as f (f.key)}
             <div class="space-y-1.5">
@@ -56,5 +86,31 @@
         {/each}
         <Button type="submit" class="w-full" loading={form.submitting}>重置密码</Button>
     </form>
+
+    {#if mailEnabled}
+        <Card class="mt-6">
+            <CardHeader>
+                <CardTitle>通过邮箱重置</CardTitle>
+            </CardHeader>
+            <CardContent class="space-y-3">
+                <p class="text-xs text-muted-foreground">
+                    没有恢复码？把重置链接发送到你的邮箱地址，链接 {60} 分钟内有效。
+                </p>
+                <div class="space-y-1.5">
+                    <Label for="forgot-link-email">邮箱</Label>
+                    <Input id="forgot-link-email" type="email" autocomplete="email" bind:value={linkEmail} disabled={sendingLink} placeholder="you@example.com" />
+                </div>
+                {#if linkError}
+                    <Alert variant="destructive">{linkError}</Alert>
+                {:else if linkSent}
+                    <Alert variant="success">如果该邮箱对应本面板的账号，重置链接已经发出。</Alert>
+                {/if}
+                <Button type="button" variant="secondary" class="w-full" loading={sendingLink} disabled={linkEmail.trim() === ''} onclick={sendLink}>
+                    发送重置链接
+                </Button>
+            </CardContent>
+        </Card>
+    {/if}
+
     <p class="mt-4 text-center text-xs"><Link href="/auth/login" class="text-muted-foreground hover:text-foreground">返回登录</Link></p>
 </AuthLayout>

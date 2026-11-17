@@ -149,10 +149,10 @@
     });
 
     // --- Console log export -------------------------------------------------
-    let consoleLog: string[] = [];
-
+    // The lines are kept on the store so that the assistant can read the log
+    // too; the buffer is bounded there.
     websocketEvent(store, SocketEvent.CONSOLE_OUTPUT, (line: string) => {
-        consoleLog = [...consoleLog, line.startsWith('>') ? line.substring(1) : line].slice(-1000);
+        store.pushConsoleLine(line.startsWith('>') ? line.substring(1) : line);
     });
 
     let savingLogs = $state(false);
@@ -162,7 +162,7 @@
 
         savingLogs = true;
         try {
-            const data = stripAnsi(consoleLog.map(it => it.replace('\r', '')).join('\n')) || '';
+            const data = stripAnsi(store.consoleLog.map(it => it.replace('\r', '')).join('\n')) || '';
             const file = `/.console-logs/${new Date().toLocaleTimeString()}.log`;
             const { saveFileContents } = await import('$lib/api/files');
             await saveFileContents(store.server.uuid, file, data);

@@ -149,6 +149,66 @@ export async function updateMode(mode: NonNullable<PanelMode>): Promise<void> {
     await http.patch('/api/application/settings/mode', { mode });
 }
 
+// --- Mail -------------------------------------------------------------------
+
+export type MailDriver = 'smtp' | 'log' | 'sendmail';
+export type MailEncryption = 'none' | 'tls' | 'ssl';
+
+export interface MailSettings {
+    enabled: boolean;
+    driver: MailDriver;
+    host: string;
+    port: number;
+    encryption: MailEncryption;
+    username: string;
+    from_address: string;
+    from_name: string;
+    /** The password stays on the server; the form only shows whether one is stored. */
+    has_password: boolean;
+}
+
+export async function getMailSettings(): Promise<MailSettings> {
+    const { data } = await http.get('/api/application/settings/mail');
+
+    return data;
+}
+
+export interface MailSettingsInput {
+    enabled: boolean;
+    driver: MailDriver;
+    host: string;
+    port: number;
+    encryption: MailEncryption;
+    username: string;
+    /** Empty values are omitted so an existing server-side password is preserved. */
+    password?: string;
+    from_address: string;
+    from_name: string;
+}
+
+export async function updateMailSettings(settings: MailSettingsInput): Promise<void> {
+    const payload: Record<string, unknown> = {
+        enabled: settings.enabled,
+        driver: settings.driver,
+        host: settings.host || null,
+        port: settings.port,
+        encryption: settings.encryption,
+        username: settings.username || null,
+        from_address: settings.from_address || null,
+        from_name: settings.from_name || null,
+    };
+
+    const password = settings.password?.trim();
+    if (password) payload.password = password;
+
+    await http.patch('/api/application/settings/mail', payload);
+}
+
+/** Sends a message through the configured transport, so the settings can be checked. */
+export async function sendMailTestEmail(email: string): Promise<void> {
+    await http.post('/api/application/settings/mail/test', { email });
+}
+
 export interface LogFile {
     name: string;
     size: number;

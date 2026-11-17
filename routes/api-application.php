@@ -29,6 +29,13 @@ Route::middleware([AdminSubject::class])->group(function () {
         Route::patch('/', [Application\Settings\GeneralController::class, 'update']);
         Route::patch('/mode', [Application\Settings\ModeController::class, 'update']);
 
+        // The mail configuration of the panel. It lives in the settings table
+        // instead of the environment, so the transport can be changed without
+        // a restart.
+        Route::get('/mail', [Application\Settings\MailController::class, 'index']);
+        Route::patch('/mail', [Application\Settings\MailController::class, 'update']);
+        Route::post('/mail/test', [Application\Settings\MailController::class, 'test']);
+
         Route::group(['prefix' => '/debug'], function () {
             Route::get('/', [Application\Settings\DebugController::class, 'index']);
             Route::get('/archive', [Application\Settings\DebugController::class, 'archive']);

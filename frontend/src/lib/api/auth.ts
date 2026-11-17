@@ -94,6 +94,16 @@ export async function resetWithRecoveryCode(
     return toAuthResponse(data);
 }
 
+/**
+ * Asks the panel to mail a reset link to an address. The panel answers the same way
+ * for every address, so the answer cannot be used to find out which addresses have
+ * an account.
+ */
+export async function sendPasswordResetLink(email: string, captcha?: CaptchaPayload): Promise<void> {
+    await csrf();
+    await http.post('/auth/password/email', { email, ...(captcha ?? {}) });
+}
+
 /** Completes a reset from an emailed link (`/auth/password/reset/:token?email=`). */
 export async function resetWithToken(values: { email: string; token: string; password: string; password_confirmation: string }): Promise<{
     redirectTo: string;
