@@ -5,6 +5,7 @@
     import {
         ChevronDown,
         ChevronUp,
+        CloudDownload,
         Ellipsis,
         FileArchive,
         FileText,
@@ -17,6 +18,7 @@
         X,
     } from '@lucide/svelte';
     import axios from 'axios';
+    import { onDestroy } from 'svelte';
     import { app } from '$lib/stores/app.svelte';
     import { navigate, router } from '$lib/router/router.svelte';
     import type { ServerStore } from '$lib/stores/server.svelte';
@@ -31,6 +33,7 @@
         getFileDownloadUrl,
         getFileUploadUrl,
         loadDirectory,
+        pullFile,
         renameFiles,
     } from '$lib/api/files';
     import { bytesToString, formatDateTime, formatIp } from '$lib/utils/format';
@@ -274,6 +277,115 @@
             newDirError = httpErrorToHuman(error);
         } finally {
             creatingDir = false;
+        }
+    }
+
+    // --- remote download ----------------------------------------------------
+    let pullOpen = $state(false);
+    let pullUrl = $state('');
+    let pullFilename = $state('');
+    let pullError = $state('');
+    let pulling = $state(false);
+    let pullStatus = $state<{ name: string; state: 'running' | 'done' } | null>(null);
+
+    /**
+     * The file name the daemon will most likely use for a download URL: the last
+     * segment of its path. Only a hint — the daemon derives the name itself unless
+     * the user overrides it.
+     */
+    function guessFilename(url: string): string {
+        try {
+            const segment = new URL(url).pathname.split('/').filter(Boolean).pop() ?? '';
+
+            return decodeURIComponent(segment);
+        } catch {
+            return '';
+        }
+    }
+
+    const pullGuess = $derived(guessFilename(pullUrl));
+    const pullTargetName = $derived(pullFilename.trim() || pullGuess);
+
+    function openPullDialog() {
+        pullUrl = '';
+        pullFilename = '';
+        pullError = '';
+        pullOpen = true;
+    }
+
+    async function submitPull() {
+        pullError = '';
+        const url = pullUrl.trim();
+        if (!url) {
+            pullError = '请填写下载链接。';
+            return;
+        }
+
+        try {
+            const parsed = new URL(url);
+            if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+                pullError = '只支持 HTTP 或 HTTPS 链接。';
+                return;
+            }
+        } catch {
+            pullError = '链接格式无效，请检查后重试。';
+            return;
+        }
+
+        // The daemon downloads in the background, so the file only shows up later.
+        // Remember what is in the directory now to recognise it once it lands.
+        const known = new Set((filesQuery.data ?? []).map(file => file.name));
+        const directory = directoryKey;
+        const target = pullTargetName;
+
+        pulling = true;
+        try {
+            await pullFile(store.server!.uuid, url, directory, pullFilename.trim() || undefined);
+            pullOpen = false;
+            pullStatus = { name: target, state: 'running' };
+            void watchForDownload(directory, known);
+        } catch (error) {
+            pullError = httpErrorToHuman(error);
+        } finally {
+            pulling = false;
+        }
+    }
+
+    /**
+     * Polls the directory until a new file shows up. The daemon answers the request
+     * as soon as it queued the download, so the panel has to keep looking for the
+     * result on the user's behalf.
+     */
+    let pullWatch = 0;
+
+    onDestroy(() => {
+        // Stop the watcher when the page goes away.
+        pullWatch += 1;
+    });
+
+    async function watchForDownload(directory: string, known: Set<string>) {
+        const token = ++pullWatch;
+
+        for (let attempt = 0; attempt < 40; attempt++) {
+            await new Promise(resolve => setTimeout(resolve, 3000));
+
+            // A newer request replaced this one, or the user moved to another
+            // directory; either way there is nothing left to watch here.
+            if (token !== pullWatch) return;
+            if (cleanDirectoryPath(files.directory) !== directory) return;
+
+            await queryClient.invalidateQueries({ queryKey: ['files', store.server!.uuid] });
+
+            const listed = queryClient.getQueryData<FileObject[]>(['files', store.server!.uuid, directory]) ?? [];
+            if (listed.some(file => !known.has(file.name))) {
+                // The refetch may have taken a while, so check the token once more
+                // before reporting the download as finished.
+                if (token === pullWatch && pullStatus) {
+                    pullStatus = { ...pullStatus, state: 'done' };
+                }
+
+                return;
+            }
         }
     }
 
@@ -545,6 +657,23 @@
         <Alert variant="destructive" class="mb-4">{actionError}</Alert>
     {/if}
 
+    {#if pullStatus}
+        <Alert variant={pullStatus.state === 'done' ? 'success' : 'info'} class="mb-4">
+            {#if pullStatus.state === 'done'}
+                {#if pullStatus.name}
+                    <span class="font-mono">{pullStatus.name}</span>
+                    {/if}
+                已出现在文件列表中。
+            {:else}
+                服务器正在后台下载
+                {#if pullStatus.name}
+                    <span class="font-mono">{pullStatus.name}</span>
+                {/if}
+                ，文件列表会自动刷新。
+            {/if}
+        </Alert>
+    {/if}
+
     <PageHeader title="文件管理" description="在网页界面管理服务器上的文件与目录。">
         {#snippet children()}
             <Button variant="outline" size="sm" onclick={() => files.toggleViewMode()} title="切换列表/网格视图">
@@ -624,6 +753,10 @@
                     新建目录
                 </Button>
                 <Button variant="outline" size="sm" onclick={() => uploadInput?.click()}>上传</Button>
+                <Button variant="outline" size="sm" onclick={openPullDialog}>
+                    <CloudDownload class="size-4" />
+                    远程下载
+                </Button>
             </div>
         {/if}
     </div>
@@ -915,6 +1048,52 @@
     {#snippet footer()}
         <Button variant="ghost" size="sm" onclick={() => (newDirOpen = false)}>取消</Button>
         <Button size="sm" loading={creatingDir} onclick={createNewDirectory}>创建</Button>
+    {/snippet}
+</Dialog>
+
+<!-- Remote download dialog: the daemon pulls the URL straight onto the server. -->
+<Dialog
+    bind:open={pullOpen}
+    title="远程下载"
+    description="让服务器直接从 HTTP 或 HTTPS 链接下载文件到当前目录。"
+    onOpenChange={open => open || (pullError = '')}
+>
+    <div class="space-y-3">
+        {#if pullError}
+            <Alert variant="destructive">{pullError}</Alert>
+        {/if}
+        <div>
+            <Label for="pull-url" required>下载链接</Label>
+            <Input
+                id="pull-url"
+                type="url"
+                bind:value={pullUrl}
+                placeholder="https://example.com/file.zip"
+                disabled={pulling}
+            />
+        </div>
+        <div>
+            <Label for="pull-filename">文件名（可选）</Label>
+            <Input
+                id="pull-filename"
+                bind:value={pullFilename}
+                placeholder={pullGuess || '留空则使用链接中的文件名'}
+                disabled={pulling}
+            />
+        </div>
+        <p class="break-all text-sm text-muted-foreground">
+            将保存到
+            <code class="rounded bg-muted px-1 py-0.5 font-mono text-xs text-info">
+                /home/container/{directoryKey.replace(/^\//, '')}
+            </code>
+        </p>
+        <p class="text-xs text-muted-foreground">
+            下载在服务器后台进行，提交后请稍候；列表会在文件到达时自动刷新，较大的文件可能需要几分钟。
+        </p>
+    </div>
+    {#snippet footer()}
+        <Button variant="ghost" size="sm" disabled={pulling} onclick={() => (pullOpen = false)}>取消</Button>
+        <Button size="sm" loading={pulling} onclick={submitPull}>开始下载</Button>
     {/snippet}
 </Dialog>
 

@@ -92,3 +92,34 @@ export async function decompressFiles(uuid: string, directory: string, file: str
 export async function chmodFiles(uuid: string, directory: string, files: { file: string; mode: string }[]): Promise<void> {
     await http.post(`/api/client/servers/${uuid}/files/chmod`, { root: directory, files });
 }
+
+/**
+ * Asks the daemon to pull a remote URL straight onto the server's filesystem.
+ *
+ * The download itself happens on the node: `foreground: false` makes the daemon queue
+ * the job and answer immediately, so the request only confirms that the download was
+ * accepted, not that it finished. The file shows up in the listing shortly after.
+ *
+ * `filename` is optional — when it is omitted the daemon derives the name from the
+ * URL.
+ */
+export async function pullFile(
+    uuid: string,
+    url: string,
+    directory: string,
+    filename?: string,
+): Promise<void> {
+    await http.post(
+        `/api/client/servers/${uuid}/files/pull`,
+        {
+            url,
+            directory,
+            ...(filename ? { filename } : {}),
+            foreground: false,
+        },
+        {
+            timeout: 30000,
+            timeoutErrorMessage: '下载请求提交超时，请稍后刷新文件列表确认结果。',
+        },
+    );
+}

@@ -81,6 +81,13 @@ export function httpErrorToHuman(error: unknown): string {
         if (typeof data?.error === 'string') {
             return data.error;
         }
+
+        // Framework level failures (rate limits, authorization, ...) answer with a
+        // plain message; without this they would surface as "Request failed with
+        // status code 429" and the like.
+        if (typeof data?.message === 'string') {
+            return data.message;
+        }
     }
 
     return err?.message ?? 'An unexpected error occurred.';
