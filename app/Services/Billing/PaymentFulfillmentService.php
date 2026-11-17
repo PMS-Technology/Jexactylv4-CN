@@ -4,6 +4,7 @@ namespace Everest\Services\Billing;
 
 use Everest\Models\User;
 use Everest\Models\Server;
+use Illuminate\Support\Str;
 use Everest\Models\Billing\Order;
 use Illuminate\Support\Facades\DB;
 use Everest\Models\Billing\Product;
@@ -82,15 +83,22 @@ class PaymentFulfillmentService
             }
 
             $claimed->setStatus(Order::STATUS_PROCESSED);
-        } catch (DisplayException $exception) {
+        } catch (\Throwable $exception) {
+            // Whatever went wrong, the order is not going to be fulfilled. Leaving it
+            // in the processing state would hide it, so it is marked as failed and the
+            // reason is recorded for an administrator to look at.
             $claimed->setStatus(Order::STATUS_FAILED);
 
-            BillingException::create([
-                'order_id' => $claimed->id,
-                'exception_type' => BillingException::TYPE_DEPLOYMENT,
-                'title' => 'Deployment or renewal of server failed',
-                'description' => $exception->getMessage(),
-            ]);
+            try {
+                BillingException::create([
+                    'order_id' => $claimed->id,
+                    'exception_type' => BillingException::TYPE_DEPLOYMENT,
+                    'title' => 'Deployment or renewal of server failed',
+                    'description' => Str::limit($exception->getMessage() ?: $exception::class, 190),
+                ]);
+            } catch (\Throwable $ignored) {
+                // The reason could not be recorded; the failed order still shows it.
+            }
 
             throw $exception;
         }

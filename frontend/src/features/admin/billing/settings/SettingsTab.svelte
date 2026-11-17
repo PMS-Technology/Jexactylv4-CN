@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { ArrowUpDown, ArrowLeftRight, CircleDollarSign, Download, Gavel, KeyRound, Power, Upload } from '@lucide/svelte';
+    import { ArrowUpDown, ArrowLeftRight, CircleDollarSign, Clock, Download, Gavel, KeyRound, Power, Upload } from '@lucide/svelte';
     import { useQueryClient } from '@tanstack/svelte-query';
     import { adminBillingKeys, exportBillingConfig, updateBillingSetting } from '$lib/api/admin/billing';
     import { httpErrorToHuman } from '$lib/api/http';
@@ -71,6 +71,23 @@
     let terms = $state(app.flags!.billing.links.terms ?? '');
     let privacy = $state(app.flags!.billing.links.privacy ?? '');
     const isUrl = (v: string) => !v.trim() || /^https?:\/\/\S+$/i.test(v.trim());
+
+    // --- Order expiry. How long an unpaid order is kept before it is removed.
+    let expireDays = $state(String(app.flags!.billing.orders?.expire_days ?? 7));
+    const expireDaysValid = $derived(/^\d+$/.test(expireDays.trim()) && Number(expireDays) >= 1 && Number(expireDays) <= 365);
+
+    const saveExpireDays = (event: SubmitEvent) => {
+        event.preventDefault();
+        if (!expireDaysValid) return;
+        void run(
+            'expire-days',
+            async () => {
+                await updateBillingSetting('orders:expire_days', Number(expireDays));
+                patch({ orders: { expire_days: Number(expireDays) } });
+            },
+            '订单保留天数已保存。',
+        );
+    };
 
     const saveLinks = (event: SubmitEvent) => {
         event.preventDefault();
@@ -190,6 +207,30 @@
                     <div class="text-right">
                         <Button type="submit" size="sm" loading={busy === 'links'} disabled={!isUrl(terms) || !isUrl(privacy)}>保存</Button>
                     </div>
+                {/if}
+            </form>
+        </CardContent>
+    </Card>
+
+    <Card>
+        <CardHeader><CardTitle class="flex items-center gap-2"><Clock class="size-4" />订单保留天数</CardTitle></CardHeader>
+        <CardContent>
+            <form class="space-y-3 text-sm" onsubmit={saveExpireDays}>
+                <p class="text-muted-foreground">
+                    用户下单后没有付款，订单会保留这么多天。超过之后订单被标记为已过期，并在下一次清理时删除。这个时间要足够用户在支付页面完成付款。
+                </p>
+                <div class="space-y-1.5">
+                    <Label for="billing-expire-days">天数</Label>
+                    <Input
+                        id="billing-expire-days"
+                        inputmode="numeric"
+                        bind:value={expireDays}
+                        disabled={!app.can('billing.update')}
+                        error={expireDaysValid ? undefined : '请输入 1–365 之间的整数。'}
+                    />
+                </div>
+                {#if app.can('billing.update')}
+                    <div class="text-right"><Button type="submit" size="sm" loading={busy === 'expire-days'} disabled={!expireDaysValid}>保存</Button></div>
                 {/if}
             </form>
         </CardContent>

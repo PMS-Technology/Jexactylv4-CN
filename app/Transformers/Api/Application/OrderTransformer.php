@@ -27,6 +27,17 @@ class OrderTransformer extends Transformer
             'product_id' => $model->product_id,
             'type' => $model->type ?? '?',
             'threat_index' => $model->threat_index,
+            // The reference the gateway was given, which is what a payment notification
+            // comes back with.
+            'transaction_id' => $model->transaction_id,
+            'server_id' => $model->server_id,
+            // What was bought, so an administrator can tell what an order is for.
+            'metadata' => $model->metadata ?? [],
+            'user' => [
+                'id' => $model->user->id ?? null,
+                'username' => $model->user->username ?? null,
+                'email' => $model->user->email ?? null,
+            ],
             'created_at' => $model->created_at->toIso8601String(),
             'updated_at' => $model->updated_at->toIso8601String() ? $model->updated_at->toIso8601String() : null,
         ];

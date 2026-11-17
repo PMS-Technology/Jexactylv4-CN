@@ -104,6 +104,8 @@ Route::middleware([AdminSubject::class])->group(function () {
 
         Route::group(['prefix' => '/orders'], function () {
             Route::get('/', [Application\Billing\OrderController::class, 'index']);
+            Route::get('/{order:id}', [Application\Billing\OrderController::class, 'view']);
+            Route::patch('/{order:id}', [Application\Billing\OrderController::class, 'update']);
         });
 
         Route::group(['prefix' => '/invoices'], function () {

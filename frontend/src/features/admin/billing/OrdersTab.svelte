@@ -1,9 +1,10 @@
 <script lang="ts">
     import { createQuery, keepPreviousData } from '@tanstack/svelte-query';
+    import { Eye } from '@lucide/svelte';
     import { adminBillingKeys, getOrders, type OrderQuery } from '$lib/api/admin/billing';
     import { httpErrorToHuman } from '$lib/api/http';
     import { cn } from '$lib/utils/cn';
-    import { Card, Spinner } from '$lib/ui';
+    import { Button, Card, Spinner } from '$lib/ui';
     import Alert from '$lib/components/Alert.svelte';
     import Pagination from '$lib/components/Pagination.svelte';
     import { formatMoney } from '$features/dashboard/billing/money';
@@ -11,6 +12,8 @@
     import SearchBox from '../shared/SearchBox.svelte';
     import SortHeader from '../shared/SortHeader.svelte';
     import { TableState } from '../shared/table.svelte';
+    import OrderDialog from './OrderDialog.svelte';
+    import { app } from '$lib/stores/app.svelte';
 
     /**
      * All orders, ported from orders/OrdersContainer.tsx and OrdersTable.tsx. The legacy
@@ -35,11 +38,21 @@
 
     const threatClass = (index: number) =>
         index < 0 ? 'bg-muted text-muted-foreground' : index >= 50 ? 'bg-destructive/15 text-destructive' : index >= 25 ? 'bg-warning/15 text-warning' : 'bg-success/15 text-success';
+
+    /** How long an unpaid order is kept before it is expired and removed. */
+    const expireDays = $derived(app.flags?.billing.orders?.expire_days ?? 7);
+
+    let dialogOpen = $state(false);
+    let dialogOrderId = $state<number | null>(null);
+
+    const openOrder = (id: number) => {
+        dialogOrderId = id;
+        dialogOpen = true;
+    };
 </script>
 
-{#if serverId === null}
-<Alert variant="warning" title="说明" class="mb-4">
-    待支付订单 7 天后会自动标记为过期并删除，之后不再显示在这里。如需手动删除订单，只能直接操作数据库，不建议这样做。
+{#if serverId === null}<Alert variant="warning" title="说明" class="mb-4">
+    待支付订单超过 {expireDays} 天后会被标记为过期，并在下一次清理时删除。在那之前，你可以在订单详情里手动标记为已支付或取消。
 </Alert>
 {/if}
 
@@ -66,6 +79,7 @@
                         <th scope="col" class="px-4 py-2 font-medium">支付状态</th>
                         <th scope="col" class="px-4 py-2 font-medium">类型</th>
                         <SortHeader {table} key="threat_index" label="风险指数" />
+                        <th scope="col" class="px-4 py-2"><span class="sr-only">操作</span></th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-border">
@@ -90,6 +104,11 @@
                                     {order.threatIndex < 0 ? '检测中' : `${order.threatIndex}/100`}
                                 </span>
                             </td>
+                            <td class="px-4 py-3 text-right">
+                                <Button size="sm" variant="outline" onclick={() => openOrder(order.id)}>
+                                    <Eye />详情
+                                </Button>
+                            </td>
                         </tr>
                     {/each}
                 </tbody>
@@ -100,3 +119,5 @@
         </div>
     {/if}
 </Card>
+
+<OrderDialog bind:open={dialogOpen} orderId={dialogOrderId} onChanged={() => orders.refetch()} />

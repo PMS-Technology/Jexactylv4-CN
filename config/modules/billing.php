@@ -77,6 +77,17 @@ return [
     ],
 
     /*
+     * How long an unpaid order is kept.
+     *
+     * An order that has been waiting unpaid for longer than this is marked expired and
+     * then removed by the cleanup task. The window has to be long enough for a customer
+     * to finish paying at the gateway, since the payment notification arrives later.
+     */
+    'orders' => [
+        'expire_days' => env('BILLING_ORDER_EXPIRE_DAYS', 7),
+    ],
+
+    /*
      * Control whether users should be allowed to upgrade their plan.
      */
     'allow_upgrades' => env('BILLING_ALLOW_UPGRADES', true),

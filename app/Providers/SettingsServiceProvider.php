@@ -61,6 +61,7 @@ class SettingsServiceProvider extends ServiceProvider
         'modules:billing:renewal:days',
         'modules:billing:renewal:threshold',
         'modules:billing:allow_upgrades',
+        'modules:billing:orders:expire_days',
 
         // Payment channel settings. Several channels can be set up at the same time;
         // the credentials of each are stored, so a payment method can point at any of

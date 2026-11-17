@@ -118,6 +118,10 @@ export interface EverestSettings {
         currency: { symbol: string; code: string };
         links: { terms: string; privacy: string };
         renewal: { days: number; threshold: number };
+        /**
+         * How long an unpaid order is kept before it is expired and removed.
+         */
+        orders: { expire_days: number };
         allow_upgrades: boolean;
         /**
          * The payment methods offered at checkout. An empty list means the storefront

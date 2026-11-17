@@ -85,6 +85,10 @@ class EverestComposer
                     'days' => config('modules.billing.renewal.days'),
                     'threshold' => config('modules.billing.renewal.threshold'),
                 ],
+                'orders' => [
+                    // How long an unpaid order is kept before it is expired and removed.
+                    'expire_days' => config('modules.billing.orders.expire_days'),
+                ],
                 'allow_upgrades' => config('modules.billing.allow_upgrades'),
                 // The payment methods a customer can pay with. An empty list means the
                 // storefront cannot take money at all.

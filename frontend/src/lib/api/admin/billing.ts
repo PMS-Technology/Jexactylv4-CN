@@ -51,7 +51,8 @@ export type BillingSettingKey =
     | 'links:terms'
     | 'links:privacy'
     | 'renewal:days'
-    | 'renewal:threshold';
+    | 'renewal:threshold'
+    | 'orders:expire_days';
 
 export async function updateBillingSetting(key: BillingSettingKey, value: boolean | string | number | null): Promise<void> {
     await http.put('/api/application/billing/settings', { key, value });
@@ -324,7 +325,14 @@ export interface AdminOrder {
     type: OrderType | '?';
     /** -1 while the threat check is still running. */
     threatIndex: number;
+    /** The reference the gateway was given, and what a payment notification comes back with. */
+    transactionId: string | null;
+    serverId: number | null;
+    /** What was bought, so an administrator can tell what the order is for. */
+    metadata: Record<string, string>;
+    user: { id: number | null; username: string | null; email: string | null };
     createdAt: Date;
+    updatedAt: Date | null;
 }
 
 const toOrder = (a: Record<string, any>): AdminOrder => ({
@@ -337,7 +345,12 @@ const toOrder = (a: Record<string, any>): AdminOrder => ({
     productId: a.product_id,
     type: a.type,
     threatIndex: a.threat_index,
+    transactionId: a.transaction_id ?? null,
+    serverId: a.server_id ?? null,
+    metadata: a.metadata ?? {},
+    user: a.user ?? { id: null, username: null, email: null },
     createdAt: new Date(a.created_at),
+    updatedAt: a.updated_at ? new Date(a.updated_at) : null,
 });
 
 /** OrderController only allows these sorts; the legacy table also offered `type`, which returns 400. */
@@ -345,6 +358,23 @@ export type OrderQuery = QueryBuilderParams<'description' | 'server_id', 'id' | 
 
 export const getOrders = (params: OrderQuery = {}) =>
     list('/api/application/billing/orders', params, ({ attributes }) => toOrder(attributes));
+
+export async function getOrder(id: number): Promise<AdminOrder> {
+    const { data } = await http.get(`/api/application/billing/orders/${id}`);
+
+    return toOrder(data.attributes);
+}
+
+/**
+ * Acts on an order by hand.
+ *
+ * `mark_paid` settles the order and carries out what it paid for; `cancel` gives it up.
+ */
+export async function updateOrder(id: number, action: 'mark_paid' | 'cancel'): Promise<AdminOrder> {
+    const { data } = await http.patch(`/api/application/billing/orders/${id}`, { action });
+
+    return toOrder(data.attributes);
+}
 
 // --- Analytics --------------------------------------------------------------
 
